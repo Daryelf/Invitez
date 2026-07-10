@@ -1,0 +1,33 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+test("contains the party landing page content", async () => {
+  const [page, layout] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+  ]);
+  const source = `${page}\n${layout}`;
+  assert.match(source, /The Night Shift/i);
+  assert.match(source, /RSVP now/i);
+  assert.match(source, /through your eyes/i);
+  assert.match(source, /Add your photo/i);
+  assert.match(source, /Save your/i);
+  assert.doesNotMatch(source, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
+});
+
+test("keeps persistent event capabilities wired into the app", async () => {
+  const [schema, hosting, rsvpRoute, photoRoute] = await Promise.all([
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/rsvp/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/photos/route.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(hosting, /"d1":\s*"DB"/);
+  assert.match(hosting, /"r2":\s*"MEDIA"/);
+  assert.match(schema, /sqliteTable\("rsvps"/);
+  assert.match(schema, /sqliteTable\("photos"/);
+  assert.match(rsvpRoute, /INSERT INTO rsvps/);
+  assert.match(photoRoute, /env\.MEDIA\.put/);
+});
