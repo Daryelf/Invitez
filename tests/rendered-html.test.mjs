@@ -13,6 +13,9 @@ test("contains the party landing page content", async () => {
   assert.match(source, /through your eyes/i);
   assert.match(source, /Add your photo/i);
   assert.match(source, /Save your/i);
+  assert.match(source, /\/first\.mp4/);
+  assert.match(source, /\/second\.mp4/);
+  assert.match(source, /scroll to continue/i);
   assert.doesNotMatch(source, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 

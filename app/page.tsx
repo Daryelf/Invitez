@@ -26,6 +26,36 @@ function ArrowUpRight() {
   return <span aria-hidden="true" className="arrow-icon">↗</span>;
 }
 
+function IntroVideo({ id, src, number, title, nextHref }: { id: string; src: string; number: string; title: string; nextHref: string }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => undefined);
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.55 },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section className="intro-panel" id={id}>
+      <video className="intro-video" ref={videoRef} src={src} autoPlay muted playsInline preload="auto" aria-label={`${title} intro animation`} />
+      <div className="intro-scrim" />
+      <div className="intro-panel-top"><span>after hours / intro</span><span>{number} / 02</span></div>
+      <a className="intro-scroll" href={nextHref}><span>scroll to continue</span><strong>↓</strong></a>
+    </section>
+  );
+}
+
 export default function Home() {
   const [showRSVP, setShowRSVP] = useState(false);
   const [rsvpState, setRsvpState] = useState({ name: "", email: "", guests: "1", notes: "" });
@@ -142,8 +172,13 @@ export default function Home() {
 
   return (
     <main className="site-shell">
+      <section className="intro-sequence" id="intro" aria-label="Event introduction">
+        <IntroVideo id="intro-first" src="/first.mp4" number="01" title="The invitation" nextHref="#intro-second" />
+        <IntroVideo id="intro-second" src="/second.mp4" number="02" title="The night begins" nextHref="#details" />
+      </section>
+
       <nav className="topbar" aria-label="Main navigation">
-        <a className="wordmark" href="#top" aria-label="After Hours home">AH<span>•</span></a>
+        <a className="wordmark" href="#intro" aria-label="After Hours home">AH<span>•</span></a>
         <div className="nav-links">
           <a href="#details">The details</a>
           <a href="#gallery">The gallery</a>
