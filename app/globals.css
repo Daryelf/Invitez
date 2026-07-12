@@ -36,6 +36,15 @@ video {
   background: #141414;
 }
 
+.intro-sequence--locked {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.intro-sequence--unlocked {
+  overflow-y: auto;
+}
+
 .intro-panel {
   position: relative;
   width: 100%;

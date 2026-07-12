@@ -77,7 +77,10 @@ export default function Home() {
   const [introStage, setIntroStage] = useState<IntroStage>("first");
 
   return (
-    <main className="intro-sequence" aria-label="After Hours invitation">
+    <main
+      className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
+      aria-label="After Hours invitation"
+    >
       <IntroVideo
         id="intro-first"
         src="/first.mp4"
