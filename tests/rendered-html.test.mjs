@@ -12,7 +12,7 @@ test("contains only the two gated invitation videos", async () => {
 
   assert.match(source, /\/first\.mp4/);
   assert.match(source, /\/second\.mp4/);
-  assert.match(source, /className="intro-video"/i);
+  assert.match(source, /className=.*intro-video/i);
   assert.match(source, /aria-label="Open invitation"/i);
   assert.match(source, /OPEN INVITATION/);
   assert.match(source, /intro-sequence--locked/);
@@ -21,6 +21,12 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /introStage === "second"/);
   assert.match(source, /scrollIntoView/);
   assert.match(source, /object-fit: cover/);
+  assert.match(source, /intro-panel--full/);
+  assert.match(source, /intro-video--full/);
+  assert.match(source, /object-fit: contain/);
+  assert.match(source, /aspect-ratio: 736 \/ 4088/);
+  assert.match(source, /scroll-snap-type: y proximity/);
+  assert.match(source, /threshold: 0\.01/);
   assert.match(source, /preload="metadata"/);
   assert.match(source, /autoPlay = false/);
   assert.match(source, /viewportFit: "cover"/);

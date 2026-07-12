@@ -11,6 +11,7 @@ function IntroVideo({
   autoPlay = false,
   preload = "metadata",
   nextId,
+  fullFrame = false,
   onAction,
 }: {
   id: string;
@@ -19,6 +20,7 @@ function IntroVideo({
   autoPlay?: boolean;
   preload?: "none" | "metadata" | "auto";
   nextId?: string;
+  fullFrame?: boolean;
   onAction?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -35,7 +37,7 @@ function IntroVideo({
           video.pause();
         }
       },
-      { threshold: 0.55 },
+      { threshold: 0.01 },
     );
 
     observer.observe(video);
@@ -48,9 +50,9 @@ function IntroVideo({
   }
 
   return (
-    <section className="intro-panel" id={id}>
+    <section className={`intro-panel ${fullFrame ? "intro-panel--full" : ""}`} id={id}>
       <video
-        className="intro-video"
+        className={`intro-video ${fullFrame ? "intro-video--full" : ""}`}
         ref={videoRef}
         src={src}
         autoPlay={autoPlay}
@@ -109,6 +111,7 @@ export default function Home() {
           src="/second.mp4"
           title="After Hours invitation transition"
           preload="metadata"
+          fullFrame
         />
       ) : null}
     </main>

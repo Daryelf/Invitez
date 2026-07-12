@@ -32,7 +32,7 @@ video {
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior-y: contain;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
   background: #141414;
 }
 
@@ -57,6 +57,13 @@ video {
   scroll-snap-align: start;
 }
 
+.intro-panel--full {
+  height: auto;
+  min-height: 100dvh;
+  display: block;
+  overflow: visible;
+}
+
 .intro-video {
   display: block;
   width: 100%;
@@ -68,6 +75,17 @@ video {
   object-fit: cover;
   object-position: center;
   background: #141414;
+}
+
+.intro-video--full {
+  width: 100%;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  min-height: 0;
+  object-fit: contain;
+  object-position: top center;
+  aspect-ratio: 736 / 4088;
 }
 
 .intro-action {
