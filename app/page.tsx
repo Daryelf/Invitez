@@ -26,6 +26,37 @@ function ArrowUpRight() {
   return <span aria-hidden="true" className="arrow-icon">↗</span>;
 }
 
+function IntroVideo({ id, src, number, title, nextHref, panelRef }: { id: string; src: string; number: string; title: string; nextHref: string; panelRef?: { current: HTMLElement | null } }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => undefined);
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.55 },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section className="intro-panel" id={id} ref={panelRef}>
+      <video className="intro-video" ref={videoRef} src={src} autoPlay muted playsInline preload="auto" aria-label={`${title} intro animation`} />
+      <div className="intro-scrim" />
+      <div className="intro-panel-top"><span>after hours / intro</span><span>{number} / 02</span></div>
+      <div className="intro-panel-title"><span className="eyebrow"><span className="eyebrow-dot" /> before you enter</span><h2>{title}</h2></div>
+      <a className="intro-scroll" href={nextHref}><span>scroll to continue</span><strong>↓</strong></a>
+    </section>
+  );
+}
+
 export default function Home() {
   const [showRSVP, setShowRSVP] = useState(false);
   const [rsvpState, setRsvpState] = useState({ name: "", email: "", guests: "1", notes: "" });
@@ -39,6 +70,27 @@ export default function Home() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const musicTimerRef = useRef<number | null>(null);
   const beatRef = useRef(0);
+  const introSecondRef = useRef<HTMLElement | null>(null);
+  const introSecondLockedRef = useRef(false);
+
+  useEffect(() => {
+    const secondPanel = introSecondRef.current;
+    if (!secondPanel) return;
+
+    const syncIntroLock = () => {
+      const secondTop = secondPanel.getBoundingClientRect().top + window.scrollY;
+      if (window.scrollY >= secondTop - 2) {
+        introSecondLockedRef.current = true;
+      }
+      if (introSecondLockedRef.current && window.scrollY < secondTop) {
+        window.scrollTo({ top: secondTop, behavior: "auto" });
+      }
+    };
+
+    syncIntroLock();
+    window.addEventListener("scroll", syncIntroLock, { passive: true });
+    return () => window.removeEventListener("scroll", syncIntroLock);
+  }, []);
 
   const allPhotos = useMemo(() => {
     return [
@@ -142,8 +194,13 @@ export default function Home() {
 
   return (
     <main className="site-shell">
+      <section className="intro-sequence" id="intro" aria-label="Event introduction">
+        <IntroVideo id="intro-first" src="/first.mp4" number="01" title="The invitation" nextHref="#intro-second" />
+        <IntroVideo id="intro-second" src="/seconds.mp4" number="02" title="The night begins" nextHref="#details" panelRef={introSecondRef} />
+      </section>
+
       <nav className="topbar" aria-label="Main navigation">
-        <a className="wordmark" href="#top" aria-label="After Hours home">AH<span>•</span></a>
+        <a className="wordmark" href="#intro" aria-label="After Hours home">AH<span>•</span></a>
         <div className="nav-links">
           <a href="#details">The details</a>
           <a href="#gallery">The gallery</a>
