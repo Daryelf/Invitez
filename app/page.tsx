@@ -26,7 +26,7 @@ function ArrowUpRight() {
   return <span aria-hidden="true" className="arrow-icon">↗</span>;
 }
 
-function IntroVideo({ id, src, number, title, nextHref }: { id: string; src: string; number: string; title: string; nextHref: string }) {
+function IntroVideo({ id, src, title }: { id: string; src: string; title: string }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -49,9 +49,6 @@ function IntroVideo({ id, src, number, title, nextHref }: { id: string; src: str
   return (
     <section className="intro-panel" id={id}>
       <video className="intro-video" ref={videoRef} src={src} autoPlay muted playsInline preload="auto" aria-label={`${title} intro animation`} />
-      <div className="intro-scrim" />
-      <div className="intro-panel-top"><span>after hours / intro</span><span>{number} / 02</span></div>
-      <a className="intro-scroll" href={nextHref}><span>scroll to continue</span><strong>↓</strong></a>
     </section>
   );
 }
@@ -173,8 +170,8 @@ export default function Home() {
   return (
     <main className="site-shell">
       <section className="intro-sequence" id="intro" aria-label="Event introduction">
-        <IntroVideo id="intro-first" src="/first.mp4" number="01" title="The invitation" nextHref="#intro-second" />
-        <IntroVideo id="intro-second" src="/second.mp4" number="02" title="The night begins" nextHref="#details" />
+        <IntroVideo id="intro-first" src="/first.mp4" title="The invitation" />
+        <IntroVideo id="intro-second" src="/second.mp4" title="The night begins" />
       </section>
 
       <nav className="topbar" aria-label="Main navigation">
