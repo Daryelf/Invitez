@@ -22,7 +22,6 @@ function IntroVideo({
   onAction?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -44,7 +43,7 @@ function IntroVideo({
   }, []);
 
   function openNext() {
-    if (!nextId || !isComplete) return;
+    if (!nextId) return;
     onAction?.();
   }
 
@@ -59,14 +58,12 @@ function IntroVideo({
         playsInline
         preload={preload}
         aria-label={title}
-        onEnded={() => setIsComplete(true)}
       />
       {nextId ? (
         <button
           type="button"
           className="intro-action"
           aria-label="Open invitation"
-          disabled={!isComplete}
           onClick={openNext}
         />
       ) : null}

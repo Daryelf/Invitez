@@ -72,10 +72,8 @@ video {
   border-radius: 999px;
   background: transparent;
   cursor: pointer;
-}
-
-.intro-action:disabled {
-  pointer-events: none;
+  z-index: 2;
+  touch-action: manipulation;
 }
 
 .intro-action:focus-visible {

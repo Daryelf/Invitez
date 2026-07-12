@@ -14,6 +14,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /\/second\.mp4/);
   assert.match(source, /className="intro-video"/i);
   assert.match(source, /aria-label="Open invitation"/i);
+  assert.doesNotMatch(source, /disabled={!isComplete}/);
   assert.match(source, /introStage === "second"/);
   assert.match(source, /object-fit: cover/);
   assert.match(source, /preload="metadata"/);
