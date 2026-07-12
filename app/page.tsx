@@ -29,10 +29,18 @@ function IntroVideo({
     const video = videoRef.current;
     if (!video) return;
 
+    let isVisible = false;
+    const playIfVisible = () => {
+      if (isVisible && video.paused) {
+        video.play().catch(() => undefined);
+      }
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => undefined);
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          playIfVisible();
         } else {
           video.pause();
         }
@@ -40,8 +48,14 @@ function IntroVideo({
       { threshold: 0.01 },
     );
 
+    video.addEventListener("loadeddata", playIfVisible);
+    video.addEventListener("canplay", playIfVisible);
     observer.observe(video);
-    return () => observer.disconnect();
+    return () => {
+      video.removeEventListener("loadeddata", playIfVisible);
+      video.removeEventListener("canplay", playIfVisible);
+      observer.disconnect();
+    };
   }, []);
 
   function openNext() {
@@ -98,7 +112,8 @@ export default function Home() {
           id="intro-second"
           src="/second.mp4"
           title="After Hours invitation transition"
-          preload="metadata"
+          autoPlay
+          preload="auto"
           fullFrame
         />
       )}

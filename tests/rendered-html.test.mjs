@@ -26,9 +26,11 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /intro-video--full/);
   assert.match(source, /object-fit: contain/);
   assert.match(source, /aspect-ratio: 736 \/ 4088/);
+  assert.match(source, /video\.addEventListener\("canplay", playIfVisible\)/);
+  assert.match(source, /src="\/second\.mp4"[\s\S]*autoPlay[\s\S]*preload="auto"/);
   assert.match(source, /scroll-snap-type: y proximity/);
   assert.match(source, /threshold: 0\.01/);
-  assert.match(source, /preload="metadata"/);
+  assert.match(source, /preload="auto"/);
   assert.match(source, /autoPlay = false/);
   assert.match(source, /viewportFit: "cover"/);
   assert.match(source, /title: "After Hours Invitation"/);
