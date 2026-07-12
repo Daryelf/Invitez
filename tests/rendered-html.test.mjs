@@ -18,8 +18,9 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /intro-sequence--locked/);
   assert.match(source, /overflow: hidden/);
   assert.doesNotMatch(source, /disabled={!isComplete}/);
-  assert.match(source, /introStage === "second"/);
-  assert.match(source, /scrollIntoView/);
+  assert.match(source, /introStage === "first" \?/);
+  assert.match(source, /setIntroStage\("second"\)/);
+  assert.doesNotMatch(source, /scrollIntoView/);
   assert.match(source, /object-fit: cover/);
   assert.match(source, /intro-panel--full/);
   assert.match(source, /intro-video--full/);

@@ -78,34 +78,22 @@ function IntroVideo({
 export default function Home() {
   const [introStage, setIntroStage] = useState<IntroStage>("first");
 
-  useEffect(() => {
-    if (introStage !== "second") return;
-
-    const frame = window.requestAnimationFrame(() => {
-      document.getElementById("intro-second")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [introStage]);
-
   return (
     <main
       className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
       aria-label="After Hours invitation"
     >
-      <IntroVideo
-        id="intro-first"
-        src="/first.mp4"
-        title="After Hours invitation"
-        autoPlay
-        preload="auto"
-        nextId="intro-second"
-        onAction={() => setIntroStage("second")}
-      />
-      {introStage === "second" ? (
+      {introStage === "first" ? (
+        <IntroVideo
+          id="intro-first"
+          src="/first.mp4"
+          title="After Hours invitation"
+          autoPlay
+          preload="auto"
+          nextId="intro-second"
+          onAction={() => setIntroStage("second")}
+        />
+      ) : (
         <IntroVideo
           id="intro-second"
           src="/second.mp4"
@@ -113,7 +101,7 @@ export default function Home() {
           preload="metadata"
           fullFrame
         />
-      ) : null}
+      )}
     </main>
   );
 }
