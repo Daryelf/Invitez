@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "The Night Shift / After Hours",
-  description: "A night for good people, loud music, and staying a little longer.",
+  title: "After Hours Invitation",
+  description: "Open the After Hours invitation.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
