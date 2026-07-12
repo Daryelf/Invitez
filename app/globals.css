@@ -68,10 +68,21 @@ video {
   width: 38%;
   height: 9%;
   padding: 0;
-  border: 0;
+  border: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 999px;
-  background: transparent;
+  background: #ffd400;
+  color: #171717;
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-family: inherit;
+  font-size: clamp(0.72rem, 3.2vw, 1.05rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 212, 0, 0.22);
   z-index: 2;
   touch-action: manipulation;
 }

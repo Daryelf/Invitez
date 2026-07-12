@@ -65,7 +65,9 @@ function IntroVideo({
           className="intro-action"
           aria-label="Open invitation"
           onClick={openNext}
-        />
+        >
+          OPEN INVITATION
+        </button>
       ) : null}
     </section>
   );
