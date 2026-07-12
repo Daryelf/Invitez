@@ -76,6 +76,19 @@ function IntroVideo({
 export default function Home() {
   const [introStage, setIntroStage] = useState<IntroStage>("first");
 
+  useEffect(() => {
+    if (introStage !== "second") return;
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("intro-second")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [introStage]);
+
   return (
     <main
       className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
