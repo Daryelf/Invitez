@@ -8,14 +8,10 @@ test("contains the party landing page content", async () => {
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
   ]);
   const source = `${page}\n${layout}`;
-  assert.match(source, /The Night Shift/i);
-  assert.match(source, /RSVP now/i);
-  assert.match(source, /through your eyes/i);
-  assert.match(source, /Add your photo/i);
-  assert.match(source, /Save your/i);
   assert.match(source, /\/first\.mp4/);
   assert.match(source, /\/second\.mp4/);
   assert.match(source, /className="intro-video"/i);
+  assert.doesNotMatch(source, /Come for|RSVP now|The gallery|Play the track/i);
   assert.doesNotMatch(source, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
