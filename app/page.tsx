@@ -8,12 +8,16 @@ function IntroVideo({
   id,
   src,
   title,
+  autoPlay = false,
+  preload = "metadata",
   nextId,
   onAction,
 }: {
   id: string;
   src: string;
   title: string;
+  autoPlay?: boolean;
+  preload?: "none" | "metadata" | "auto";
   nextId?: string;
   onAction?: () => void;
 }) {
@@ -42,9 +46,6 @@ function IntroVideo({
   function openNext() {
     if (!nextId || !isComplete) return;
     onAction?.();
-    window.setTimeout(() => {
-      document.getElementById(nextId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 0);
   }
 
   return (
@@ -53,10 +54,10 @@ function IntroVideo({
         className="intro-video"
         ref={videoRef}
         src={src}
-        autoPlay
+        autoPlay={autoPlay}
         muted
         playsInline
-        preload="auto"
+        preload={preload}
         aria-label={title}
         onEnded={() => setIsComplete(true)}
       />
@@ -82,6 +83,8 @@ export default function Home() {
         id="intro-first"
         src="/first.mp4"
         title="After Hours invitation"
+        autoPlay
+        preload="auto"
         nextId="intro-second"
         onAction={() => setIntroStage("second")}
       />
@@ -90,6 +93,7 @@ export default function Home() {
           id="intro-second"
           src="/second.mp4"
           title="After Hours invitation transition"
+          preload="metadata"
         />
       ) : null}
     </main>

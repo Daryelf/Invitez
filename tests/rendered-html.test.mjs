@@ -14,9 +14,12 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /\/second\.mp4/);
   assert.match(source, /className="intro-video"/i);
   assert.match(source, /aria-label="Open invitation"/i);
-  assert.match(source, /scrollIntoView/);
   assert.match(source, /introStage === "second"/);
   assert.match(source, /object-fit: cover/);
+  assert.match(source, /preload="metadata"/);
+  assert.match(source, /autoPlay = false/);
+  assert.match(source, /viewportFit: "cover"/);
+  assert.doesNotMatch(source, /scrollIntoView/);
   assert.match(source, /title: "After Hours Invitation"/);
 
   assert.doesNotMatch(source, /The Night Shift|event-page|RSVP|gallery|hero|eventDetails|starterPhotos/i);
