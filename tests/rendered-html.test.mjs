@@ -11,6 +11,8 @@ test("contains the party landing page content", async () => {
   assert.match(source, /\/first\.mp4/);
   assert.match(source, /\/second\.mp4/);
   assert.match(source, /className="intro-video"/i);
+  assert.match(source, /aria-label="Open invitation"/i);
+  assert.match(source, /scrollIntoView/);
   assert.doesNotMatch(source, /Come for|RSVP now|The gallery|Play the track/i);
   assert.doesNotMatch(source, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });

@@ -1,9 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-function IntroVideo({ id, src, title }: { id: string; src: string; title: string }) {
+function IntroVideo({
+  id,
+  src,
+  title,
+  nextId,
+}: {
+  id: string;
+  src: string;
+  title: string;
+  nextId?: string;
+}) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -24,6 +35,11 @@ function IntroVideo({ id, src, title }: { id: string; src: string; title: string
     return () => observer.disconnect();
   }, []);
 
+  function openInvitation() {
+    if (!nextId) return;
+    document.getElementById(nextId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <section className="intro-panel" id={id}>
       <video
@@ -35,7 +51,17 @@ function IntroVideo({ id, src, title }: { id: string; src: string; title: string
         playsInline
         preload="auto"
         aria-label={title}
+        onEnded={() => setIsComplete(true)}
       />
+      {nextId ? (
+        <button
+          type="button"
+          className="intro-action"
+          aria-label="Open invitation"
+          disabled={!isComplete}
+          onClick={openInvitation}
+        />
+      ) : null}
     </section>
   );
 }
@@ -44,7 +70,12 @@ export default function Home() {
   return (
     <main className="site-shell" aria-label="After Hours invitation videos">
       <section className="intro-sequence">
-        <IntroVideo id="intro-first" src="/first.mp4" title="After Hours invitation" />
+        <IntroVideo
+          id="intro-first"
+          src="/first.mp4"
+          title="After Hours invitation"
+          nextId="intro-second"
+        />
         <IntroVideo id="intro-second" src="/second.mp4" title="After Hours event details" />
       </section>
     </main>
