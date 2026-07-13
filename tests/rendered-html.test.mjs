@@ -35,7 +35,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /vinyl-record\.png/);
   assert.match(source, /vinyl-spin 7s linear infinite/);
   assert.match(source, /rotate\(360deg\)/);
-  assert.match(source, /top: calc\(27\.5% - 5px\)/);
+  assert.match(source, /top: calc\(27\.5% - 10px\)/);
   assert.match(source, /left: 66\.5%/);
   assert.match(source, /id="details"/);
   assert.match(source, /position: absolute/);
