@@ -4,6 +4,52 @@ import { useEffect, useRef, useState } from "react";
 
 type IntroStage = "first" | "second";
 
+type CountdownValue = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+const eventTime = new Date("2026-10-03T19:00:00-04:00").getTime();
+
+function Countdown() {
+  const [remaining, setRemaining] = useState<CountdownValue | null>(null);
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const distance = Math.max(0, eventTime - Date.now());
+      const totalSeconds = Math.floor(distance / 1000);
+      setRemaining({
+        days: Math.floor(totalSeconds / 86400),
+        hours: Math.floor((totalSeconds % 86400) / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
+      });
+    };
+
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const values = remaining ?? { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  const format = (value: number) => String(value).padStart(2, "0");
+
+  return (
+    <div className="countdown-panel" aria-label="Countdown to October 3 at 7 PM">
+      <p className="countdown-kicker">the night begins in</p>
+      <div className="countdown-grid">
+        <div><strong>{format(values.days)}</strong><span>days</span></div>
+        <div><strong>{format(values.hours)}</strong><span>hours</span></div>
+        <div><strong>{format(values.minutes)}</strong><span>minutes</span></div>
+        <div><strong>{format(values.seconds)}</strong><span>seconds</span></div>
+      </div>
+      <p className="countdown-date">october 03 / 07:00 pm</p>
+    </div>
+  );
+}
+
 function IntroVideo({
   id,
   src,
@@ -85,6 +131,7 @@ function IntroVideo({
           OPEN INVITATION
         </button>
       ) : null}
+      {fullFrame ? <Countdown /> : null}
     </section>
   );
 }

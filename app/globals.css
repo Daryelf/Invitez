@@ -118,3 +118,64 @@ video {
   outline: 2px solid rgba(255, 255, 255, 0.9);
   outline-offset: 5px;
 }
+
+.countdown-panel {
+  padding: 30px 18px 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  background: #141414;
+  color: #f2f0e9;
+  text-align: center;
+}
+
+.countdown-kicker,
+.countdown-date,
+.countdown-grid span {
+  margin: 0;
+  color: rgba(242, 240, 233, 0.58);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.countdown-kicker {
+  margin-bottom: 18px;
+}
+
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 520px);
+  margin: 0 auto 18px;
+}
+
+.countdown-grid > div {
+  display: grid;
+  gap: 5px;
+  padding: 0 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.countdown-grid > div:last-child {
+  border-right: 0;
+}
+
+.countdown-grid strong {
+  color: #ffd400;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: clamp(1.8rem, 7vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.08em;
+  line-height: 0.9;
+}
+
+@media (max-width: 420px) {
+  .countdown-grid > div {
+    padding: 0 5px;
+  }
+
+  .countdown-grid span {
+    font-size: 0.5rem;
+    letter-spacing: 0.06em;
+  }
+}
