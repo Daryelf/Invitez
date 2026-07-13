@@ -122,7 +122,7 @@ video {
 .vinyl-stage {
   position: absolute;
   z-index: 3;
-  top: calc(27.5% - 17px);
+  top: calc(27.5% - 22px);
   left: 66.5%;
   width: clamp(105px, 22vw, 220px);
   aspect-ratio: 1;
