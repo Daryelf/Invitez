@@ -29,10 +29,18 @@ function IntroVideo({
     const video = videoRef.current;
     if (!video) return;
 
+    let isVisible = false;
+    const playIfVisible = () => {
+      if (isVisible && video.paused) {
+        video.play().catch(() => undefined);
+      }
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => undefined);
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          playIfVisible();
         } else {
           video.pause();
         }
@@ -40,8 +48,14 @@ function IntroVideo({
       { threshold: 0.01 },
     );
 
+    video.addEventListener("loadeddata", playIfVisible);
+    video.addEventListener("canplay", playIfVisible);
     observer.observe(video);
-    return () => observer.disconnect();
+    return () => {
+      video.removeEventListener("loadeddata", playIfVisible);
+      video.removeEventListener("canplay", playIfVisible);
+      observer.disconnect();
+    };
   }, []);
 
   function openNext() {
@@ -78,42 +92,31 @@ function IntroVideo({
 export default function Home() {
   const [introStage, setIntroStage] = useState<IntroStage>("first");
 
-  useEffect(() => {
-    if (introStage !== "second") return;
-
-    const frame = window.requestAnimationFrame(() => {
-      document.getElementById("intro-second")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [introStage]);
-
   return (
     <main
       className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
       aria-label="After Hours invitation"
     >
-      <IntroVideo
-        id="intro-first"
-        src="/first.mp4"
-        title="After Hours invitation"
-        autoPlay
-        preload="auto"
-        nextId="intro-second"
-        onAction={() => setIntroStage("second")}
-      />
-      {introStage === "second" ? (
+      {introStage === "first" ? (
+        <IntroVideo
+          id="intro-first"
+          src="/first.mp4"
+          title="After Hours invitation"
+          autoPlay
+          preload="auto"
+          nextId="intro-second"
+          onAction={() => setIntroStage("second")}
+        />
+      ) : (
         <IntroVideo
           id="intro-second"
-          src="/second.mp4"
+          src="/secondv2.mp4"
           title="After Hours invitation transition"
-          preload="metadata"
+          autoPlay
+          preload="auto"
           fullFrame
         />
-      ) : null}
+      )}
     </main>
   );
 }
