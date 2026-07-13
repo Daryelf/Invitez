@@ -35,11 +35,9 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /vinyl-record\.png/);
   assert.match(source, /vinyl-spin 7s linear infinite/);
   assert.match(source, /rotate\(360deg\)/);
-  assert.match(source, /rsvp-panel/);
-  assert.match(source, /Additional information/);
-  assert.match(source, /Will you be attending\?/);
-  assert.match(source, /fetch\("\/api\/rsvp"/);
-  assert.match(source, /autoComplete="email"/);
+  assert.match(source, /id="details"/);
+  assert.match(source, /position: absolute/);
+  assert.doesNotMatch(page, /RSVPForm|rsvp-panel|fetch\("\/api\/rsvp"/);
   assert.match(source, /scroll-snap-type: y proximity/);
   assert.match(source, /threshold: 0\.01/);
   assert.match(source, /preload="auto"/);
