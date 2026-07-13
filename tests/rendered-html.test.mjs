@@ -32,6 +32,9 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /October 3 at 7 PM/);
   assert.match(source, /setInterval\(updateCountdown, 1000\)/);
   assert.match(source, /2026-10-03T19:00:00-04:00/);
+  assert.match(source, /vinyl-record\.png/);
+  assert.match(source, /vinyl-spin 7s linear infinite/);
+  assert.match(source, /rotate\(360deg\)/);
   assert.match(source, /scroll-snap-type: y proximity/);
   assert.match(source, /threshold: 0\.01/);
   assert.match(source, /preload="auto"/);

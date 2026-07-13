@@ -111,6 +111,11 @@ function IntroVideo({
 
   return (
     <section className={`intro-panel ${fullFrame ? "intro-panel--full" : ""}`} id={id}>
+      {fullFrame ? (
+        <div className="vinyl-stage" aria-hidden="true">
+          <img className="vinyl-record" src="/vinyl-record.png" alt="" />
+        </div>
+      ) : null}
       <video
         className={`intro-video ${fullFrame ? "intro-video--full" : ""}`}
         ref={videoRef}
