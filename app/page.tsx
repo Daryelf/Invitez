@@ -50,6 +50,67 @@ function Countdown() {
   );
 }
 
+function RSVPForm() {
+  const [form, setForm] = useState({ name: "", email: "", attending: "yes", notes: "" });
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  function updateField(field: keyof typeof form, value: string) {
+    setForm((current) => ({ ...current, [field]: value }));
+    if (status !== "idle") setStatus("idle");
+  }
+
+  async function submitRSVP(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus("saving");
+    try {
+      const response = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          guests: 1,
+          notes: `Attendance: ${form.attending === "yes" ? "Yes" : "No"}${form.notes.trim() ? ` — ${form.notes.trim()}` : ""}`,
+        }),
+      });
+      if (!response.ok) throw new Error("Unable to save RSVP");
+      setStatus("saved");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <form className="rsvp-panel" onSubmit={submitRSVP}>
+      <div className="rsvp-panel-topline"><span>after hours / rsvp</span><span>03 / 10 / 26</span></div>
+      <div className="rsvp-panel-heading"><span className="rsvp-bow">✦</span><h2>RSVP</h2><p>save your place for the night.</p></div>
+      <label className="rsvp-field">
+        <span>Name</span>
+        <input required value={form.name} onChange={(event) => updateField("name", event.target.value)} placeholder="Your name" autoComplete="name" />
+      </label>
+      <label className="rsvp-field">
+        <span>Email</span>
+        <input required type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} placeholder="you@example.com" autoComplete="email" inputMode="email" />
+      </label>
+      <fieldset className="rsvp-field rsvp-attendance">
+        <legend>Will you be attending?</legend>
+        <div className="rsvp-options">
+          <label><input type="radio" name="attending" value="yes" checked={form.attending === "yes"} onChange={(event) => updateField("attending", event.target.value)} /> <span>Yes, I’ll be there</span></label>
+          <label><input type="radio" name="attending" value="no" checked={form.attending === "no"} onChange={(event) => updateField("attending", event.target.value)} /> <span>Sorry, I can’t make it</span></label>
+        </div>
+      </fieldset>
+      <label className="rsvp-field">
+        <span>Additional information <em>(optional)</em></span>
+        <textarea value={form.notes} onChange={(event) => updateField("notes", event.target.value)} placeholder="Anything we should know?" rows={3} />
+      </label>
+      <div className="rsvp-submit-row">
+        <span className={`rsvp-status rsvp-status-${status}`} aria-live="polite">{status === "saved" ? "You’re on the list." : status === "error" ? "Try again in a moment." : ""}</span>
+        <button type="submit" disabled={status === "saving"}>{status === "saving" ? "SENDING…" : "SUBMIT"}</button>
+      </div>
+    </form>
+  );
+}
+
 function IntroVideo({
   id,
   src,
@@ -136,7 +197,7 @@ function IntroVideo({
           OPEN INVITATION
         </button>
       ) : null}
-      {fullFrame ? <Countdown /> : null}
+      {fullFrame ? <><Countdown /><RSVPForm /></> : null}
     </section>
   );
 }
