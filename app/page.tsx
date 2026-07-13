@@ -81,7 +81,7 @@ function RSVPForm() {
   }
 
   return (
-    <form className="rsvp-panel" onSubmit={submitRSVP}>
+    <form className="rsvp-panel" id="details" onSubmit={submitRSVP}>
       <div className="rsvp-panel-topline"><span>after hours / rsvp</span><span>03 / 10 / 26</span></div>
       <div className="rsvp-panel-heading"><span className="rsvp-bow">✦</span><h2>RSVP</h2><p>save your place for the night.</p></div>
       <label className="rsvp-field">

@@ -212,6 +212,7 @@ video {
 }
 
 .rsvp-panel {
+  scroll-margin-top: 24px;
   width: min(92%, 720px);
   margin: 34px auto 56px;
   padding: 26px clamp(20px, 5vw, 48px) 34px;
