@@ -35,6 +35,11 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /vinyl-record\.png/);
   assert.match(source, /vinyl-spin 7s linear infinite/);
   assert.match(source, /rotate\(360deg\)/);
+  assert.match(source, /rsvp-panel/);
+  assert.match(source, /Additional information/);
+  assert.match(source, /Will you be attending\?/);
+  assert.match(source, /fetch\("\/api\/rsvp"/);
+  assert.match(source, /autoComplete="email"/);
   assert.match(source, /scroll-snap-type: y proximity/);
   assert.match(source, /threshold: 0\.01/);
   assert.match(source, /preload="auto"/);
@@ -42,6 +47,6 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /viewportFit: "cover"/);
   assert.match(source, /title: "After Hours Invitation"/);
 
-  assert.doesNotMatch(source, /The Night Shift|event-page|RSVP|gallery|hero|eventDetails|starterPhotos/i);
+  assert.doesNotMatch(source, /The Night Shift|event-page|gallery|hero|eventDetails|starterPhotos/i);
   assert.doesNotMatch(source, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
