@@ -59,6 +59,8 @@ function IntroVideo({
   nextId,
   fullFrame = false,
   onAction,
+  vinylPaused = false,
+  onVinylToggle,
 }: {
   id: string;
   src: string;
@@ -68,9 +70,10 @@ function IntroVideo({
   nextId?: string;
   fullFrame?: boolean;
   onAction?: () => void;
+  vinylPaused?: boolean;
+  onVinylToggle?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [vinylPaused, setVinylPaused] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -125,7 +128,7 @@ function IntroVideo({
             className="vinyl-toggle"
             aria-label={vinylPaused ? "Play vinyl" : "Pause vinyl"}
             aria-pressed={vinylPaused}
-            onClick={() => setVinylPaused((paused) => !paused)}
+            onClick={onVinylToggle}
           >
             <span aria-hidden="true">{vinylPaused ? "▶" : "❚❚"}</span>
           </button>
@@ -158,12 +161,40 @@ function IntroVideo({
 
 export default function Home() {
   const [introStage, setIntroStage] = useState<IntroStage>("first");
+  const [vinylPaused, setVinylPaused] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  function openSecondInvitation() {
+    const song = audioRef.current;
+    if (song) {
+      song.currentTime = 0;
+      song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
+    }
+    setIntroStage("second");
+  }
+
+  function toggleVinylAndSong() {
+    const song = audioRef.current;
+    if (!song) return;
+
+    if (vinylPaused) {
+      song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
+    } else {
+      song.pause();
+      setVinylPaused(true);
+    }
+  }
 
   return (
     <main
       className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
       aria-label="After Hours invitation"
     >
+      <audio
+        ref={audioRef}
+        src="/Nicki Minaj - Moment 4 Life (Remastered) (Official Video) ft. Drake - NickiMinajAtVEVO.mp3"
+        preload="auto"
+      />
       {introStage === "first" ? (
         <IntroVideo
           id="intro-first"
@@ -172,7 +203,7 @@ export default function Home() {
           autoPlay
           preload="auto"
           nextId="intro-second"
-          onAction={() => setIntroStage("second")}
+          onAction={openSecondInvitation}
         />
       ) : (
         <IntroVideo
@@ -182,6 +213,8 @@ export default function Home() {
           autoPlay
           preload="auto"
           fullFrame
+          vinylPaused={vinylPaused}
+          onVinylToggle={toggleVinylAndSong}
         />
       )}
     </main>
