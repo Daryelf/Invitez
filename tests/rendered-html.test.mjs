@@ -35,7 +35,10 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /vinyl-record\.png/);
   assert.match(source, /vinyl-spin 7s linear infinite/);
   assert.match(source, /rotate\(360deg\)/);
-  assert.doesNotMatch(source, /animation-play-state: paused/);
+  assert.match(source, /vinyl-record--paused/);
+  assert.match(source, /animation-play-state: paused/);
+  assert.match(source, /aria-label=\{vinylPaused \? "Play vinyl" : "Pause vinyl"\}/);
+  assert.match(source, /setVinylPaused\(\(paused\) => !paused\)/);
   assert.match(source, /top: calc\(27\.5% - 22px\)/);
   assert.match(source, /left: 66\.5%/);
   assert.match(source, /id="details"/);

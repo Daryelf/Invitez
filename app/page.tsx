@@ -70,6 +70,7 @@ function IntroVideo({
   onAction?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [vinylPaused, setVinylPaused] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -112,8 +113,22 @@ function IntroVideo({
   return (
     <section className={`intro-panel ${fullFrame ? "intro-panel--full" : ""}`} id={id}>
       {fullFrame ? (
-        <div className="vinyl-stage" aria-hidden="true">
-          <img className="vinyl-record" src="/vinyl-record.png" alt="" />
+        <div className="vinyl-stage">
+          <img
+            className={`vinyl-record ${vinylPaused ? "vinyl-record--paused" : ""}`}
+            src="/vinyl-record.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <button
+            type="button"
+            className="vinyl-toggle"
+            aria-label={vinylPaused ? "Play vinyl" : "Pause vinyl"}
+            aria-pressed={vinylPaused}
+            onClick={() => setVinylPaused((paused) => !paused)}
+          >
+            <span aria-hidden="true">{vinylPaused ? "▶" : "❚❚"}</span>
+          </button>
         </div>
       ) : null}
       <video
