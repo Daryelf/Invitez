@@ -15,6 +15,9 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /className=.*intro-video/i);
   assert.match(source, /aria-label="Open invitation"/i);
   assert.match(source, /OPEN INVITATION/);
+  assert.match(source, /\.intro-action[\s\S]*background: transparent/);
+  assert.match(source, /\.intro-action[\s\S]*color: transparent/);
+  assert.match(source, /\.intro-action[\s\S]*box-shadow: none/);
   assert.match(source, /intro-sequence--locked/);
   assert.match(source, /overflow: hidden/);
   assert.doesNotMatch(source, /disabled={!isComplete}/);
