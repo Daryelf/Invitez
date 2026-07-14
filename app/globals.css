@@ -214,12 +214,6 @@ video {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .vinyl-record {
-    animation-play-state: paused;
-  }
-}
-
 .rsvp-panel {
   scroll-margin-top: 24px;
   width: min(92%, 720px);
