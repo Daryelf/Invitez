@@ -38,14 +38,21 @@ function Countdown() {
 
   return (
     <div className="countdown-panel" id="details" aria-label="Countdown to October 3 at 7 PM">
-      <p className="countdown-kicker">the night begins in</p>
+      <div className="countdown-bloom countdown-bloom--left" aria-hidden="true">
+        <span /><span /><span /><span /><span /><i />
+      </div>
+      <div className="countdown-bloom countdown-bloom--right" aria-hidden="true">
+        <span /><span /><span /><span /><span /><i />
+      </div>
+      <div className="countdown-bow" aria-hidden="true"><span /><span /><i /></div>
+      <p className="countdown-kicker">countdown to the ball</p>
       <div className="countdown-grid">
         <div><strong>{format(values.days)}</strong><span>days</span></div>
         <div><strong>{format(values.hours)}</strong><span>hours</span></div>
         <div><strong>{format(values.minutes)}</strong><span>minutes</span></div>
         <div><strong>{format(values.seconds)}</strong><span>seconds</span></div>
       </div>
-      <p className="countdown-date">october 03 / 07:00 pm</p>
+      <p className="countdown-date"><span aria-hidden="true">♥</span> october 3rd, 2026 · 7:00 pm <span aria-hidden="true">♥</span></p>
     </div>
   );
 }

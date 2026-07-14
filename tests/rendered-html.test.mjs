@@ -29,6 +29,11 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /video\.addEventListener\("canplay", playIfVisible\)/);
   assert.match(source, /src="\/secondv2\.mp4"[\s\S]*autoPlay[\s\S]*preload="auto"/);
   assert.match(source, /countdown-panel/);
+  assert.match(source, /countdown to the ball/i);
+  assert.match(source, /countdown-bloom/);
+  assert.match(source, /countdown-bow/);
+  assert.match(source, /repeating-linear-gradient/);
+  assert.match(source, /Georgia, "Times New Roman", serif/);
   assert.match(source, /October 3 at 7 PM/);
   assert.match(source, /setInterval\(updateCountdown, 1000\)/);
   assert.match(source, /2026-10-03T19:00:00-04:00/);
