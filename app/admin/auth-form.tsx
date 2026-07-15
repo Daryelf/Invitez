@@ -26,7 +26,13 @@ export default function AdminAuthForm({
     if (configured) return;
     const timer = window.setTimeout(() => {
       const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
-      setSetupToken(new URLSearchParams(hash).get("setup")?.trim() || "");
+      const hashToken = new URLSearchParams(hash).get("setup")?.trim() || "";
+      const queryToken = new URLSearchParams(window.location.search).get("setup")?.trim() || "";
+      const token = hashToken || queryToken;
+      if (queryToken && !hashToken) {
+        window.history.replaceState(null, "", `/admin#setup=${encodeURIComponent(queryToken)}`);
+      }
+      setSetupToken(token);
     }, 0);
     return () => window.clearTimeout(timer);
   }, [configured]);

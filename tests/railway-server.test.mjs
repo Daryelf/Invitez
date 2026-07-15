@@ -13,6 +13,11 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(packageJson, /"start": "node railway-server\.mjs"/);
   assert.doesNotMatch(server, /cloudflare:/);
   assert.match(server, /process\.env\.PORT \|\| 8080/);
+  assert.match(server, /shouldProxyDashboard/);
+  assert.match(server, /proxyDashboardRequest/);
+  assert.match(server, /pathname\.startsWith\("\/assets\/"\)/);
+  assert.match(server, /invitez_admin_session=/);
+  assert.match(server, /replaceAll\(dashboardOrigin, publicOrigin\)/);
   assert.match(server, /Accept-Ranges/);
   assert.match(html, /\/first\.mp4/);
   assert.match(html, /\/secondv2\.mp4/);
@@ -36,7 +41,7 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(html, /rsvp-confirmation/);
   assert.match(html, /eventDayActive/);
   assert.ok(server.includes('if (/^\\/i\\/[^/]+\\/?$/.test(pathname))'));
-  assert.match(server, /after-hours-party\.adventraa\.chatgpt\.site\/admin/);
+  assert.doesNotMatch(server, /Location: "https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/admin"/);
   assert.match(server, /after-hours-party\.adventraa\.chatgpt\.site\/event-day/);
   assert.match(styles, /@media \(min-width: 700px\)/);
   assert.match(styles, /\[hidden\][\s\S]*display: none !important/);
