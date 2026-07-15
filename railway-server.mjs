@@ -19,6 +19,7 @@ const contentTypes = {
 
 function resolveRequestPath(pathname) {
   if (pathname === "/" || pathname === "/index.html") return join(root, "railway", "index.html");
+  if (/^\/i\/[^/]+\/?$/.test(pathname)) return join(root, "railway", "index.html");
   if (pathname === "/globals.css") return join(root, "app", "globals.css");
 
   const decoded = decodeURIComponent(pathname).replace(/^\/+/, "");
@@ -72,7 +73,18 @@ async function sendFile(request, response, filePath) {
 
 createServer(async (request, response) => {
   try {
-    const pathname = new URL(request.url || "/", "http://localhost").pathname;
+    const requestUrl = new URL(request.url || "/", "http://localhost");
+    const pathname = requestUrl.pathname;
+    if (pathname === "/admin" || pathname === "/admin/") {
+      response.writeHead(302, { Location: "https://after-hours-party.adventraa.chatgpt.site/admin" });
+      response.end();
+      return;
+    }
+    if (pathname === "/event-day" || pathname === "/event-day/") {
+      response.writeHead(302, { Location: `https://after-hours-party.adventraa.chatgpt.site/event-day${requestUrl.search}` });
+      response.end();
+      return;
+    }
     const filePath = resolveRequestPath(pathname);
     if (!filePath) throw new Error("Invalid path");
     await sendFile(request, response, filePath);

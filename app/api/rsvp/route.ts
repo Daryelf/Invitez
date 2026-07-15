@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { ensureInvitationSchema, getD1, getEventSettings, publicEvent } from "@/db/invitations";
 
 type RSVPInput = {
   name?: string;
@@ -64,11 +65,46 @@ export async function POST(request: Request) {
 
   const now = new Date().toISOString();
   try {
+    await ensureInvitationSchema();
     await env.DB.prepare(
       "INSERT INTO rsvps (id, name, email, guests, notes, created_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(email) DO UPDATE SET name = excluded.name, guests = excluded.guests, notes = excluded.notes, created_at = excluded.created_at",
     ).bind(crypto.randomUUID(), name, email, guests, notes, now).run();
-    return json(request, { ok: true, totalGuests: await totalGuests() });
-  } catch {
+    const trackedGuest = await getD1().prepare("SELECT id FROM invitation_guests WHERE name = ? COLLATE NOCASE ORDER BY created_at DESC LIMIT 1")
+      .bind(name)
+      .first<{ id: string }>();
+    const trackedStatus = attending === "yes" ? "attending" : "declined";
+    if (trackedGuest) {
+      await getD1().prepare(`UPDATE invitation_guests SET status = ?, party_size = ?,
+        additional_information = ?, first_opened_at = COALESCE(first_opened_at, ?),
+        last_opened_at = ?, opened_count = CASE WHEN opened_count < 1 THEN 1 ELSE opened_count END,
+        responded_at = ?, updated_at = ? WHERE id = ?`)
+        .bind(trackedStatus, Math.max(1, guests), additionalInformation || null, now, now, now, now, trackedGuest.id)
+        .run();
+    } else {
+      await getD1().prepare(`INSERT INTO invitation_guests (
+        id, invite_token, name, email, party_size, status, additional_information,
+        first_opened_at, last_opened_at, opened_count, responded_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`)
+        .bind(
+          crypto.randomUUID(),
+          crypto.randomUUID().replaceAll("-", ""),
+          name,
+          input.email?.trim().toLowerCase() || null,
+          Math.max(1, guests),
+          trackedStatus,
+          additionalInformation || null,
+          now,
+          now,
+          now,
+          now,
+          now,
+        )
+        .run();
+    }
+    const event = await getEventSettings();
+    return json(request, { ok: true, totalGuests: await totalGuests(), event: publicEvent(event) });
+  } catch (error) {
+    console.error("Could not save RSVP", error);
     return json(request, { error: "Could not save RSVP" }, { status: 500 });
   }
 }

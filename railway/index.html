@@ -7,10 +7,10 @@
     <meta name="description" content="Open Erika's Sweet 16 invitation." />
     <title>Erika's Sweet 16 Invitation</title>
     <link rel="icon" href="/favicon.svg" />
-    <link rel="stylesheet" href="/globals.css?v=railway-2" />
+    <link rel="stylesheet" href="/globals.css?v=railway-3" />
   </head>
   <body>
-    <div class="device-shell">
+    <div class="device-shell invitation-pending" id="device-shell">
       <div class="device-camera" aria-hidden="true"><span></span></div>
       <main id="invitation" class="intro-sequence intro-sequence--locked" aria-label="After Hours invitation">
       <audio id="party-song" src="/Nicki%20Minaj%20-%20Moment%204%20Life%20(Remastered)%20(Official%20Video)%20ft.%20Drake%20-%20NickiMinajAtVEVO.mp3" preload="auto"></audio>
@@ -67,15 +67,42 @@
             <div><strong data-countdown="minutes">00</strong><span>minutes</span></div>
             <div><strong data-countdown="seconds">00</strong><span>seconds</span></div>
           </div>
-          <p class="countdown-date"><span aria-hidden="true">♥</span> october 3rd, 2026 · 7:00 pm <span aria-hidden="true">♥</span></p>
+          <p class="countdown-date"><span aria-hidden="true">♥</span> <span id="countdown-event-label">october 3rd, 2026 · 7:00 pm</span> <span aria-hidden="true">♥</span></p>
         </div>
       </section>
       </main>
+      <section class="confirmation-screen" id="rsvp-confirmation" hidden aria-label="RSVP confirmation">
+        <div class="confirmation-orbit confirmation-orbit--one" aria-hidden="true"></div>
+        <div class="confirmation-orbit confirmation-orbit--two" aria-hidden="true"></div>
+        <div class="confirmation-butterfly" aria-hidden="true">♡</div>
+        <div class="confirmation-card">
+          <div class="confirmation-monogram">E</div>
+          <p class="confirmation-kicker" id="confirmation-kicker">RSVP received</p>
+          <h1 id="confirmation-title">You&apos;re on the list!</h1>
+          <p class="confirmation-message" id="confirmation-message">We can&apos;t wait to celebrate with you.</p>
+          <div class="confirmation-status" id="confirmation-status">Attending</div>
+          <div class="confirmation-event-card">
+            <div><span>Date</span><strong id="confirmation-date">October 3, 2026</strong></div>
+            <div><span>Time</span><strong id="confirmation-time">7:00 PM</strong></div>
+            <div><span>Venue</span><strong id="confirmation-venue">Centerville Banquet Hall</strong></div>
+            <div id="confirmation-address-row" hidden><span>Address</span><strong id="confirmation-address"></strong></div>
+          </div>
+          <a class="confirmation-map" id="confirmation-map" href="#" target="_blank" rel="noreferrer" hidden>Open in Maps ↗</a>
+          <div class="confirmation-actions">
+            <button type="button" id="view-invitation-details">View invitation details</button>
+            <button type="button" id="update-rsvp">Update RSVP</button>
+          </div>
+          <p class="confirmation-note">Keep this link — on event day it becomes the party photo wall.</p>
+        </div>
+      </section>
       <div class="device-home-indicator" aria-hidden="true"></div>
     </div>
 
     <script>
+      const API_ORIGIN = "https://after-hours-party.adventraa.chatgpt.site";
+      const OPENED_KEY = "invitez-opening-viewed";
       const invitation = document.querySelector("#invitation");
+      const deviceShell = document.querySelector("#device-shell");
       const firstPanel = document.querySelector("#intro-first");
       const secondPanel = document.querySelector("#intro-second");
       const firstVideo = document.querySelector("#first-video");
@@ -88,7 +115,26 @@
       const rsvpForm = document.querySelector("#rsvp-form");
       const rsvpSubmit = document.querySelector("#rsvp-submit");
       const rsvpStatus = document.querySelector("#rsvp-submit-status");
+      const confirmation = document.querySelector("#rsvp-confirmation");
+      const nameInput = rsvpForm.elements.namedItem("name");
+      const notesInput = rsvpForm.elements.namedItem("additionalInformation");
+      const tokenMatch = window.location.pathname.match(/^\/i\/([^/]+)\/?$/);
+      const invitationToken = tokenMatch ? decodeURIComponent(tokenMatch[1]) : "";
+      const query = new URLSearchParams(window.location.search);
+      const freshPreview = query.get("fresh") === "1";
+      const confirmationPreview = query.get("confirmation") === "1";
       let vinylPaused = false;
+      let guestContext = null;
+      let currentEvent = {
+        eventName: "Erika's Sweet 16",
+        eventDate: "October 3, 2026",
+        eventTime: "7:00 PM",
+        eventIso: "2026-10-03T19:00:00-04:00",
+        venue: "Centerville Banquet Hall",
+        address: "",
+        mapUrl: "",
+      };
+      let eventTime = new Date(currentEvent.eventIso).getTime();
 
       function setVinylPaused(paused) {
         vinylPaused = paused;
@@ -114,9 +160,22 @@
       firstVideo.addEventListener("playing", () => { firstPoster.hidden = true; });
       secondVideo.addEventListener("playing", () => { secondPoster.hidden = true; });
 
-      function resetOpeningScreen() {
+      function markReady() {
+        deviceShell.classList.remove("invitation-pending");
+        deviceShell.classList.add("invitation-ready");
+      }
+
+      function pauseMedia() {
         song.pause();
         song.currentTime = 0;
+        firstVideo.pause();
+        secondVideo.pause();
+      }
+
+      function showOpeningScreen() {
+        confirmation.hidden = true;
+        invitation.hidden = false;
+        pauseMedia();
         firstPanel.hidden = false;
         secondPanel.hidden = true;
         invitation.classList.add("intro-sequence--locked");
@@ -127,16 +186,126 @@
         setVinylPaused(false);
       }
 
-      window.addEventListener("pageshow", resetOpeningScreen);
+      function applyGuestToForm(guest) {
+        if (!guest) return;
+        nameInput.value = guest.name || "";
+        notesInput.value = guest.additionalInformation || "";
+        if (guest.status === "attending" || guest.status === "declined") {
+          const value = guest.status === "attending" ? "yes" : "no";
+          const radio = rsvpForm.querySelector(`input[name="attending"][value="${value}"]`);
+          if (radio) radio.checked = true;
+        }
+      }
 
-      document.querySelector("#open-invitation").addEventListener("click", () => {
+      function applyEvent(event) {
+        if (!event) return;
+        currentEvent = { ...currentEvent, ...event };
+        eventTime = new Date(currentEvent.eventIso).getTime();
+        document.querySelector("#countdown-event-label").textContent = `${currentEvent.eventDate} · ${currentEvent.eventTime}`;
+      }
+
+      function showSecondStage(playSong = false, scrollToForm = false) {
+        confirmation.hidden = true;
+        invitation.hidden = false;
         firstPanel.hidden = true;
         secondPanel.hidden = false;
         invitation.classList.remove("intro-sequence--locked");
         invitation.classList.add("intro-sequence--unlocked");
+        invitation.scrollTop = 0;
         playVideoOrShowFallback(secondVideo, secondPoster);
-        song.currentTime = 0;
-        song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
+        if (playSong) {
+          song.currentTime = 0;
+          song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
+        } else {
+          song.pause();
+          setVinylPaused(true);
+        }
+        if (scrollToForm) {
+          window.setTimeout(() => invitation.scrollTo({ top: secondPanel.scrollHeight * 0.68, behavior: "smooth" }), 120);
+        }
+      }
+
+      function showConfirmation(context) {
+        const guest = context.guest || {};
+        const event = context.event || currentEvent;
+        applyEvent(event);
+        pauseMedia();
+        invitation.hidden = true;
+        confirmation.hidden = false;
+        confirmation.scrollTop = 0;
+        const attending = guest.status === "attending";
+        document.querySelector("#confirmation-kicker").textContent = guest.name ? `RSVP received · ${guest.name}` : "RSVP received";
+        document.querySelector("#confirmation-title").textContent = attending ? "You're on the list!" : "We'll miss you!";
+        document.querySelector("#confirmation-message").textContent = attending ? "We can't wait to celebrate this magical night with you." : "Thank you for letting us know. You'll be part of the celebration in spirit.";
+        const status = document.querySelector("#confirmation-status");
+        status.textContent = attending ? "Attending" : "Not attending";
+        status.classList.toggle("confirmation-status--declined", !attending);
+        document.querySelector("#confirmation-date").textContent = event.eventDate;
+        document.querySelector("#confirmation-time").textContent = event.eventTime;
+        document.querySelector("#confirmation-venue").textContent = event.venue;
+        const addressRow = document.querySelector("#confirmation-address-row");
+        const address = document.querySelector("#confirmation-address");
+        addressRow.hidden = !event.address;
+        address.textContent = event.address || "";
+        const map = document.querySelector("#confirmation-map");
+        const mapUrl = event.mapUrl || (event.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}` : "");
+        map.hidden = !mapUrl;
+        map.href = mapUrl || "#";
+      }
+
+      async function initializeInvitation() {
+        try {
+          if (confirmationPreview) {
+            showConfirmation({ guest: { name: "Preview Guest", status: "attending" }, event: currentEvent });
+            return;
+          }
+          if (invitationToken) {
+            const response = await fetch(`${API_ORIGIN}/api/invite/${encodeURIComponent(invitationToken)}`, { cache: "no-store" });
+            if (!response.ok) throw new Error("Invitation link not found");
+            guestContext = await response.json();
+            applyEvent(guestContext.event);
+            applyGuestToForm(guestContext.guest);
+            if (guestContext.eventDayActive) {
+              window.location.replace(`${API_ORIGIN}/event-day?guest=${encodeURIComponent(guestContext.guest.name || "Guest")}`);
+              return;
+            }
+            if (guestContext.guest.status !== "pending") showConfirmation(guestContext);
+            else if (guestContext.guest.previouslyOpened && !freshPreview) showSecondStage(false);
+            else showOpeningScreen();
+          } else {
+            const eventResponse = await fetch(`${API_ORIGIN}/api/event-day`, { cache: "no-store" });
+            if (eventResponse.ok) {
+              const eventData = await eventResponse.json();
+              applyEvent(eventData.event);
+              if (eventData.active) {
+                window.location.replace(`${API_ORIGIN}/event-day`);
+                return;
+              }
+            }
+            const alreadyOpened = window.localStorage.getItem(OPENED_KEY) === "1";
+            if (alreadyOpened && !freshPreview) showSecondStage(false);
+            else showOpeningScreen();
+          }
+        } catch {
+          showOpeningScreen();
+        } finally {
+          markReady();
+        }
+      }
+
+      let initializationStarted = false;
+      function initializeOnce() {
+        if (initializationStarted) return;
+        initializationStarted = true;
+        void initializeInvitation();
+      }
+      window.addEventListener("pageshow", initializeOnce);
+      window.setTimeout(markReady, 450);
+      initializeOnce();
+
+      document.querySelector("#open-invitation").addEventListener("click", () => {
+        window.localStorage.setItem(OPENED_KEY, "1");
+        showSecondStage(true);
       });
 
       vinylToggle.addEventListener("click", () => {
@@ -156,7 +325,9 @@
         rsvpStatus.textContent = "";
 
         try {
-          const response = await fetch("https://after-hours-party.adventraa.chatgpt.site/api/rsvp", {
+          const endpoint = invitationToken ? `${API_ORIGIN}/api/invite/${encodeURIComponent(invitationToken)}/rsvp` : `${API_ORIGIN}/api/rsvp`;
+          const attending = formData.get("attending");
+          const response = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -166,8 +337,14 @@
             }),
           });
           if (!response.ok) throw new Error("Could not submit RSVP");
-          rsvpStatus.className = "rsvp-submit-status rsvp-submit-status--success";
-          rsvpStatus.textContent = "RSVP sent!";
+          const result = await response.json();
+          window.localStorage.setItem(OPENED_KEY, "1");
+          const confirmationGuest = result.guest || {
+            name: formData.get("name"),
+            status: attending === "yes" ? "attending" : "declined",
+          };
+          guestContext = { guest: confirmationGuest, event: result.event || currentEvent };
+          showConfirmation(guestContext);
         } catch {
           rsvpStatus.className = "rsvp-submit-status rsvp-submit-status--error";
           rsvpStatus.textContent = "Please try again";
@@ -176,7 +353,6 @@
         }
       });
 
-      const eventTime = new Date("2026-10-03T19:00:00-04:00").getTime();
       const countdownFields = Object.fromEntries(
         Array.from(document.querySelectorAll("[data-countdown]")).map((element) => [element.dataset.countdown, element]),
       );
@@ -193,6 +369,9 @@
 
       updateCountdown();
       window.setInterval(updateCountdown, 1000);
+
+      document.querySelector("#view-invitation-details").addEventListener("click", () => showSecondStage(false));
+      document.querySelector("#update-rsvp").addEventListener("click", () => showSecondStage(false, true));
     </script>
   </body>
 </html>

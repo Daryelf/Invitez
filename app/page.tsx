@@ -2,7 +2,32 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 
-type IntroStage = "first" | "second";
+type IntroStage = "first" | "second" | "confirmation";
+
+type EventInfo = {
+  eventName: string;
+  eventDate: string;
+  eventTime: string;
+  eventIso: string;
+  venue: string;
+  address: string;
+  mapUrl: string;
+};
+
+type ConfirmationData = {
+  guest: { name: string; status: "attending" | "declined" };
+  event: EventInfo;
+};
+
+const fallbackEvent: EventInfo = {
+  eventName: "Erika's Sweet 16",
+  eventDate: "October 3, 2026",
+  eventTime: "7:00 PM",
+  eventIso: "2026-10-03T19:00:00-04:00",
+  venue: "Centerville Banquet Hall",
+  address: "",
+  mapUrl: "",
+};
 
 type CountdownValue = {
   days: number;
@@ -57,7 +82,7 @@ function Countdown() {
   );
 }
 
-function RSVPHotspots() {
+function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: ConfirmationData) => void }) {
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
   async function submitRSVP(event: FormEvent<HTMLFormElement>) {
@@ -77,7 +102,17 @@ function RSVPHotspots() {
         }),
       });
       if (!response.ok) throw new Error("Could not submit RSVP");
+      const result = await response.json() as { event?: EventInfo };
+      const confirmation: ConfirmationData = {
+        guest: {
+          name: String(formData.get("name") || "Guest"),
+          status: formData.get("attending") === "yes" ? "attending" : "declined",
+        },
+        event: result.event || fallbackEvent,
+      };
+      window.localStorage.setItem("invitez-rsvp-confirmation", JSON.stringify(confirmation));
       setSubmitState("success");
+      onConfirmed(confirmation);
     } catch {
       setSubmitState("error");
     }
@@ -133,6 +168,7 @@ function IntroVideo({
   onAction,
   vinylPaused = false,
   onVinylToggle,
+  onRSVPConfirmed,
 }: {
   id: string;
   src: string;
@@ -145,6 +181,7 @@ function IntroVideo({
   onAction?: () => void;
   vinylPaused?: boolean;
   onVinylToggle?: () => void;
+  onRSVPConfirmed?: (confirmation: ConfirmationData) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [showAutoplayFallback, setShowAutoplayFallback] = useState(false);
@@ -253,7 +290,7 @@ function IntroVideo({
       ) : null}
       {fullFrame ? (
         <>
-          <RSVPHotspots />
+          <RSVPHotspots onConfirmed={onRSVPConfirmed || (() => undefined)} />
           <Countdown />
         </>
       ) : null}
@@ -261,34 +298,106 @@ function IntroVideo({
   );
 }
 
+function ConfirmationScreen({
+  confirmation,
+  onViewDetails,
+  onUpdate,
+}: {
+  confirmation: ConfirmationData;
+  onViewDetails: () => void;
+  onUpdate: () => void;
+}) {
+  const attending = confirmation.guest.status === "attending";
+  const event = confirmation.event;
+  const mapUrl = event.mapUrl || (event.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}` : "");
+
+  return (
+    <section className="confirmation-screen" aria-label="RSVP confirmation">
+      <div className="confirmation-orbit confirmation-orbit--one" aria-hidden="true" />
+      <div className="confirmation-orbit confirmation-orbit--two" aria-hidden="true" />
+      <div className="confirmation-butterfly" aria-hidden="true">♡</div>
+      <div className="confirmation-card">
+        <div className="confirmation-monogram">E</div>
+        <p className="confirmation-kicker">RSVP received · {confirmation.guest.name}</p>
+        <h1>{attending ? "You're on the list!" : "We'll miss you!"}</h1>
+        <p className="confirmation-message">{attending ? "We can't wait to celebrate this magical night with you." : "Thank you for letting us know. You'll be part of the celebration in spirit."}</p>
+        <div className={`confirmation-status ${attending ? "" : "confirmation-status--declined"}`}>{attending ? "Attending" : "Not attending"}</div>
+        <div className="confirmation-event-card">
+          <div><span>Date</span><strong>{event.eventDate}</strong></div>
+          <div><span>Time</span><strong>{event.eventTime}</strong></div>
+          <div><span>Venue</span><strong>{event.venue}</strong></div>
+          {event.address ? <div><span>Address</span><strong>{event.address}</strong></div> : null}
+        </div>
+        {mapUrl ? <a className="confirmation-map" href={mapUrl} target="_blank" rel="noreferrer">Open in Maps ↗</a> : null}
+        <div className="confirmation-actions"><button type="button" onClick={onViewDetails}>View invitation details</button><button type="button" onClick={onUpdate}>Update RSVP</button></div>
+        <p className="confirmation-note">Keep this link — on event day it becomes the party photo wall.</p>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const [introStage, setIntroStage] = useState<IntroStage>("first");
   const [vinylPaused, setVinylPaused] = useState(false);
+  const [confirmation, setConfirmation] = useState<ConfirmationData | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const resetOpeningScreen = () => {
+    const initializeScreen = async () => {
       const song = audioRef.current;
       if (song) {
         song.pause();
         song.currentTime = 0;
       }
       setVinylPaused(false);
-      setIntroStage("first");
+      try {
+        const eventDay = await fetch("/api/event-day", { cache: "no-store" });
+        if (eventDay.ok) {
+          const result = await eventDay.json() as { active?: boolean };
+          if (result.active) {
+            window.location.replace("/event-day");
+            return;
+          }
+        }
+      } catch {
+        // The invitation remains available if event-day status cannot load.
+      }
+      const savedConfirmation = window.localStorage.getItem("invitez-rsvp-confirmation");
+      if (savedConfirmation) {
+        try {
+          const parsed = JSON.parse(savedConfirmation) as ConfirmationData;
+          setConfirmation(parsed);
+          setIntroStage("confirmation");
+        } catch {
+          window.localStorage.removeItem("invitez-rsvp-confirmation");
+        }
+      } else {
+        const fresh = new URLSearchParams(window.location.search).get("fresh") === "1";
+        setIntroStage(window.localStorage.getItem("invitez-opening-viewed") === "1" && !fresh ? "second" : "first");
+      }
       window.scrollTo(0, 0);
     };
 
-    window.addEventListener("pageshow", resetOpeningScreen);
-    return () => window.removeEventListener("pageshow", resetOpeningScreen);
+    const onPageShow = () => { void initializeScreen(); };
+    window.addEventListener("pageshow", onPageShow);
+    void initializeScreen();
+    return () => window.removeEventListener("pageshow", onPageShow);
   }, []);
 
   function openSecondInvitation() {
+    window.localStorage.setItem("invitez-opening-viewed", "1");
     const song = audioRef.current;
     if (song) {
       song.currentTime = 0;
       song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
     }
     setIntroStage("second");
+  }
+
+  function showConfirmation(next: ConfirmationData) {
+    audioRef.current?.pause();
+    setConfirmation(next);
+    setIntroStage("confirmation");
   }
 
   function toggleVinylAndSong() {
@@ -306,7 +415,9 @@ export default function Home() {
   return (
     <div className="device-shell">
       <div className="device-camera" aria-hidden="true"><span /></div>
-      <main
+      {introStage === "confirmation" && confirmation ? (
+        <ConfirmationScreen confirmation={confirmation} onViewDetails={() => setIntroStage("second")} onUpdate={() => setIntroStage("second")} />
+      ) : <main
         className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
         aria-label="After Hours invitation"
       >
@@ -337,9 +448,10 @@ export default function Home() {
             fullFrame
             vinylPaused={vinylPaused}
             onVinylToggle={toggleVinylAndSong}
+            onRSVPConfirmed={showConfirmation}
           />
         )}
-      </main>
+      </main>}
       <div className="device-home-indicator" aria-hidden="true" />
     </div>
   );
