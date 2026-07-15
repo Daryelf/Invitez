@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 type IntroStage = "first" | "second";
 
@@ -58,16 +58,41 @@ function Countdown() {
 }
 
 function RSVPHotspots() {
+  const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  async function submitRSVP(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    setSubmitState("submitting");
+
+    try {
+      const response = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          attending: formData.get("attending"),
+          additionalInformation: formData.get("additionalInformation"),
+        }),
+      });
+      if (!response.ok) throw new Error("Could not submit RSVP");
+      setSubmitState("success");
+    } catch {
+      setSubmitState("error");
+    }
+  }
+
   return (
-    <div className="rsvp-hotspots" aria-label="RSVP form fields">
+    <form className="rsvp-hotspots" aria-label="RSVP form fields" onSubmit={submitRSVP}>
       <label className="rsvp-text-hotspot rsvp-name-hotspot">
         <span className="sr-only">Name</span>
-        <input type="text" name="name" autoComplete="name" placeholder="Name" />
+        <input type="text" name="name" autoComplete="name" placeholder="Name" required />
       </label>
       <fieldset className="rsvp-attendance-hotspots">
         <legend className="sr-only">Will you be attending?</legend>
         <label className="rsvp-radio-hotspot rsvp-radio-hotspot--yes">
-          <input type="radio" name="attending" value="yes" />
+          <input type="radio" name="attending" value="yes" required />
           <span aria-hidden="true" />
           <span className="sr-only">Yes, I will be there</span>
         </label>
@@ -81,7 +106,18 @@ function RSVPHotspots() {
         <span className="sr-only">Additional information</span>
         <textarea name="additionalInformation" placeholder="Additional information" />
       </label>
-    </div>
+      <button
+        type="submit"
+        className="rsvp-submit-hotspot"
+        aria-label="Submit RSVP"
+        disabled={submitState === "submitting"}
+      >
+        Submit RSVP
+      </button>
+      <p className={`rsvp-submit-status rsvp-submit-status--${submitState}`} aria-live="polite">
+        {submitState === "success" ? "RSVP sent!" : submitState === "error" ? "Please try again" : ""}
+      </p>
+    </form>
   );
 }
 

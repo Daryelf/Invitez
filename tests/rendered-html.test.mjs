@@ -37,6 +37,9 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /name="additionalInformation"/);
   assert.match(source, /name="attending" value="yes"/);
   assert.match(source, /name="attending" value="no"/);
+  assert.match(source, /className="rsvp-submit-hotspot"/);
+  assert.match(source, /aria-label="Submit RSVP"/);
+  assert.match(source, /fetch\("\/api\/rsvp"/);
   assert.match(source, /background: rgba\(255, 212, 0, 0\.58\)/);
   assert.match(source, /rsvp-radio-hotspot--yes/);
   assert.match(source, /rsvp-radio-hotspot--no/);
@@ -61,8 +64,11 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /top: calc\(27\.5% - 22px\)/);
   assert.match(source, /left: 66\.5%/);
   assert.match(source, /id="details"/);
+  assert.match(source, /top: 74\.8%/);
+  assert.match(source, /top: 77\.55%/);
+  assert.match(source, /\.rsvp-submit-hotspot[\s\S]*top: 74\.8%/);
   assert.match(source, /position: absolute/);
-  assert.doesNotMatch(page, /RSVPForm|rsvp-panel|fetch\("\/api\/rsvp"/);
+  assert.doesNotMatch(page, /RSVPForm|rsvp-panel/);
   assert.match(source, /scroll-snap-type: y proximity/);
   assert.match(source, /threshold: 0\.01/);
   assert.match(source, /preload="auto"/);

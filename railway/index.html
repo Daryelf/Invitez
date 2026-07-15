@@ -28,15 +28,15 @@
 
         <video class="intro-video intro-video--full" id="second-video" src="/secondv2.mp4" autoplay muted playsinline preload="auto" aria-label="Erika's Sweet 16 invitation details"></video>
 
-        <div class="rsvp-hotspots" aria-label="RSVP form fields">
+        <form class="rsvp-hotspots" id="rsvp-form" aria-label="RSVP form fields">
           <label class="rsvp-text-hotspot rsvp-name-hotspot">
             <span class="sr-only">Name</span>
-            <input type="text" name="name" autocomplete="name" placeholder="Name" />
+            <input type="text" name="name" autocomplete="name" placeholder="Name" required />
           </label>
           <fieldset class="rsvp-attendance-hotspots">
             <legend class="sr-only">Will you be attending?</legend>
             <label class="rsvp-radio-hotspot rsvp-radio-hotspot--yes">
-              <input type="radio" name="attending" value="yes" />
+              <input type="radio" name="attending" value="yes" required />
               <span aria-hidden="true"></span>
               <span class="sr-only">Yes, I will be there</span>
             </label>
@@ -50,7 +50,9 @@
             <span class="sr-only">Additional information</span>
             <textarea name="additionalInformation" placeholder="Additional information"></textarea>
           </label>
-        </div>
+          <button type="submit" class="rsvp-submit-hotspot" id="rsvp-submit" aria-label="Submit RSVP">Submit RSVP</button>
+          <p class="rsvp-submit-status rsvp-submit-status--idle" id="rsvp-submit-status" aria-live="polite"></p>
+        </form>
 
         <div class="countdown-panel" id="details" aria-label="Countdown to October 3 at 7 PM">
           <div class="countdown-bloom countdown-bloom--left" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><i></i></div>
@@ -79,6 +81,9 @@
       const song = document.querySelector("#party-song");
       const vinyl = document.querySelector("#vinyl-record");
       const vinylToggle = document.querySelector("#vinyl-toggle");
+      const rsvpForm = document.querySelector("#rsvp-form");
+      const rsvpSubmit = document.querySelector("#rsvp-submit");
+      const rsvpStatus = document.querySelector("#rsvp-submit-status");
       let vinylPaused = false;
 
       function setVinylPaused(paused) {
@@ -120,6 +125,34 @@
         } else {
           song.pause();
           setVinylPaused(true);
+        }
+      });
+
+      rsvpForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(rsvpForm);
+        rsvpSubmit.disabled = true;
+        rsvpStatus.className = "rsvp-submit-status rsvp-submit-status--submitting";
+        rsvpStatus.textContent = "";
+
+        try {
+          const response = await fetch("https://after-hours-party.adventraa.chatgpt.site/api/rsvp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: formData.get("name"),
+              attending: formData.get("attending"),
+              additionalInformation: formData.get("additionalInformation"),
+            }),
+          });
+          if (!response.ok) throw new Error("Could not submit RSVP");
+          rsvpStatus.className = "rsvp-submit-status rsvp-submit-status--success";
+          rsvpStatus.textContent = "RSVP sent!";
+        } catch {
+          rsvpStatus.className = "rsvp-submit-status rsvp-submit-status--error";
+          rsvpStatus.textContent = "Please try again";
+        } finally {
+          rsvpSubmit.disabled = false;
         }
       });
 
