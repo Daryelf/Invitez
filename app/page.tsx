@@ -124,6 +124,7 @@ function RSVPHotspots() {
 function IntroVideo({
   id,
   src,
+  poster,
   title,
   autoPlay = false,
   preload = "metadata",
@@ -135,6 +136,7 @@ function IntroVideo({
 }: {
   id: string;
   src: string;
+  poster: string;
   title: string;
   autoPlay?: boolean;
   preload?: "none" | "metadata" | "auto";
@@ -145,6 +147,7 @@ function IntroVideo({
   onVinylToggle?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [showAutoplayFallback, setShowAutoplayFallback] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -153,9 +156,20 @@ function IntroVideo({
     let isVisible = false;
     const playIfVisible = () => {
       if (isVisible && video.paused) {
-        video.play().catch(() => undefined);
+        video.muted = true;
+        video.play()
+          .then(() => setShowAutoplayFallback(false))
+          .catch(() => setShowAutoplayFallback(true));
       }
     };
+
+    const showFallbackIfBlocked = () => {
+      if (isVisible && video.paused && video.currentTime < 0.1) {
+        setShowAutoplayFallback(true);
+      }
+    };
+
+    const hideFallback = () => setShowAutoplayFallback(false);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -171,11 +185,15 @@ function IntroVideo({
 
     video.addEventListener("loadeddata", playIfVisible);
     video.addEventListener("canplay", playIfVisible);
+    video.addEventListener("playing", hideFallback);
     observer.observe(video);
+    const fallbackTimer = window.setTimeout(showFallbackIfBlocked, 500);
     return () => {
       video.removeEventListener("loadeddata", playIfVisible);
       video.removeEventListener("canplay", playIfVisible);
+      video.removeEventListener("playing", hideFallback);
       observer.disconnect();
+      window.clearTimeout(fallbackTimer);
     };
   }, []);
 
@@ -209,11 +227,19 @@ function IntroVideo({
         className={`intro-video ${fullFrame ? "intro-video--full" : ""}`}
         ref={videoRef}
         src={src}
+        poster={poster}
         autoPlay={autoPlay}
         muted
         playsInline
         preload={preload}
         aria-label={title}
+      />
+      <img
+        className={`intro-video autoplay-poster ${fullFrame ? "intro-video--full autoplay-poster--full" : ""}`}
+        src={poster}
+        alt=""
+        aria-hidden="true"
+        hidden={!showAutoplayFallback}
       />
       {nextId ? (
         <button
@@ -293,6 +319,7 @@ export default function Home() {
           <IntroVideo
             id="intro-first"
             src="/first.mp4"
+            poster="/first-poster.png"
             title="After Hours invitation"
             autoPlay
             preload="auto"
@@ -303,6 +330,7 @@ export default function Home() {
           <IntroVideo
             id="intro-second"
             src="/secondv2.mp4"
+            poster="/secondv2-poster.png"
             title="After Hours invitation transition"
             autoPlay
             preload="auto"

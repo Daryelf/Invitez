@@ -16,7 +16,8 @@
       <audio id="party-song" src="/Nicki%20Minaj%20-%20Moment%204%20Life%20(Remastered)%20(Official%20Video)%20ft.%20Drake%20-%20NickiMinajAtVEVO.mp3" preload="auto"></audio>
 
       <section class="intro-panel" id="intro-first">
-        <video class="intro-video" id="first-video" src="/first.mp4" autoplay muted playsinline preload="auto" aria-label="Sweet 16 invitation"></video>
+        <video class="intro-video" id="first-video" src="/first.mp4" poster="/first-poster.png" autoplay muted playsinline preload="auto" aria-label="Sweet 16 invitation"></video>
+        <img class="intro-video autoplay-poster" id="first-poster" src="/first-poster.png" alt="" aria-hidden="true" hidden />
         <button type="button" class="intro-action" id="open-invitation" aria-label="Open invitation">OPEN INVITATION</button>
       </section>
 
@@ -26,7 +27,8 @@
           <button type="button" class="vinyl-toggle" id="vinyl-toggle" aria-label="Pause vinyl" aria-pressed="false"><span aria-hidden="true">❚❚</span></button>
         </div>
 
-        <video class="intro-video intro-video--full" id="second-video" src="/secondv2.mp4" autoplay muted playsinline preload="auto" aria-label="Erika's Sweet 16 invitation details"></video>
+        <video class="intro-video intro-video--full" id="second-video" src="/secondv2.mp4" poster="/secondv2-poster.png" autoplay muted playsinline preload="auto" aria-label="Erika's Sweet 16 invitation details"></video>
+        <img class="intro-video intro-video--full autoplay-poster autoplay-poster--full" id="second-poster" src="/secondv2-poster.png" alt="" aria-hidden="true" hidden />
 
         <form class="rsvp-hotspots" id="rsvp-form" aria-label="RSVP form fields">
           <label class="rsvp-text-hotspot rsvp-name-hotspot">
@@ -78,6 +80,8 @@
       const secondPanel = document.querySelector("#intro-second");
       const firstVideo = document.querySelector("#first-video");
       const secondVideo = document.querySelector("#second-video");
+      const firstPoster = document.querySelector("#first-poster");
+      const secondPoster = document.querySelector("#second-poster");
       const song = document.querySelector("#party-song");
       const vinyl = document.querySelector("#vinyl-record");
       const vinylToggle = document.querySelector("#vinyl-toggle");
@@ -94,6 +98,22 @@
         vinylToggle.querySelector("span").textContent = paused ? "▶" : "❚❚";
       }
 
+      function playVideoOrShowFallback(video, fallback) {
+        video.muted = true;
+        const playAttempt = video.play();
+        if (playAttempt) {
+          playAttempt
+            .then(() => { fallback.hidden = true; })
+            .catch(() => { fallback.hidden = false; });
+        }
+        window.setTimeout(() => {
+          if (video.paused && video.currentTime < 0.1) fallback.hidden = false;
+        }, 500);
+      }
+
+      firstVideo.addEventListener("playing", () => { firstPoster.hidden = true; });
+      secondVideo.addEventListener("playing", () => { secondPoster.hidden = true; });
+
       function resetOpeningScreen() {
         song.pause();
         song.currentTime = 0;
@@ -103,7 +123,7 @@
         invitation.classList.remove("intro-sequence--unlocked");
         invitation.scrollTop = 0;
         firstVideo.currentTime = 0;
-        firstVideo.play().catch(() => undefined);
+        playVideoOrShowFallback(firstVideo, firstPoster);
         setVinylPaused(false);
       }
 
@@ -114,7 +134,7 @@
         secondPanel.hidden = false;
         invitation.classList.remove("intro-sequence--locked");
         invitation.classList.add("intro-sequence--unlocked");
-        secondVideo.play().catch(() => undefined);
+        playVideoOrShowFallback(secondVideo, secondPoster);
         song.currentTime = 0;
         song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
       });

@@ -31,6 +31,11 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /aspect-ratio: 736 \/ 4088/);
   assert.match(source, /video\.addEventListener\("canplay", playIfVisible\)/);
   assert.match(source, /src="\/secondv2\.mp4"[\s\S]*autoPlay[\s\S]*preload="auto"/);
+  assert.match(source, /poster="\/first-poster\.png"/);
+  assert.match(source, /poster="\/secondv2-poster\.png"/);
+  assert.match(source, /showAutoplayFallback/);
+  assert.match(source, /video\.play\(\)[\s\S]*setShowAutoplayFallback\(true\)/);
+  assert.match(source, /autoplay-poster/);
   assert.match(source, /countdown-panel/);
   assert.match(source, /RSVPHotspots/);
   assert.match(source, /name="name"/);

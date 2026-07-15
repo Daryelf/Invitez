@@ -16,6 +16,9 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(server, /Accept-Ranges/);
   assert.match(html, /\/first\.mp4/);
   assert.match(html, /\/secondv2\.mp4/);
+  assert.match(html, /\/first-poster\.png/);
+  assert.match(html, /\/secondv2-poster\.png/);
+  assert.match(html, /playVideoOrShowFallback/);
   assert.match(html, /Nicki%20Minaj/);
   assert.match(html, /rsvp-name-hotspot/);
   assert.match(html, /rsvp-submit-hotspot/);
