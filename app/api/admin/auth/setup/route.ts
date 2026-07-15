@@ -16,8 +16,7 @@ export async function POST(request: Request) {
     const body = await request.json() as Record<string, unknown>;
     const email = typeof body.email === "string" ? body.email : "";
     const password = typeof body.password === "string" ? body.password : "";
-    const setupToken = typeof body.setupToken === "string" ? body.setupToken : "";
-    const user = await createInitialAdminPassword({ email, password, setupToken });
+    const user = await createInitialAdminPassword({ email, password });
     const session = await createAdminSession(user.email);
     const response = Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
     response.headers.append("Set-Cookie", sessionCookie(session.token, session.expiresAt, requestIsSecure(request)));

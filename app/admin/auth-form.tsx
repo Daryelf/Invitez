@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import styles from "./admin.module.css";
 
 type AuthResponse = {
@@ -14,7 +14,6 @@ export default function AdminAuthForm({
   configured: boolean;
   ownerEmail: string;
 }) {
-  const [setupToken, setSetupToken] = useState<string | null>(configured ? "" : null);
   const [email, setEmail] = useState(ownerEmail);
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -22,22 +21,7 @@ export default function AdminAuthForm({
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (configured) return;
-    const timer = window.setTimeout(() => {
-      const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
-      const hashToken = new URLSearchParams(hash).get("setup")?.trim() || "";
-      const queryToken = new URLSearchParams(window.location.search).get("setup")?.trim() || "";
-      const token = hashToken || queryToken;
-      if (queryToken && !hashToken) {
-        window.history.replaceState(null, "", `/admin#setup=${encodeURIComponent(queryToken)}`);
-      }
-      setSetupToken(token);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [configured]);
-
-  const setupMode = !configured && Boolean(setupToken);
+  const setupMode = !configured;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,7 +37,7 @@ export default function AdminAuthForm({
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(setupMode ? { email, password, setupToken } : { email, password }),
+        body: JSON.stringify({ email, password }),
       });
       const result = await response.json() as AuthResponse;
       if (!response.ok) throw new Error(result.error || "Could not sign in.");
@@ -64,25 +48,6 @@ export default function AdminAuthForm({
       setError(submitError instanceof Error ? submitError.message : "Could not sign in.");
       setSubmitting(false);
     }
-  }
-
-  if (!configured && setupToken === null) {
-    return (
-      <div className={styles.authWaiting} aria-live="polite">
-        <div className={styles.loader} />
-        <span>Checking your private setup link…</span>
-      </div>
-    );
-  }
-
-  if (!configured && !setupMode) {
-    return (
-      <>
-        <h1>Password setup required</h1>
-        <p>Open the private one-time setup link to create your dashboard password.</p>
-        <div className={styles.authNotice}>Only the invitation owner can use that private link.</div>
-      </>
-    );
   }
 
   return (

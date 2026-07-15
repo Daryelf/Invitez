@@ -12,7 +12,6 @@ const LOGIN_LOCK_SECONDS = 15 * 60;
 
 type RuntimeEnvironment = {
   ADMIN_EMAILS?: string;
-  ADMIN_SETUP_TOKEN?: string;
 };
 
 export type AdminUser = {
@@ -40,7 +39,6 @@ function runtimeEnvironment() {
   const localEnvironment = typeof process !== "undefined" ? process.env : {};
   return {
     ADMIN_EMAILS: workerEnvironment.ADMIN_EMAILS || localEnvironment.ADMIN_EMAILS,
-    ADMIN_SETUP_TOKEN: workerEnvironment.ADMIN_SETUP_TOKEN || localEnvironment.ADMIN_SETUP_TOKEN,
   };
 }
 
@@ -125,12 +123,6 @@ function constantTimeEqual(left: Uint8Array, right: Uint8Array) {
   return difference === 0;
 }
 
-async function secretsMatch(left: string, right: string) {
-  if (!left || !right) return false;
-  const [leftDigest, rightDigest] = await Promise.all([sha256(left), sha256(right)]);
-  return constantTimeEqual(leftDigest, rightDigest);
-}
-
 async function derivePassword(password: string, salt: Uint8Array, iterations: number) {
   const key = await crypto.subtle.importKey(
     "raw",
@@ -161,16 +153,10 @@ function validatePassword(password: string) {
 export async function createInitialAdminPassword(input: {
   email: string;
   password: string;
-  setupToken: string;
 }) {
   const email = normalizedEmail(input.email);
   if (!isAllowedEmail(email)) throw new AdminAuthError("This email cannot manage this invitation.", 403);
   validatePassword(input.password);
-
-  const configuredToken = runtimeEnvironment().ADMIN_SETUP_TOKEN || "";
-  if (!(await secretsMatch(input.setupToken, configuredToken))) {
-    throw new AdminAuthError("This private setup link is invalid or has expired.", 403);
-  }
 
   await ensureAdminAuthSchema();
   if (await isAdminPasswordConfigured()) {

@@ -26,8 +26,8 @@ test("admin dashboard uses first-time password setup and protected owner session
   assert.match(form, /Create your password/);
   assert.match(form, /Log in/);
   assert.match(form, /new-password/);
-  assert.match(form, /window\.location\.search/);
-  assert.match(form, /replaceState\(null, "", `\/admin#setup=/);
+  assert.match(form, /const setupMode = !configured/);
+  assert.doesNotMatch(adminSource, /ADMIN_SETUP_TOKEN|setupToken|private one-time/);
   assert.doesNotMatch(adminSource, /Sign in with ChatGPT/);
   assert.match(auth, /PBKDF2/);
   assert.match(auth, /password_hash/);
