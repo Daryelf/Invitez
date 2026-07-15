@@ -57,6 +57,34 @@ function Countdown() {
   );
 }
 
+function RSVPHotspots() {
+  return (
+    <div className="rsvp-hotspots" aria-label="RSVP form fields">
+      <label className="rsvp-text-hotspot rsvp-name-hotspot">
+        <span className="sr-only">Name</span>
+        <input type="text" name="name" autoComplete="name" placeholder="Name" />
+      </label>
+      <fieldset className="rsvp-attendance-hotspots">
+        <legend className="sr-only">Will you be attending?</legend>
+        <label className="rsvp-radio-hotspot rsvp-radio-hotspot--yes">
+          <input type="radio" name="attending" value="yes" />
+          <span aria-hidden="true" />
+          <span className="sr-only">Yes, I will be there</span>
+        </label>
+        <label className="rsvp-radio-hotspot rsvp-radio-hotspot--no">
+          <input type="radio" name="attending" value="no" />
+          <span aria-hidden="true" />
+          <span className="sr-only">Sorry, I cannot make it</span>
+        </label>
+      </fieldset>
+      <label className="rsvp-text-hotspot rsvp-notes-hotspot">
+        <span className="sr-only">Additional information</span>
+        <textarea name="additionalInformation" placeholder="Additional information" />
+      </label>
+    </div>
+  );
+}
+
 function IntroVideo({
   id,
   src,
@@ -161,7 +189,12 @@ function IntroVideo({
           OPEN INVITATION
         </button>
       ) : null}
-      {fullFrame ? <Countdown /> : null}
+      {fullFrame ? (
+        <>
+          <RSVPHotspots />
+          <Countdown />
+        </>
+      ) : null}
     </section>
   );
 }

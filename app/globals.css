@@ -25,6 +25,18 @@ video {
   -webkit-tap-highlight-color: transparent;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .intro-sequence {
   width: 100%;
   height: 100dvh;
@@ -178,6 +190,119 @@ video {
 @keyframes vinyl-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.rsvp-hotspots {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rsvp-text-hotspot {
+  position: absolute;
+  display: block;
+  transform: rotate(-15deg);
+  transform-origin: center;
+  pointer-events: auto;
+}
+
+.rsvp-text-hotspot input,
+.rsvp-text-hotspot textarea {
+  width: 100%;
+  height: 100%;
+  padding: 0.25em 0.65em;
+  border: 2px solid #ffd400;
+  border-radius: 7px;
+  outline: 0;
+  background: rgba(255, 212, 0, 0.58);
+  color: #243b31;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(0.58rem, 2.5vw, 1rem);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.72);
+  resize: none;
+  -webkit-appearance: none;
+}
+
+.rsvp-text-hotspot input:focus,
+.rsvp-text-hotspot textarea:focus {
+  border-color: #ffb000;
+  background: rgba(255, 226, 70, 0.76);
+  box-shadow: 0 0 0 3px rgba(255, 176, 0, 0.32);
+}
+
+.rsvp-text-hotspot input::placeholder,
+.rsvp-text-hotspot textarea::placeholder {
+  color: rgba(54, 67, 47, 0.7);
+}
+
+.rsvp-name-hotspot {
+  top: 75.7%;
+  left: 14%;
+  width: 40%;
+  height: 1.6%;
+}
+
+.rsvp-notes-hotspot {
+  top: 78.9%;
+  left: 20.5%;
+  width: 60%;
+  height: 1.6%;
+}
+
+.rsvp-attendance-hotspots {
+  position: static;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.rsvp-radio-hotspot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: clamp(22px, 6vw, 48px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.rsvp-radio-hotspot--yes {
+  top: 73.6%;
+  left: 55.8%;
+}
+
+.rsvp-radio-hotspot--no {
+  top: 72.12%;
+  left: 77.5%;
+}
+
+.rsvp-radio-hotspot input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.rsvp-radio-hotspot > span[aria-hidden="true"] {
+  width: 72%;
+  aspect-ratio: 1;
+  border: 3px solid #ffd400;
+  border-radius: 50%;
+  background: rgba(255, 212, 0, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75);
+}
+
+.rsvp-radio-hotspot input:checked + span {
+  background: #ffd400;
+  box-shadow: inset 0 0 0 4px #fff7cf, 0 0 0 2px rgba(255, 176, 0, 0.8);
+}
+
+.rsvp-radio-hotspot input:focus-visible + span {
+  outline: 3px solid rgba(255, 176, 0, 0.82);
+  outline-offset: 3px;
 }
 
 .countdown-panel {

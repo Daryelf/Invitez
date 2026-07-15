@@ -32,6 +32,14 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /video\.addEventListener\("canplay", playIfVisible\)/);
   assert.match(source, /src="\/secondv2\.mp4"[\s\S]*autoPlay[\s\S]*preload="auto"/);
   assert.match(source, /countdown-panel/);
+  assert.match(source, /RSVPHotspots/);
+  assert.match(source, /name="name"/);
+  assert.match(source, /name="additionalInformation"/);
+  assert.match(source, /name="attending" value="yes"/);
+  assert.match(source, /name="attending" value="no"/);
+  assert.match(source, /background: rgba\(255, 212, 0, 0\.58\)/);
+  assert.match(source, /rsvp-radio-hotspot--yes/);
+  assert.match(source, /rsvp-radio-hotspot--no/);
   assert.match(source, /countdown to the ball/i);
   assert.match(source, /countdown-bloom/);
   assert.match(source, /countdown-bow/);
