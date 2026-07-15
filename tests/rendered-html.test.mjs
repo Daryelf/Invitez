@@ -73,6 +73,8 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /device-camera/);
   assert.match(source, /device-home-indicator/);
   assert.match(source, /@media \(min-width: 700px\)/);
+  assert.match(source, /window\.addEventListener\("pageshow", resetOpeningScreen\)/);
+  assert.match(source, /setIntroStage\("first"\)/);
 
   assert.doesNotMatch(source, /The Night Shift|event-page|gallery|hero|eventDetails|starterPhotos/i);
   assert.doesNotMatch(source, /codex-preview|Your site is taking shape|react-loading-skeleton/i);

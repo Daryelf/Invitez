@@ -204,6 +204,22 @@ export default function Home() {
   const [vinylPaused, setVinylPaused] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  useEffect(() => {
+    const resetOpeningScreen = () => {
+      const song = audioRef.current;
+      if (song) {
+        song.pause();
+        song.currentTime = 0;
+      }
+      setVinylPaused(false);
+      setIntroStage("first");
+      window.scrollTo(0, 0);
+    };
+
+    window.addEventListener("pageshow", resetOpeningScreen);
+    return () => window.removeEventListener("pageshow", resetOpeningScreen);
+  }, []);
+
   function openSecondInvitation() {
     const song = audioRef.current;
     if (song) {

@@ -74,6 +74,7 @@
       const invitation = document.querySelector("#invitation");
       const firstPanel = document.querySelector("#intro-first");
       const secondPanel = document.querySelector("#intro-second");
+      const firstVideo = document.querySelector("#first-video");
       const secondVideo = document.querySelector("#second-video");
       const song = document.querySelector("#party-song");
       const vinyl = document.querySelector("#vinyl-record");
@@ -87,6 +88,21 @@
         vinylToggle.setAttribute("aria-label", paused ? "Play vinyl" : "Pause vinyl");
         vinylToggle.querySelector("span").textContent = paused ? "▶" : "❚❚";
       }
+
+      function resetOpeningScreen() {
+        song.pause();
+        song.currentTime = 0;
+        firstPanel.hidden = false;
+        secondPanel.hidden = true;
+        invitation.classList.add("intro-sequence--locked");
+        invitation.classList.remove("intro-sequence--unlocked");
+        invitation.scrollTop = 0;
+        firstVideo.currentTime = 0;
+        firstVideo.play().catch(() => undefined);
+        setVinylPaused(false);
+      }
+
+      window.addEventListener("pageshow", resetOpeningScreen);
 
       document.querySelector("#open-invitation").addEventListener("click", () => {
         firstPanel.hidden = true;
