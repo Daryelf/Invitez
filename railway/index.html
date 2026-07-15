@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#141414" />
+    <meta name="description" content="Open Erika's Sweet 16 invitation." />
+    <title>Erika's Sweet 16 Invitation</title>
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="stylesheet" href="/globals.css?v=railway-1" />
+  </head>
+  <body>
+    <main id="invitation" class="intro-sequence intro-sequence--locked" aria-label="After Hours invitation">
+      <audio id="party-song" src="/Nicki%20Minaj%20-%20Moment%204%20Life%20(Remastered)%20(Official%20Video)%20ft.%20Drake%20-%20NickiMinajAtVEVO.mp3" preload="auto"></audio>
+
+      <section class="intro-panel" id="intro-first">
+        <video class="intro-video" id="first-video" src="/first.mp4" autoplay muted playsinline preload="auto" aria-label="Sweet 16 invitation"></video>
+        <button type="button" class="intro-action" id="open-invitation" aria-label="Open invitation">OPEN INVITATION</button>
+      </section>
+
+      <section class="intro-panel intro-panel--full" id="intro-second" hidden>
+        <div class="vinyl-stage">
+          <img class="vinyl-record" id="vinyl-record" src="/vinyl-record.png" alt="" aria-hidden="true" />
+          <button type="button" class="vinyl-toggle" id="vinyl-toggle" aria-label="Pause vinyl" aria-pressed="false"><span aria-hidden="true">❚❚</span></button>
+        </div>
+
+        <video class="intro-video intro-video--full" id="second-video" src="/secondv2.mp4" autoplay muted playsinline preload="auto" aria-label="Erika's Sweet 16 invitation details"></video>
+
+        <div class="rsvp-hotspots" aria-label="RSVP form fields">
+          <label class="rsvp-text-hotspot rsvp-name-hotspot">
+            <span class="sr-only">Name</span>
+            <input type="text" name="name" autocomplete="name" placeholder="Name" />
+          </label>
+          <fieldset class="rsvp-attendance-hotspots">
+            <legend class="sr-only">Will you be attending?</legend>
+            <label class="rsvp-radio-hotspot rsvp-radio-hotspot--yes">
+              <input type="radio" name="attending" value="yes" />
+              <span aria-hidden="true"></span>
+              <span class="sr-only">Yes, I will be there</span>
+            </label>
+            <label class="rsvp-radio-hotspot rsvp-radio-hotspot--no">
+              <input type="radio" name="attending" value="no" />
+              <span aria-hidden="true"></span>
+              <span class="sr-only">Sorry, I cannot make it</span>
+            </label>
+          </fieldset>
+          <label class="rsvp-text-hotspot rsvp-notes-hotspot">
+            <span class="sr-only">Additional information</span>
+            <textarea name="additionalInformation" placeholder="Additional information"></textarea>
+          </label>
+        </div>
+
+        <div class="countdown-panel" id="details" aria-label="Countdown to October 3 at 7 PM">
+          <div class="countdown-bloom countdown-bloom--left" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><i></i></div>
+          <div class="countdown-bloom countdown-bloom--right" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><i></i></div>
+          <div class="countdown-bow" aria-hidden="true"><span></span><span></span><i></i></div>
+          <p class="countdown-kicker">countdown to the ball</p>
+          <div class="countdown-grid">
+            <div><strong data-countdown="days">00</strong><span>days</span></div>
+            <div><strong data-countdown="hours">00</strong><span>hours</span></div>
+            <div><strong data-countdown="minutes">00</strong><span>minutes</span></div>
+            <div><strong data-countdown="seconds">00</strong><span>seconds</span></div>
+          </div>
+          <p class="countdown-date"><span aria-hidden="true">♥</span> october 3rd, 2026 · 7:00 pm <span aria-hidden="true">♥</span></p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const invitation = document.querySelector("#invitation");
+      const firstPanel = document.querySelector("#intro-first");
+      const secondPanel = document.querySelector("#intro-second");
+      const secondVideo = document.querySelector("#second-video");
+      const song = document.querySelector("#party-song");
+      const vinyl = document.querySelector("#vinyl-record");
+      const vinylToggle = document.querySelector("#vinyl-toggle");
+      let vinylPaused = false;
+
+      function setVinylPaused(paused) {
+        vinylPaused = paused;
+        vinyl.classList.toggle("vinyl-record--paused", paused);
+        vinylToggle.setAttribute("aria-pressed", String(paused));
+        vinylToggle.setAttribute("aria-label", paused ? "Play vinyl" : "Pause vinyl");
+        vinylToggle.querySelector("span").textContent = paused ? "▶" : "❚❚";
+      }
+
+      document.querySelector("#open-invitation").addEventListener("click", () => {
+        firstPanel.hidden = true;
+        secondPanel.hidden = false;
+        invitation.classList.remove("intro-sequence--locked");
+        invitation.classList.add("intro-sequence--unlocked");
+        secondVideo.play().catch(() => undefined);
+        song.currentTime = 0;
+        song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
+      });
+
+      vinylToggle.addEventListener("click", () => {
+        if (vinylPaused) {
+          song.play().then(() => setVinylPaused(false)).catch(() => setVinylPaused(true));
+        } else {
+          song.pause();
+          setVinylPaused(true);
+        }
+      });
+
+      const eventTime = new Date("2026-10-03T19:00:00-04:00").getTime();
+      const countdownFields = Object.fromEntries(
+        Array.from(document.querySelectorAll("[data-countdown]")).map((element) => [element.dataset.countdown, element]),
+      );
+      const format = (value) => String(value).padStart(2, "0");
+
+      function updateCountdown() {
+        const distance = Math.max(0, eventTime - Date.now());
+        const totalSeconds = Math.floor(distance / 1000);
+        countdownFields.days.textContent = format(Math.floor(totalSeconds / 86400));
+        countdownFields.hours.textContent = format(Math.floor((totalSeconds % 86400) / 3600));
+        countdownFields.minutes.textContent = format(Math.floor((totalSeconds % 3600) / 60));
+        countdownFields.seconds.textContent = format(totalSeconds % 60);
+      }
+
+      updateCountdown();
+      window.setInterval(updateCountdown, 1000);
+    </script>
+  </body>
+</html>

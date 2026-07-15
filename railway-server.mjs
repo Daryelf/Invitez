@@ -1,0 +1,85 @@
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import { createServer } from "node:http";
+import { extname, join, normalize } from "node:path";
+
+const port = Number(process.env.PORT || 8080);
+const root = process.cwd();
+const publicRoot = join(root, "public");
+
+const contentTypes = {
+  ".css": "text/css; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".mp3": "audio/mpeg",
+  ".mp4": "video/mp4",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+};
+
+function resolveRequestPath(pathname) {
+  if (pathname === "/" || pathname === "/index.html") return join(root, "railway", "index.html");
+  if (pathname === "/globals.css") return join(root, "app", "globals.css");
+
+  const decoded = decodeURIComponent(pathname).replace(/^\/+/, "");
+  const safePath = normalize(decoded);
+  if (safePath.startsWith("..") || safePath.includes("/../")) return null;
+  return join(publicRoot, safePath);
+}
+
+async function sendFile(request, response, filePath) {
+  const fileStat = await stat(filePath);
+  if (!fileStat.isFile()) throw new Error("Not a file");
+
+  const contentType = contentTypes[extname(filePath).toLowerCase()] || "application/octet-stream";
+  const range = request.headers.range;
+  const headers = {
+    "Accept-Ranges": "bytes",
+    "Cache-Control": [".html", ".css"].includes(extname(filePath)) ? "no-cache" : "public, max-age=3600",
+    "Content-Type": contentType,
+  };
+
+  if (range) {
+    const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+    if (!match) {
+      response.writeHead(416, { "Content-Range": `bytes */${fileStat.size}` });
+      response.end();
+      return;
+    }
+
+    const start = match[1] ? Number(match[1]) : 0;
+    const end = match[2] ? Math.min(Number(match[2]), fileStat.size - 1) : fileStat.size - 1;
+    if (start > end || start >= fileStat.size) {
+      response.writeHead(416, { "Content-Range": `bytes */${fileStat.size}` });
+      response.end();
+      return;
+    }
+
+    response.writeHead(206, {
+      ...headers,
+      "Content-Length": end - start + 1,
+      "Content-Range": `bytes ${start}-${end}/${fileStat.size}`,
+    });
+    if (request.method === "HEAD") return response.end();
+    createReadStream(filePath, { start, end }).pipe(response);
+    return;
+  }
+
+  response.writeHead(200, { ...headers, "Content-Length": fileStat.size });
+  if (request.method === "HEAD") return response.end();
+  createReadStream(filePath).pipe(response);
+}
+
+createServer(async (request, response) => {
+  try {
+    const pathname = new URL(request.url || "/", "http://localhost").pathname;
+    const filePath = resolveRequestPath(pathname);
+    if (!filePath) throw new Error("Invalid path");
+    await sendFile(request, response, filePath);
+  } catch {
+    response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Not found");
+  }
+}).listen(port, "0.0.0.0", () => {
+  console.log(`Invitez is listening on port ${port}`);
+});
