@@ -20,6 +20,16 @@ body {
   overflow: hidden;
 }
 
+.device-shell {
+  width: 100%;
+  height: 100%;
+}
+
+.device-camera,
+.device-home-indicator {
+  display: none;
+}
+
 button {
   font: inherit;
 }
@@ -536,6 +546,151 @@ video {
   .countdown-grid span {
     font-size: 0.46rem;
     letter-spacing: 0.08em;
+  }
+}
+
+@media (min-width: 700px) {
+  html,
+  body {
+    background:
+      radial-gradient(circle at 50% 42%, rgba(239, 173, 191, 0.2), transparent 36%),
+      linear-gradient(145deg, #1d171b 0%, #090909 72%);
+  }
+
+  body {
+    display: grid;
+    place-items: center;
+    padding: 22px;
+  }
+
+  .device-shell {
+    position: relative;
+    width: min(430px, calc(100vw - 44px));
+    height: min(884px, calc(100dvh - 44px));
+    padding: 12px;
+    border: 1px solid #4c4c4f;
+    border-radius: 58px;
+    background: linear-gradient(145deg, #404044 0%, #08080a 18%, #000 78%, #29292c 100%);
+    box-shadow:
+      0 0 0 2px #050506,
+      0 0 0 4px #525257,
+      0 28px 70px rgba(0, 0, 0, 0.72),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.17);
+  }
+
+  .device-shell::before,
+  .device-shell::after {
+    content: "";
+    position: absolute;
+    left: -7px;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+    background: linear-gradient(to right, #222225, #77777b);
+  }
+
+  .device-shell::before {
+    top: 160px;
+    height: 76px;
+  }
+
+  .device-shell::after {
+    top: 254px;
+    height: 110px;
+  }
+
+  .intro-sequence {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border-radius: 46px;
+    scrollbar-width: none;
+    container-type: inline-size;
+  }
+
+  .intro-sequence::-webkit-scrollbar {
+    display: none;
+  }
+
+  .intro-panel {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .intro-panel--full {
+    height: auto;
+    min-height: 100%;
+  }
+
+  .device-camera {
+    position: absolute;
+    z-index: 30;
+    top: 25px;
+    left: 50%;
+    display: block;
+    width: 124px;
+    height: 34px;
+    border-radius: 999px;
+    background: #050505;
+    transform: translateX(-50%);
+    box-shadow: inset 0 -1px 2px rgba(255, 255, 255, 0.08), 0 2px 7px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+  }
+
+  .device-camera span {
+    position: absolute;
+    top: 11px;
+    right: 17px;
+    width: 11px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 34%, #243a55 0 12%, #09111d 38%, #010205 72%);
+    box-shadow: 0 0 0 1px #111b25, inset 0 0 3px #355175;
+  }
+
+  .device-home-indicator {
+    position: absolute;
+    z-index: 30;
+    bottom: 20px;
+    left: 50%;
+    display: block;
+    width: 126px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.88);
+    transform: translateX(-50%);
+    mix-blend-mode: difference;
+    pointer-events: none;
+  }
+
+  .vinyl-stage {
+    width: 112px;
+  }
+
+  .vinyl-toggle {
+    width: 38px;
+  }
+
+  .vinyl-toggle span {
+    font-size: 0.72rem;
+  }
+
+  .rsvp-radio-hotspot {
+    width: 26px;
+  }
+
+  .rsvp-text-hotspot input,
+  .rsvp-text-hotspot textarea {
+    font-size: 0.72rem;
+  }
+
+  .countdown-panel {
+    bottom: 28px;
+    width: calc(100% - 38px);
+    padding: 48px 22px 26px;
+  }
+
+  .countdown-grid strong {
+    font-size: 2rem;
   }
 }
 

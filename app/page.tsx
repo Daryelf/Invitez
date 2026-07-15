@@ -226,37 +226,41 @@ export default function Home() {
   }
 
   return (
-    <main
-      className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
-      aria-label="After Hours invitation"
-    >
-      <audio
-        ref={audioRef}
-        src="/Nicki Minaj - Moment 4 Life (Remastered) (Official Video) ft. Drake - NickiMinajAtVEVO.mp3"
-        preload="auto"
-      />
-      {introStage === "first" ? (
-        <IntroVideo
-          id="intro-first"
-          src="/first.mp4"
-          title="After Hours invitation"
-          autoPlay
+    <div className="device-shell">
+      <div className="device-camera" aria-hidden="true"><span /></div>
+      <main
+        className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
+        aria-label="After Hours invitation"
+      >
+        <audio
+          ref={audioRef}
+          src="/Nicki Minaj - Moment 4 Life (Remastered) (Official Video) ft. Drake - NickiMinajAtVEVO.mp3"
           preload="auto"
-          nextId="intro-second"
-          onAction={openSecondInvitation}
         />
-      ) : (
-        <IntroVideo
-          id="intro-second"
-          src="/secondv2.mp4"
-          title="After Hours invitation transition"
-          autoPlay
-          preload="auto"
-          fullFrame
-          vinylPaused={vinylPaused}
-          onVinylToggle={toggleVinylAndSong}
-        />
-      )}
-    </main>
+        {introStage === "first" ? (
+          <IntroVideo
+            id="intro-first"
+            src="/first.mp4"
+            title="After Hours invitation"
+            autoPlay
+            preload="auto"
+            nextId="intro-second"
+            onAction={openSecondInvitation}
+          />
+        ) : (
+          <IntroVideo
+            id="intro-second"
+            src="/secondv2.mp4"
+            title="After Hours invitation transition"
+            autoPlay
+            preload="auto"
+            fullFrame
+            vinylPaused={vinylPaused}
+            onVinylToggle={toggleVinylAndSong}
+          />
+        )}
+      </main>
+      <div className="device-home-indicator" aria-hidden="true" />
+    </div>
   );
 }

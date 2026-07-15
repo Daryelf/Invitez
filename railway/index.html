@@ -7,10 +7,12 @@
     <meta name="description" content="Open Erika's Sweet 16 invitation." />
     <title>Erika's Sweet 16 Invitation</title>
     <link rel="icon" href="/favicon.svg" />
-    <link rel="stylesheet" href="/globals.css?v=railway-1" />
+    <link rel="stylesheet" href="/globals.css?v=railway-2" />
   </head>
   <body>
-    <main id="invitation" class="intro-sequence intro-sequence--locked" aria-label="After Hours invitation">
+    <div class="device-shell">
+      <div class="device-camera" aria-hidden="true"><span></span></div>
+      <main id="invitation" class="intro-sequence intro-sequence--locked" aria-label="After Hours invitation">
       <audio id="party-song" src="/Nicki%20Minaj%20-%20Moment%204%20Life%20(Remastered)%20(Official%20Video)%20ft.%20Drake%20-%20NickiMinajAtVEVO.mp3" preload="auto"></audio>
 
       <section class="intro-panel" id="intro-first">
@@ -64,7 +66,9 @@
           <p class="countdown-date"><span aria-hidden="true">♥</span> october 3rd, 2026 · 7:00 pm <span aria-hidden="true">♥</span></p>
         </div>
       </section>
-    </main>
+      </main>
+      <div class="device-home-indicator" aria-hidden="true"></div>
+    </div>
 
     <script>
       const invitation = document.querySelector("#invitation");
