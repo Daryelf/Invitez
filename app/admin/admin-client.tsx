@@ -65,12 +65,10 @@ export default function AdminClient({
   adminName,
   adminEmail,
   signOutPath,
-  localPreview,
 }: {
   adminName: string;
   adminEmail: string;
   signOutPath: string;
-  localPreview: boolean;
 }) {
   const [data, setData] = useState<DashboardData>({ guests: [], event: emptyEvent, eventDayOverride: false, photoUploadsEnabled: true, eventDayActive: false });
   const [loading, setLoading] = useState(true);
@@ -249,8 +247,8 @@ export default function AdminClient({
         </nav>
         <div className={styles.sidebarFooter}>
           <div className={styles.avatar}>{adminName.slice(0, 1).toUpperCase()}</div>
-          <div><strong>{adminName}</strong><small>{localPreview ? "Local preview" : adminEmail}</small></div>
-          {!localPreview ? <a href={signOutPath} aria-label="Sign out">↗</a> : null}
+          <div><strong>{adminName}</strong><small>{adminEmail}</small></div>
+          <a href={signOutPath} aria-label="Log out" title="Log out">↗</a>
         </div>
       </aside>
 

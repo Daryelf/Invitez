@@ -6,20 +6,35 @@ async function source(path) {
   return readFile(new URL(path, import.meta.url), "utf8");
 }
 
-test("admin dashboard is owner authenticated and tracks the complete guest lifecycle", async () => {
-  const [auth, page, client, guestApi, guestUpdateApi, schema, invitations] = await Promise.all([
+test("admin dashboard uses first-time password setup and protected owner sessions", async () => {
+  const [auth, page, form, loginApi, setupApi, logoutApi, client, guestApi, guestUpdateApi, schema, invitations] = await Promise.all([
     source("../app/admin-auth.ts"),
     source("../app/admin/page.tsx"),
+    source("../app/admin/auth-form.tsx"),
+    source("../app/api/admin/auth/login/route.ts"),
+    source("../app/api/admin/auth/setup/route.ts"),
+    source("../app/api/admin/auth/logout/route.ts"),
     source("../app/admin/admin-client.tsx"),
     source("../app/api/admin/guests/route.ts"),
     source("../app/api/admin/guests/[id]/route.ts"),
     source("../db/schema.ts"),
     source("../db/invitations.ts"),
   ]);
-  const adminSource = `${auth}\n${page}\n${client}\n${guestApi}\n${guestUpdateApi}`;
+  const adminSource = `${auth}\n${page}\n${form}\n${loginApi}\n${setupApi}\n${logoutApi}\n${client}\n${guestApi}\n${guestUpdateApi}`;
 
   assert.match(auth, /gamingboi567@gmail\.com/);
-  assert.match(page, /Sign in with ChatGPT/);
+  assert.match(form, /Create your password/);
+  assert.match(form, /Log in/);
+  assert.match(form, /new-password/);
+  assert.doesNotMatch(adminSource, /Sign in with ChatGPT/);
+  assert.match(auth, /PBKDF2/);
+  assert.match(auth, /password_hash/);
+  assert.match(auth, /admin_sessions/);
+  assert.match(auth, /HttpOnly; SameSite=Lax/);
+  assert.match(auth, /MAX_FAILED_LOGINS = 5/);
+  assert.match(setupApi, /createInitialAdminPassword/);
+  assert.match(loginApi, /authenticateAdmin/);
+  assert.match(logoutApi, /revokeAdminSession/);
   assert.match(adminSource, /requireAdminApi/);
   assert.match(client, /Invitation overview/);
   assert.match(client, /Guest list/);
@@ -37,6 +52,8 @@ test("admin dashboard is owner authenticated and tracks the complete guest lifec
   assert.match(schema, /invitationGuests/);
   assert.match(schema, /inviteToken/);
   assert.match(schema, /eventSettings/);
+  assert.match(schema, /adminCredentials/);
+  assert.match(schema, /adminSessions/);
   assert.match(invitations, /America\/New_York/);
 });
 

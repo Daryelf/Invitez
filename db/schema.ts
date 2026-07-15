@@ -49,3 +49,26 @@ export const eventSettings = sqliteTable("event_settings", {
   photoUploadsEnabled: integer("photo_uploads_enabled", { mode: "boolean" }).notNull().default(true),
   updatedAt: text("updated_at").notNull(),
 });
+
+export const adminCredentials = sqliteTable("admin_credentials", {
+  email: text("email").primaryKey(),
+  passwordSalt: text("password_salt").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  passwordIterations: integer("password_iterations").notNull(),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const adminSessions = sqliteTable("admin_sessions", {
+  tokenHash: text("token_hash").primaryKey(),
+  email: text("email").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const adminLoginAttempts = sqliteTable("admin_login_attempts", {
+  email: text("email").primaryKey(),
+  failedCount: integer("failed_count").notNull().default(0),
+  lockedUntil: text("locked_until"),
+  updatedAt: text("updated_at").notNull(),
+});
