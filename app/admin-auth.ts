@@ -6,12 +6,13 @@ const DEFAULT_OWNER_EMAIL = "gamingboi567@gmail.com";
 const ADMIN_DISPLAY_NAME = "Daryel";
 const SESSION_COOKIE = "invitez_admin_session";
 const SESSION_LIFETIME_SECONDS = 60 * 60 * 24 * 7;
-const PASSWORD_ITERATIONS = 210_000;
+const PEPPERED_HMAC_SCHEME = 0;
 const MAX_FAILED_LOGINS = 5;
 const LOGIN_LOCK_SECONDS = 15 * 60;
 
 type RuntimeEnvironment = {
   ADMIN_EMAILS?: string;
+  ADMIN_PASSWORD_PEPPER?: string;
 };
 
 export type AdminUser = {
@@ -39,6 +40,7 @@ function runtimeEnvironment() {
   const localEnvironment = typeof process !== "undefined" ? process.env : {};
   return {
     ADMIN_EMAILS: workerEnvironment.ADMIN_EMAILS || localEnvironment.ADMIN_EMAILS,
+    ADMIN_PASSWORD_PEPPER: workerEnvironment.ADMIN_PASSWORD_PEPPER || localEnvironment.ADMIN_PASSWORD_PEPPER,
   };
 }
 
@@ -116,6 +118,14 @@ async function sha256(value: string) {
   return new Uint8Array(digest);
 }
 
+function passwordPepper() {
+  const value = runtimeEnvironment().ADMIN_PASSWORD_PEPPER?.trim() || "";
+  if (value.length < 32) {
+    throw new AdminAuthError("Password setup is temporarily unavailable. Please try again shortly.", 503);
+  }
+  return value;
+}
+
 function constantTimeEqual(left: Uint8Array, right: Uint8Array) {
   if (left.length !== right.length) return false;
   let difference = 0;
@@ -123,7 +133,7 @@ function constantTimeEqual(left: Uint8Array, right: Uint8Array) {
   return difference === 0;
 }
 
-async function derivePassword(password: string, salt: Uint8Array, iterations: number) {
+async function deriveLegacyPbkdf2Password(password: string, salt: Uint8Array, iterations: number) {
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(password),
@@ -137,6 +147,31 @@ async function derivePassword(password: string, salt: Uint8Array, iterations: nu
     256,
   );
   return new Uint8Array(bits);
+}
+
+async function derivePepperedPassword(password: string, salt: Uint8Array) {
+  const encoder = new TextEncoder();
+  const prefix = encoder.encode("invitez-admin-password-v1\0");
+  const passwordBytes = encoder.encode(password);
+  const payload = new Uint8Array(prefix.length + salt.length + passwordBytes.length);
+  payload.set(prefix, 0);
+  payload.set(salt, prefix.length);
+  payload.set(passwordBytes, prefix.length + salt.length);
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(passwordPepper()),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, payload);
+  return new Uint8Array(signature);
+}
+
+async function derivePassword(password: string, salt: Uint8Array, scheme: number) {
+  if (scheme === PEPPERED_HMAC_SCHEME) return derivePepperedPassword(password, salt);
+  return deriveLegacyPbkdf2Password(password, salt, scheme);
 }
 
 function base64UrlToBytes(value: string) {
@@ -164,7 +199,7 @@ export async function createInitialAdminPassword(input: {
   }
 
   const salt = randomBytes(16);
-  const passwordHash = await derivePassword(input.password, salt, PASSWORD_ITERATIONS);
+  const passwordHash = await derivePassword(input.password, salt, PEPPERED_HMAC_SCHEME);
   const now = new Date().toISOString();
 
   try {
@@ -175,7 +210,7 @@ export async function createInitialAdminPassword(input: {
         email,
         bytesToBase64Url(salt),
         bytesToBase64Url(passwordHash),
-        PASSWORD_ITERATIONS,
+        PEPPERED_HMAC_SCHEME,
         now,
         now,
       )
@@ -248,7 +283,8 @@ export async function authenticateAdmin(emailInput: string, password: string) {
       credential.password_iterations,
     );
     passwordMatches = constantTimeEqual(candidate, base64UrlToBytes(credential.password_hash));
-  } catch {
+  } catch (error) {
+    if (error instanceof AdminAuthError) throw error;
     passwordMatches = false;
   }
 

@@ -22,7 +22,8 @@ export async function POST(request: Request) {
     response.headers.append("Set-Cookie", sessionCookie(session.token, session.expiresAt, requestIsSecure(request)));
     return response;
   } catch (error) {
-    const status = error instanceof AdminAuthError ? error.status : 400;
+    if (!(error instanceof AdminAuthError)) console.error("Admin password setup failed", error);
+    const status = error instanceof AdminAuthError ? error.status : 500;
     const message = error instanceof AdminAuthError ? error.message : "Could not create your password.";
     return Response.json({ error: message }, { status, headers: { "Cache-Control": "no-store" } });
   }
