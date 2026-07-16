@@ -27,7 +27,7 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(html, /Nicki%20Minaj/);
   assert.match(html, /rsvp-name-hotspot/);
   assert.match(html, /rsvp-submit-hotspot/);
-  assert.match(html, /\/invitation-layout\.js\?v=1/);
+  assert.match(html, /\/invitation-layout\.js\?v=2/);
   assert.match(html, /layoutEditorMode/);
   assert.match(html, /startEditor/);
   assert.match(html, /API_ORIGIN = "https:\/\/after-hours-party\.adventraa\.chatgpt\.site"/);

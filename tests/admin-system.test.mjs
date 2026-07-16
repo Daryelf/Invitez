@@ -70,6 +70,8 @@ test("admin dashboard uses first-time password setup and protected owner session
   assert.match(publicLayoutApi, /getRsvpLayout/);
   assert.match(layoutEditor, /rsvp-layout-editor-handle/);
   assert.match(layoutEditor, /data-handle/);
+  assert.match(layoutEditor, /handleName === "rotate"/);
+  assert.match(layoutEditor, /\["nw", "n", "ne", "e", "se", "s", "sw", "w", "rotate"\]/);
   assert.match(layoutEditor, /pointerdown/);
   assert.match(layoutEditor, /\/api\/admin\/layout/);
   assert.match(layoutEditor, /Reset/);

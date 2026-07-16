@@ -7,16 +7,17 @@ export type RsvpLayoutBox = {
   left: number;
   width: number;
   height: number;
+  rotation: number;
 };
 
 export type RsvpLayout = Record<RsvpLayoutKey, RsvpLayoutBox>;
 
 export const DEFAULT_RSVP_LAYOUT: RsvpLayout = {
-  name: { top: 74.8, left: 14, width: 40, height: 1.6 },
-  notes: { top: 77.55, left: 19, width: 61, height: 1.6 },
-  yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2 },
-  no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2 },
-  submit: { top: 74.8, left: 83.5, width: 24, height: 1.8 },
+  name: { top: 74.8, left: 14, width: 40, height: 1.6, rotation: -15 },
+  notes: { top: 77.55, left: 19, width: 61, height: 1.6, rotation: -15 },
+  yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
+  no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
+  submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15 },
 };
 
 const MINIMUM_SIZE: Record<RsvpLayoutKey, Pick<RsvpLayoutBox, "width" | "height">> = {
@@ -50,6 +51,7 @@ export function normalizeRsvpLayout(value: unknown): RsvpLayout {
       left: rounded(clamp(finiteNumber(candidate.left, fallback.left), -10, 105)),
       width: rounded(clamp(finiteNumber(candidate.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
       height: rounded(clamp(finiteNumber(candidate.height, fallback.height), MINIMUM_SIZE[key].height, 18)),
+      rotation: rounded(clamp(finiteNumber(candidate.rotation, fallback.rotation), -45, 45)),
     }];
   })) as RsvpLayout;
 }
@@ -62,6 +64,7 @@ export function rsvpLayoutVariables(layout: RsvpLayout) {
     variables[`--rsvp-${key}-left`] = `${box.left}%`;
     variables[`--rsvp-${key}-width`] = `${box.width}%`;
     variables[`--rsvp-${key}-height`] = `${box.height}%`;
+    variables[`--rsvp-${key}-rotation`] = `${box.rotation}deg`;
   }
   return variables;
 }
