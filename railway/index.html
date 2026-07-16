@@ -7,7 +7,7 @@
     <meta name="description" content="Open Erika's Sweet 16 invitation." />
     <title>Erika's Sweet 16 Invitation</title>
     <link rel="icon" href="/favicon.svg" />
-    <link rel="stylesheet" href="/globals.css?v=railway-3" />
+    <link rel="stylesheet" href="/globals.css?v=railway-4" />
   </head>
   <body>
     <div class="device-shell invitation-pending" id="device-shell">
@@ -98,6 +98,7 @@
       <div class="device-home-indicator" aria-hidden="true"></div>
     </div>
 
+    <script src="/invitation-layout.js?v=1"></script>
     <script>
       const API_ORIGIN = "https://after-hours-party.adventraa.chatgpt.site";
       const OPENED_KEY = "invitez-opening-viewed";
@@ -123,6 +124,11 @@
       const query = new URLSearchParams(window.location.search);
       const freshPreview = query.get("fresh") === "1";
       const confirmationPreview = query.get("confirmation") === "1";
+      const layoutEditorMode = query.get("editor") === "1";
+      const rsvpLayoutController = window.InvitezLayout.createRsvpLayoutController({
+        form: rsvpForm,
+        apiOrigin: API_ORIGIN,
+      });
       let vinylPaused = false;
       let guestContext = null;
       let currentEvent = {
@@ -255,6 +261,12 @@
 
       async function initializeInvitation() {
         try {
+          await rsvpLayoutController.load();
+          if (layoutEditorMode) {
+            showSecondStage(false, true);
+            rsvpLayoutController.startEditor();
+            return;
+          }
           if (confirmationPreview) {
             showConfirmation({ guest: { name: "Preview Guest", status: "attending" }, event: currentEvent });
             return;

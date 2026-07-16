@@ -7,7 +7,7 @@ async function source(path) {
 }
 
 test("admin dashboard uses first-time password setup and protected owner sessions", async () => {
-  const [auth, page, form, loginApi, setupApi, logoutApi, client, guestApi, guestUpdateApi, schema, invitations] = await Promise.all([
+  const [auth, page, form, loginApi, setupApi, logoutApi, client, guestApi, guestUpdateApi, layoutApi, publicLayoutApi, layoutEditor, schema, invitations] = await Promise.all([
     source("../app/admin-auth.ts"),
     source("../app/admin/page.tsx"),
     source("../app/admin/auth-form.tsx"),
@@ -17,6 +17,9 @@ test("admin dashboard uses first-time password setup and protected owner session
     source("../app/admin/admin-client.tsx"),
     source("../app/api/admin/guests/route.ts"),
     source("../app/api/admin/guests/[id]/route.ts"),
+    source("../app/api/admin/layout/route.ts"),
+    source("../app/api/invitation-layout/route.ts"),
+    source("../public/invitation-layout.js"),
     source("../db/schema.ts"),
     source("../db/invitations.ts"),
   ]);
@@ -51,6 +54,8 @@ test("admin dashboard uses first-time password setup and protected owner session
   assert.match(client, /Export CSV/);
   assert.match(client, /navigator\.share/);
   assert.match(client, /https:\/\/www\.invitez\.xyz\/i\/\$\{guest\.token\}/);
+  assert.match(client, /Open fresh mobile invitation/);
+  assert.match(client, /editor=1/);
   assert.match(guestApi, /opened_count/);
   assert.match(guestApi, /responded_at/);
   assert.match(guestUpdateApi, /markSent/);
@@ -59,6 +64,15 @@ test("admin dashboard uses first-time password setup and protected owner session
   assert.match(schema, /eventSettings/);
   assert.match(schema, /adminCredentials/);
   assert.match(schema, /adminSessions/);
+  assert.match(schema, /invitationLayouts/);
+  assert.match(layoutApi, /requireAdminApi/);
+  assert.match(layoutApi, /saveRsvpLayout/);
+  assert.match(publicLayoutApi, /getRsvpLayout/);
+  assert.match(layoutEditor, /rsvp-layout-editor-handle/);
+  assert.match(layoutEditor, /data-handle/);
+  assert.match(layoutEditor, /pointerdown/);
+  assert.match(layoutEditor, /\/api\/admin\/layout/);
+  assert.match(layoutEditor, /Reset/);
   assert.match(invitations, /America\/New_York/);
 });
 

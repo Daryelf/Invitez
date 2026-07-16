@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState, type CSSProperties } from "react";
+import { DEFAULT_RSVP_LAYOUT, normalizeRsvpLayout, rsvpLayoutVariables } from "@/lib/rsvp-layout";
 
 type IntroStage = "first" | "second" | "confirmation";
 
@@ -84,6 +85,18 @@ function Countdown() {
 
 function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: ConfirmationData) => void }) {
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [layout, setLayout] = useState(DEFAULT_RSVP_LAYOUT);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/invitation-layout", { cache: "no-store", signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Layout unavailable")))
+      .then((result: { layout?: unknown }) => setLayout(normalizeRsvpLayout(result.layout)))
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) setLayout(DEFAULT_RSVP_LAYOUT);
+      });
+    return () => controller.abort();
+  }, []);
 
   async function submitRSVP(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -119,7 +132,12 @@ function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: Confirmatio
   }
 
   return (
-    <form className="rsvp-hotspots" aria-label="RSVP form fields" onSubmit={submitRSVP}>
+    <form
+      className="rsvp-hotspots"
+      style={rsvpLayoutVariables(layout) as CSSProperties}
+      aria-label="RSVP form fields"
+      onSubmit={submitRSVP}
+    >
       <label className="rsvp-text-hotspot rsvp-name-hotspot">
         <span className="sr-only">Name</span>
         <input type="text" name="name" autoComplete="name" placeholder="Name" required />

@@ -50,6 +50,12 @@ export const eventSettings = sqliteTable("event_settings", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const invitationLayouts = sqliteTable("invitation_layouts", {
+  id: text("id").primaryKey(),
+  layoutJson: text("layout_json").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
 export const adminCredentials = sqliteTable("admin_credentials", {
   email: text("email").primaryKey(),
   passwordSalt: text("password_salt").notNull(),

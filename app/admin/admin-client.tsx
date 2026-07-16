@@ -322,8 +322,28 @@ export default function AdminClient({
 
         {tab === "preview" ? (
           <section className={styles.previewLayout}>
-            <div className={styles.previewControls}><div><p className={styles.eyebrow}>Live invitation</p><h2>Check every screen size</h2><p>This preview never changes the guest tracking. Open a fresh copy to test the complete animation.</p></div><div className={styles.segmented}><button className={previewSize === "mobile" ? styles.segmentActive : ""} onClick={() => setPreviewSize("mobile")}>Mobile</button><button className={previewSize === "web" ? styles.segmentActive : ""} onClick={() => setPreviewSize("web")}>Web / iPad</button></div><a className={styles.primaryButton} href="https://www.invitez.xyz/?fresh=1" target="_blank" rel="noreferrer">Open full preview</a></div>
-            <div className={`${styles.previewStage} ${previewSize === "web" ? styles.previewWeb : ""}`}><iframe title={`${previewSize} invitation preview`} src={`https://www.invitez.xyz/?fresh=1&preview=${previewSize}`} /></div>
+            <div className={styles.previewControls}>
+              <div>
+                <p className={styles.eyebrow}>Live invitation</p>
+                <h2>Check every screen size</h2>
+                <p>This preview never changes guest tracking. Open a fresh copy to test the complete animation.</p>
+              </div>
+              <div className={styles.editorGuide}>
+                <strong>Layout editor is on</strong>
+                <span>Drag any outlined RSVP control to move it. Pull a yellow corner dot to resize it. Changes save automatically.</span>
+              </div>
+              <div className={styles.segmented}>
+                <button className={previewSize === "mobile" ? styles.segmentActive : ""} onClick={() => setPreviewSize("mobile")}>Mobile</button>
+                <button className={previewSize === "web" ? styles.segmentActive : ""} onClick={() => setPreviewSize("web")}>Web / iPad</button>
+              </div>
+              <div className={styles.previewActions}>
+                <a className={styles.primaryButton} href="https://www.invitez.xyz/?fresh=1" target="_blank" rel="noreferrer">Open full preview</a>
+                <a className={styles.secondaryButton} href="https://www.invitez.xyz/?fresh=1&preview=mobile" target="_blank" rel="noreferrer">Open fresh mobile invitation</a>
+              </div>
+            </div>
+            <div className={`${styles.previewStage} ${previewSize === "web" ? styles.previewWeb : ""}`}>
+              <iframe title={`${previewSize} invitation layout editor`} src={`/?fresh=1&preview=${previewSize}&editor=1`} />
+            </div>
           </section>
         ) : null}
 

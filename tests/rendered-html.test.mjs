@@ -69,9 +69,11 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /top: calc\(27\.5% - 22px\)/);
   assert.match(source, /left: 66\.5%/);
   assert.match(source, /id="details"/);
-  assert.match(source, /top: 74\.8%/);
-  assert.match(source, /top: 77\.55%/);
-  assert.match(source, /\.rsvp-submit-hotspot[\s\S]*top: 74\.8%/);
+  assert.match(source, /--rsvp-name-top/);
+  assert.match(source, /--rsvp-notes-top/);
+  assert.match(source, /--rsvp-submit-top/);
+  assert.match(source, /fetch\("\/api\/invitation-layout"/);
+  assert.match(source, /rsvpLayoutVariables/);
   assert.match(source, /position: absolute/);
   assert.doesNotMatch(page, /RSVPForm|rsvp-panel/);
   assert.match(source, /scroll-snap-type: y proximity/);

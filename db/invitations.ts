@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { DEFAULT_RSVP_LAYOUT, normalizeRsvpLayout, type RsvpLayout } from "@/lib/rsvp-layout";
 
 export type EventSettings = {
   eventName: string;
@@ -82,6 +83,11 @@ export async function ensureInvitationSchema() {
       photo_uploads_enabled INTEGER NOT NULL DEFAULT 1,
       updated_at TEXT NOT NULL
     )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS invitation_layouts (
+      id TEXT PRIMARY KEY NOT NULL,
+      layout_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`),
   ]);
 
   await db.prepare(`INSERT OR IGNORE INTO event_settings (
@@ -99,6 +105,29 @@ export async function ensureInvitationSchema() {
       new Date().toISOString(),
     )
     .run();
+}
+
+export async function getRsvpLayout(): Promise<RsvpLayout> {
+  await ensureInvitationSchema();
+  const row = await getD1().prepare("SELECT layout_json FROM invitation_layouts WHERE id = 'rsvp' LIMIT 1")
+    .first<{ layout_json: string }>();
+  if (!row) return DEFAULT_RSVP_LAYOUT;
+  try {
+    return normalizeRsvpLayout(JSON.parse(row.layout_json));
+  } catch {
+    return DEFAULT_RSVP_LAYOUT;
+  }
+}
+
+export async function saveRsvpLayout(value: unknown): Promise<RsvpLayout> {
+  await ensureInvitationSchema();
+  const layout = normalizeRsvpLayout(value);
+  await getD1().prepare(`INSERT INTO invitation_layouts (id, layout_json, updated_at)
+    VALUES ('rsvp', ?, ?)
+    ON CONFLICT(id) DO UPDATE SET layout_json = excluded.layout_json, updated_at = excluded.updated_at`)
+    .bind(JSON.stringify(layout), new Date().toISOString())
+    .run();
+  return layout;
 }
 
 export async function getEventSettings(): Promise<EventSettings> {
