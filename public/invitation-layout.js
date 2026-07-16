@@ -3,8 +3,8 @@
 
   const KEYS = ["name", "notes", "yes", "no", "submit"];
   const DEFAULT_LAYOUT = {
-    name: { top: 74.8, left: 14, width: 40, height: 1.6, rotation: -15 },
-    notes: { top: 77.55, left: 19, width: 61, height: 1.6, rotation: -15 },
+    name: { top: 74.8, left: 14, width: 40, height: 1.6, rotation: -15, fill: "yellow" },
+    notes: { top: 77.55, left: 19, width: 61, height: 1.6, rotation: -15, fill: "yellow" },
     yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
     no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
     submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15 },
@@ -36,13 +36,17 @@
     return Object.fromEntries(KEYS.map((key) => {
       const fallback = DEFAULT_LAYOUT[key];
       const candidate = input[key] && typeof input[key] === "object" ? input[key] : {};
-      return [key, {
+      const box = {
         top: rounded(clamp(number(candidate.top, fallback.top), 0, 98.5)),
         left: rounded(clamp(number(candidate.left, fallback.left), -10, 105)),
         width: rounded(clamp(number(candidate.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
         height: rounded(clamp(number(candidate.height, fallback.height), MINIMUM_SIZE[key].height, 18)),
         rotation: rounded(clamp(number(candidate.rotation, fallback.rotation), -45, 45)),
-      }];
+      };
+      if (key === "name" || key === "notes") {
+        box.fill = candidate.fill === "transparent" ? "transparent" : "yellow";
+      }
+      return [key, box];
     }));
   }
 
@@ -55,6 +59,15 @@
       form.style.setProperty(`--rsvp-${key}-width`, `${box.width}%`);
       form.style.setProperty(`--rsvp-${key}-height`, `${box.height}%`);
       form.style.setProperty(`--rsvp-${key}-rotation`, `${box.rotation}deg`);
+      if (key === "name" || key === "notes") {
+        const transparent = box.fill === "transparent";
+        form.style.setProperty(`--rsvp-${key}-background`, transparent ? "transparent" : "rgba(255, 212, 0, 0.58)");
+        form.style.setProperty(`--rsvp-${key}-border`, transparent ? "transparent" : "#ffd400");
+        form.style.setProperty(`--rsvp-${key}-shadow`, transparent ? "none" : "0 0 0 2px rgba(255, 255, 255, 0.72)");
+        form.style.setProperty(`--rsvp-${key}-focus-background`, transparent ? "rgba(255, 255, 255, 0.18)" : "rgba(255, 226, 70, 0.76)");
+        form.style.setProperty(`--rsvp-${key}-focus-border`, transparent ? "rgba(36, 59, 49, 0.58)" : "#ffb000");
+        form.style.setProperty(`--rsvp-${key}-focus-shadow`, transparent ? "0 0 0 2px rgba(255, 255, 255, 0.65)" : "0 0 0 3px rgba(255, 176, 0, 0.32)");
+      }
     });
     return layout;
   }
@@ -67,6 +80,7 @@
     let statusElement = null;
     let saveTimer = 0;
     const editorBoxes = new Map();
+    const fillButtons = new Map();
 
     function setStatus(message, error) {
       if (!statusElement) return;
@@ -82,6 +96,11 @@
         box.style.width = `${value.width}%`;
         box.style.height = `${value.height}%`;
         box.style.transform = value.rotation ? `rotate(${value.rotation}deg)` : "none";
+      });
+      fillButtons.forEach((button, fill) => {
+        const selected = layout.name.fill === fill && layout.notes.fill === fill;
+        button.classList.toggle("is-active", selected);
+        button.setAttribute("aria-pressed", String(selected));
       });
     }
 
@@ -124,6 +143,16 @@
     function scheduleSave() {
       window.clearTimeout(saveTimer);
       saveTimer = window.setTimeout(() => { void persist(); }, 260);
+    }
+
+    function setTextBoxFill(fill) {
+      update({
+        ...layout,
+        name: { ...layout.name, fill },
+        notes: { ...layout.notes, fill },
+      });
+      setStatus(fill === "transparent" ? "Text boxes are transparent" : "Text boxes are yellow", false);
+      void persist();
     }
 
     function beginPointerEdit(event, key, handle, box) {
@@ -259,7 +288,20 @@
       const toolbar = document.createElement("div");
       toolbar.className = "rsvp-layout-editor-toolbar";
       statusElement = document.createElement("span");
+      statusElement.className = "rsvp-layout-editor-status";
       statusElement.textContent = "Move, resize from any edge, or rotate";
+      const fillPicker = document.createElement("div");
+      fillPicker.className = "rsvp-layout-fill-picker";
+      fillPicker.setAttribute("role", "group");
+      fillPicker.setAttribute("aria-label", "Text box appearance");
+      [["yellow", "Yellow"], ["transparent", "Transparent"]].forEach(([fill, label]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.addEventListener("click", () => setTextBoxFill(fill));
+        fillPicker.append(button);
+        fillButtons.set(fill, button);
+      });
       const reset = document.createElement("button");
       reset.type = "button";
       reset.textContent = "Reset";
@@ -268,7 +310,7 @@
         update(DEFAULT_LAYOUT);
         void persist();
       });
-      toolbar.append(statusElement, reset);
+      toolbar.append(statusElement, fillPicker, reset);
       document.body.append(toolbar);
 
       KEYS.forEach(createEditorBox);

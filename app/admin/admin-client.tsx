@@ -330,7 +330,7 @@ export default function AdminClient({
               </div>
               <div className={styles.editorGuide}>
                 <strong>Layout editor is on</strong>
-                <span>Drag a control to move it. Use corner or middle dots to resize, and the turn handle underneath to match its angle. Changes save automatically.</span>
+                <span>Move, resize, or rotate each control, then choose Yellow or Transparent for the text boxes. Changes save automatically.</span>
               </div>
               <div className={styles.segmented}>
                 <button className={previewSize === "mobile" ? styles.segmentActive : ""} onClick={() => setPreviewSize("mobile")}>Mobile</button>
