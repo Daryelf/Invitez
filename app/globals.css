@@ -548,11 +548,11 @@ video {
   width: var(--rsvp-submit-width, 24%);
   height: var(--rsvp-submit-height, 1.8%);
   padding: 0;
-  border: 2px solid #ffd400;
+  border: 2px solid var(--rsvp-submit-border, #ffd400);
   border-radius: 8px;
-  background: rgba(255, 212, 0, 0.58);
+  background: var(--rsvp-submit-background, rgba(255, 212, 0, 0.58));
   color: transparent;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.72);
+  box-shadow: var(--rsvp-submit-shadow, 0 0 0 2px rgba(255, 255, 255, 0.72));
   transform: rotate(var(--rsvp-submit-rotation, -15deg));
   transform-origin: center;
   cursor: pointer;
@@ -563,6 +563,12 @@ video {
 .rsvp-submit-hotspot:focus-visible {
   outline: 3px solid rgba(255, 176, 0, 0.9);
   outline-offset: 3px;
+}
+
+.rsvp-submit-hotspot:active:not(:disabled) {
+  border-color: #000;
+  background: #000;
+  box-shadow: none;
 }
 
 .rsvp-submit-hotspot:disabled {
@@ -643,19 +649,20 @@ video {
 .rsvp-radio-hotspot > span[aria-hidden="true"] {
   width: 72%;
   aspect-ratio: 1;
-  border: 3px solid #ffd400;
+  border: 3px solid transparent;
   border-radius: 50%;
-  background: rgba(255, 212, 0, 0.5);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75);
+  background: transparent;
+  box-shadow: none;
 }
 
 .rsvp-radio-hotspot input:checked + span {
-  background: #ffd400;
-  box-shadow: inset 0 0 0 4px #fff7cf, 0 0 0 2px rgba(255, 176, 0, 0.8);
+  border-color: #000;
+  background: #000;
+  box-shadow: none;
 }
 
 .rsvp-radio-hotspot input:focus-visible + span {
-  outline: 3px solid rgba(255, 176, 0, 0.82);
+  outline: 3px solid rgba(0, 0, 0, 0.72);
   outline-offset: 3px;
 }
 

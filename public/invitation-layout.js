@@ -7,7 +7,7 @@
     notes: { top: 77.55, left: 19, width: 61, height: 1.6, rotation: -15, fill: "yellow" },
     yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
     no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
-    submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15 },
+    submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
   };
   const MINIMUM_SIZE = {
     name: { width: 8, height: 0.7 },
@@ -33,6 +33,7 @@
 
   function normalizeLayout(value) {
     const input = value && typeof value === "object" ? value : {};
+    const legacyTransparent = input.name?.fill === "transparent" && input.notes?.fill === "transparent";
     return Object.fromEntries(KEYS.map((key) => {
       const fallback = DEFAULT_LAYOUT[key];
       const candidate = input[key] && typeof input[key] === "object" ? input[key] : {};
@@ -43,8 +44,10 @@
         height: rounded(clamp(number(candidate.height, fallback.height), MINIMUM_SIZE[key].height, 18)),
         rotation: rounded(clamp(number(candidate.rotation, fallback.rotation), -45, 45)),
       };
-      if (key === "name" || key === "notes") {
-        box.fill = candidate.fill === "transparent" ? "transparent" : "yellow";
+      if (key === "name" || key === "notes" || key === "submit") {
+        box.fill = candidate.fill === "transparent" || (key === "submit" && candidate.fill === undefined && legacyTransparent)
+          ? "transparent"
+          : "yellow";
       }
       return [key, box];
     }));
@@ -59,7 +62,7 @@
       form.style.setProperty(`--rsvp-${key}-width`, `${box.width}%`);
       form.style.setProperty(`--rsvp-${key}-height`, `${box.height}%`);
       form.style.setProperty(`--rsvp-${key}-rotation`, `${box.rotation}deg`);
-      if (key === "name" || key === "notes") {
+      if (key === "name" || key === "notes" || key === "submit") {
         const transparent = box.fill === "transparent";
         form.style.setProperty(`--rsvp-${key}-background`, transparent ? "transparent" : "rgba(255, 212, 0, 0.58)");
         form.style.setProperty(`--rsvp-${key}-border`, transparent ? "transparent" : "#ffd400");
@@ -98,7 +101,7 @@
         box.style.transform = value.rotation ? `rotate(${value.rotation}deg)` : "none";
       });
       fillButtons.forEach((button, fill) => {
-        const selected = layout.name.fill === fill && layout.notes.fill === fill;
+        const selected = layout.name.fill === fill && layout.notes.fill === fill && layout.submit.fill === fill;
         button.classList.toggle("is-active", selected);
         button.setAttribute("aria-pressed", String(selected));
       });
@@ -145,13 +148,14 @@
       saveTimer = window.setTimeout(() => { void persist(); }, 260);
     }
 
-    function setTextBoxFill(fill) {
+    function setControlFill(fill) {
       update({
         ...layout,
         name: { ...layout.name, fill },
         notes: { ...layout.notes, fill },
+        submit: { ...layout.submit, fill },
       });
-      setStatus(fill === "transparent" ? "Text boxes are transparent" : "Text boxes are yellow", false);
+      setStatus(fill === "transparent" ? "Fields and Submit are transparent" : "Fields and Submit are yellow", false);
       void persist();
     }
 
@@ -293,12 +297,12 @@
       const fillPicker = document.createElement("div");
       fillPicker.className = "rsvp-layout-fill-picker";
       fillPicker.setAttribute("role", "group");
-      fillPicker.setAttribute("aria-label", "Text box appearance");
+      fillPicker.setAttribute("aria-label", "Fields and Submit appearance");
       [["yellow", "Yellow"], ["transparent", "Transparent"]].forEach(([fill, label]) => {
         const button = document.createElement("button");
         button.type = "button";
         button.textContent = label;
-        button.addEventListener("click", () => setTextBoxFill(fill));
+        button.addEventListener("click", () => setControlFill(fill));
         fillPicker.append(button);
         fillButtons.set(fill, button);
       });

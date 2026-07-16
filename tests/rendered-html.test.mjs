@@ -76,6 +76,8 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /--rsvp-submit-rotation/);
   assert.match(source, /--rsvp-name-background/);
   assert.match(source, /--rsvp-notes-background/);
+  assert.match(source, /--rsvp-submit-background/);
+  assert.match(source, /input:checked \+ span[\s\S]*background: #000/);
   assert.match(source, /fetch\("\/api\/invitation-layout"/);
   assert.match(source, /rsvpLayoutVariables/);
   assert.match(source, /position: absolute/);
