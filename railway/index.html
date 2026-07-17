@@ -7,7 +7,7 @@
     <meta name="description" content="Open your private digital invitation." />
     <title>Invitez | Digital Invitation</title>
     <link rel="icon" href="/favicon.svg" />
-    <link rel="stylesheet" href="/globals.css?v=railway-8" />
+    <link rel="stylesheet" href="/globals.css?v=railway-9" />
   </head>
   <body>
     <div class="device-shell invitation-pending" id="device-shell">
@@ -62,7 +62,6 @@
             <strong>Your RSVP is in</strong>
             <span id="confirmation-message">Your response was saved.</span>
           </div>
-          <button type="button" id="update-rsvp">Edit</button>
         </aside>
 
         <div class="countdown-panel" id="details" aria-label="Countdown to October 3 at 7 PM">
@@ -360,12 +359,6 @@
       updateCountdown();
       window.setInterval(updateCountdown, 1000);
 
-      document.querySelector("#update-rsvp").addEventListener("click", () => {
-        confirmation.hidden = true;
-        rsvpForm.hidden = false;
-        rsvpForm.reset();
-        showSecondStage(false, true);
-      });
     </script>
   </body>
 </html>

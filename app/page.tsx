@@ -189,7 +189,6 @@ function IntroVideo({
   onVinylToggle,
   onRSVPConfirmed,
   confirmation,
-  onRSVPEdit,
 }: {
   id: string;
   src: string;
@@ -204,7 +203,6 @@ function IntroVideo({
   onVinylToggle?: () => void;
   onRSVPConfirmed?: (confirmation: ConfirmationData) => void;
   confirmation?: ConfirmationData | null;
-  onRSVPEdit?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [showAutoplayFallback, setShowAutoplayFallback] = useState(false);
@@ -314,7 +312,7 @@ function IntroVideo({
       {fullFrame ? (
         <>
           {confirmation ? (
-            <CompactRSVPConfirmation confirmation={confirmation} onEdit={onRSVPEdit || (() => undefined)} />
+            <CompactRSVPConfirmation confirmation={confirmation} />
           ) : (
             <RSVPHotspots onConfirmed={onRSVPConfirmed || (() => undefined)} />
           )}
@@ -325,9 +323,8 @@ function IntroVideo({
   );
 }
 
-function CompactRSVPConfirmation({ confirmation, onEdit }: {
+function CompactRSVPConfirmation({ confirmation }: {
   confirmation: ConfirmationData;
-  onEdit: () => void;
 }) {
   const attending = confirmation.guest.status === "attending";
 
@@ -338,7 +335,6 @@ function CompactRSVPConfirmation({ confirmation, onEdit }: {
         <strong>Your RSVP is in</strong>
         <span>{attending ? `See you there, ${confirmation.guest.name}!` : `Thank you, ${confirmation.guest.name}.`}</span>
       </div>
-      <button type="button" onClick={onEdit}>Edit</button>
     </aside>
   );
 }
@@ -406,11 +402,6 @@ export default function Home() {
     setIntroStage("second");
   }
 
-  function editRSVP() {
-    window.localStorage.removeItem("invitez-rsvp-confirmation");
-    setConfirmation(null);
-  }
-
   function toggleVinylAndSong() {
     const song = audioRef.current;
     if (!song) return;
@@ -459,7 +450,6 @@ export default function Home() {
             onVinylToggle={toggleVinylAndSong}
             onRSVPConfirmed={showConfirmation}
             confirmation={confirmation}
-            onRSVPEdit={editRSVP}
           />
         )}
       </main>

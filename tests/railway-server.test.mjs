@@ -47,6 +47,7 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(html, /rsvp-confirmation/);
   assert.match(html, /Your RSVP is in/);
   assert.match(html, /rsvpForm\.reset\(\)/);
+  assert.doesNotMatch(html, /id="update-rsvp"|>Edit<\/button>/);
   assert.match(html, /eventDayActive/);
   assert.match(html, /document\.title = `\$\{currentEvent\.eventName\} \| Invitez`/);
   assert.match(html, /Open your private digital invitation/);

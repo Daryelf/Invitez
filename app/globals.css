@@ -64,21 +64,24 @@ video {
   position: absolute;
   z-index: 9;
   top: 75%;
-  left: 12%;
+  left: calc(10% + 5px);
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  width: 76%;
-  min-height: 2.5%;
+  grid-template-columns: auto minmax(0, 1fr);
+  width: 80%;
+  min-height: 2.8%;
   align-items: center;
-  gap: clamp(7px, 1.8vw, 14px);
-  padding: clamp(8px, 2.15vw, 15px) clamp(10px, 2.6vw, 18px);
-  border: 1px solid rgba(94, 112, 79, 0.38);
-  border-radius: clamp(12px, 3vw, 20px);
+  gap: clamp(9px, 2.3vw, 16px);
+  padding: clamp(10px, 2.6vw, 17px) clamp(13px, 3.2vw, 21px);
+  border: 1px solid rgba(214, 139, 155, 0.58);
+  border-radius: clamp(15px, 3.8vw, 24px);
   color: #29473d;
   background:
+    radial-gradient(circle at 92% 16%, rgba(236, 178, 191, 0.18), transparent 31%),
     repeating-linear-gradient(0deg, rgba(115, 90, 58, 0.018) 0 1px, transparent 1px 4px),
-    rgba(255, 250, 239, 0.97);
-  box-shadow: 0 10px 24px rgba(61, 73, 48, 0.24), inset 0 0 0 3px rgba(255, 255, 255, 0.48);
+    rgba(255, 251, 242, 0.98);
+  box-shadow:
+    0 12px 28px rgba(61, 73, 48, 0.22),
+    inset 0 0 0 4px rgba(255, 255, 255, 0.55);
   transform: rotate(-15deg);
   transform-origin: center;
 }
@@ -86,8 +89,8 @@ video {
 .rsvp-confirmation-card::before {
   content: "";
   position: absolute;
-  inset: 4px;
-  border: 1px solid rgba(223, 148, 161, 0.38);
+  inset: 5px;
+  border: 1px solid rgba(117, 139, 101, 0.3);
   border-radius: inherit;
   pointer-events: none;
 }
@@ -96,16 +99,16 @@ video {
   position: relative;
   z-index: 1;
   display: grid;
-  width: clamp(27px, 7vw, 46px);
+  width: clamp(31px, 8vw, 52px);
   aspect-ratio: 1;
   place-items: center;
   border-radius: 50%;
   color: #fff9ed;
-  background: #516a58;
+  background: linear-gradient(145deg, #60775f, #3f5d4c);
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: clamp(0.82rem, 3.2vw, 1.28rem);
+  font-size: clamp(0.92rem, 3.7vw, 1.4rem);
   font-weight: 800;
-  box-shadow: 0 4px 10px rgba(41, 71, 61, 0.2);
+  box-shadow: 0 5px 12px rgba(41, 71, 61, 0.24), inset 0 1px rgba(255, 255, 255, 0.25);
 }
 
 .rsvp-confirmation-copy {
@@ -113,7 +116,7 @@ video {
   z-index: 1;
   display: grid;
   min-width: 0;
-  gap: 1px;
+  gap: 2px;
   text-align: left;
 }
 
@@ -121,7 +124,7 @@ video {
   overflow: hidden;
   color: #29473d;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(0.72rem, 3vw, 1.05rem);
+  font-size: clamp(0.82rem, 3.35vw, 1.16rem);
   font-weight: 600;
   line-height: 1.12;
   text-overflow: ellipsis;
@@ -130,34 +133,12 @@ video {
 
 .rsvp-confirmation-copy span {
   overflow: hidden;
-  color: #879079;
+  color: #7d8974;
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: clamp(0.43rem, 1.7vw, 0.66rem);
+  font-size: clamp(0.47rem, 1.9vw, 0.72rem);
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.rsvp-confirmation-card button {
-  position: relative;
-  z-index: 1;
-  min-width: 40px;
-  min-height: 28px;
-  padding: 5px 8px;
-  border: 1px solid rgba(81, 106, 88, 0.48);
-  border-radius: 999px;
-  color: #40594d;
-  background: rgba(232, 238, 218, 0.86);
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: clamp(0.44rem, 1.8vw, 0.64rem);
-  font-weight: 700;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.rsvp-confirmation-card button:focus-visible {
-  outline: 2px solid #29473d;
-  outline-offset: 2px;
 }
 
 .intro-sequence {

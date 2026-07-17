@@ -99,6 +99,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /className="rsvp-confirmation-card"/);
   assert.match(source, /Your RSVP is in/);
   assert.match(source, /form\.reset\(\)/);
+  assert.doesNotMatch(page, /onRSVPEdit|>Edit<|editRSVP/);
   assert.doesNotMatch(source, /setIntroStage\("confirmation"\)/);
   assert.doesNotMatch(source, /confirmation-screen/);
 
