@@ -36,6 +36,19 @@ export const invitationGuests = sqliteTable("invitation_guests", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const invitationSmsDeliveries = sqliteTable("invitation_sms_deliveries", {
+  id: text("id").primaryKey(),
+  guestId: text("guest_id").notNull(),
+  provider: text("provider").notNull().default("twilio"),
+  providerMessageId: text("provider_message_id"),
+  recipient: text("recipient").notNull(),
+  messageBody: text("message_body").notNull(),
+  status: text("status").notNull(),
+  error: text("error"),
+  sentAt: text("sent_at"),
+  createdAt: text("created_at").notNull(),
+});
+
 export const eventSettings = sqliteTable("event_settings", {
   id: text("id").primaryKey(),
   eventName: text("event_name").notNull(),

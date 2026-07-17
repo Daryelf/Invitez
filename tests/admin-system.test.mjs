@@ -6,8 +6,8 @@ async function source(path) {
   return readFile(new URL(path, import.meta.url), "utf8");
 }
 
-test("admin dashboard uses PIN-only login and protected owner sessions", async () => {
-  const [auth, page, form, loginApi, logoutApi, client, guestApi, guestUpdateApi, layoutApi, publicLayoutApi, layoutEditor, schema, invitations] = await Promise.all([
+test("Argentum Studio uses PIN-only login, clean invite links, and protected owner sessions", async () => {
+  const [auth, page, form, loginApi, logoutApi, client, guestApi, guestUpdateApi, smsApi, sms, layoutApi, publicLayoutApi, layoutEditor, schema, invitations, viteConfig] = await Promise.all([
     source("../app/admin-auth.ts"),
     source("../app/admin/page.tsx"),
     source("../app/admin/auth-form.tsx"),
@@ -16,13 +16,16 @@ test("admin dashboard uses PIN-only login and protected owner sessions", async (
     source("../app/admin/admin-client.tsx"),
     source("../app/api/admin/guests/route.ts"),
     source("../app/api/admin/guests/[id]/route.ts"),
+    source("../app/api/admin/guests/[id]/sms/route.ts"),
+    source("../lib/sms.ts"),
     source("../app/api/admin/layout/route.ts"),
     source("../app/api/invitation-layout/route.ts"),
     source("../public/invitation-layout.js"),
     source("../db/schema.ts"),
     source("../db/invitations.ts"),
+    source("../vite.config.ts"),
   ]);
-  const adminSource = `${auth}\n${page}\n${form}\n${loginApi}\n${logoutApi}\n${client}\n${guestApi}\n${guestUpdateApi}`;
+  const adminSource = `${auth}\n${page}\n${form}\n${loginApi}\n${logoutApi}\n${client}\n${guestApi}\n${guestUpdateApi}\n${smsApi}`;
 
   assert.match(auth, /gamingboi567@gmail\.com/);
   assert.match(form, /4-digit PIN/);
@@ -35,6 +38,9 @@ test("admin dashboard uses PIN-only login and protected owner sessions", async (
   assert.doesNotMatch(adminSource, /ADMIN_SETUP_TOKEN|setupToken|private one-time/);
   assert.doesNotMatch(adminSource, /Sign in with ChatGPT/);
   assert.match(auth, /ADMIN_PIN/);
+  assert.match(viteConfig, /"ADMIN_PIN"/);
+  assert.match(viteConfig, /"TWILIO_ACCOUNT_SID"/);
+  assert.doesNotMatch(viteConfig, /ADMIN_PASSWORD_PEPPER/);
   assert.match(auth, /authenticateAdminPin/);
   assert.match(auth, /constantTimeEqual/);
   assert.doesNotMatch(auth, /ADMIN_PASSWORD_PEPPER|PBKDF2|HMAC|password_hash/);
@@ -45,17 +51,30 @@ test("admin dashboard uses PIN-only login and protected owner sessions", async (
   assert.match(loginApi, /authenticateAdminPin/);
   assert.match(logoutApi, /revokeAdminSession/);
   assert.match(adminSource, /requireAdminApi/);
-  assert.match(client, /Invitation overview/);
-  assert.match(client, /Guest list/);
-  assert.match(client, /Check every screen size/);
-  assert.match(client, /Event-day control/);
+  assert.match(page, /Argentum Studio \| Invitation Creator/);
+  assert.match(page, />A</);
+  assert.match(client, /Argentum Studio/);
+  assert.match(client, /Creator dashboard/);
+  assert.match(client, /Audience & delivery/);
+  assert.match(client, /Invitation designer/);
+  assert.match(client, /Event controls/);
+  assert.doesNotMatch(`${page}\n${form}\n${client}`, /Erika(?:&apos;|'|’)?s Sweet 16/);
   assert.match(client, /No reply/);
   assert.match(client, /Not going/);
   assert.match(client, /Additional information/);
   assert.match(client, /Export CSV/);
-  assert.match(client, /navigator\.share/);
-  assert.match(client, /https:\/\/www\.invitez\.xyz\/i\/\$\{guest\.token\}/);
-  assert.match(client, /Open fresh mobile invitation/);
+  assert.doesNotMatch(client, /navigator\.share/);
+  assert.match(client, /copyInvite/);
+  assert.match(client, /Copy link/);
+  assert.match(client, /Text invite/);
+  assert.match(client, /Open Messages/);
+  assert.match(client, /One clean link copied/);
+  assert.match(client, /document\.execCommand\("copy"\)/);
+  assert.match(client, /Safari and embedded browsers/);
+  assert.match(client, /Clean invite link/);
+  assert.match(client, /no duplicated text/);
+  assert.match(client, /https:\/\/www\.invitez\.xyz\/i\/\$\{encodeURIComponent\(guest\.token\.trim\(\)\)\}/);
+  assert.match(client, /Open phone preview/);
   assert.match(client, /editor=1/);
   assert.match(guestApi, /opened_count/);
   assert.match(guestApi, /responded_at/);
@@ -66,6 +85,15 @@ test("admin dashboard uses PIN-only login and protected owner sessions", async (
   assert.match(schema, /adminCredentials/);
   assert.match(schema, /adminSessions/);
   assert.match(schema, /invitationLayouts/);
+  assert.match(schema, /invitationSmsDeliveries/);
+  assert.match(sms, /TWILIO_ACCOUNT_SID/);
+  assert.match(sms, /TWILIO_AUTH_TOKEN/);
+  assert.match(sms, /TWILIO_MESSAGING_SERVICE_SID/);
+  assert.match(sms, /normalizePhoneNumber/);
+  assert.match(sms, /Reply STOP to opt out/);
+  assert.match(smsApi, /consentConfirmed/);
+  assert.match(smsApi, /sendSmsMessage/);
+  assert.match(smsApi, /invitation_sms_deliveries/);
   assert.match(layoutApi, /requireAdminApi/);
   assert.match(layoutApi, /saveRsvpLayout/);
   assert.match(publicLayoutApi, /getRsvpLayout/);
@@ -92,6 +120,9 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   ]);
 
   assert.ok(server.includes('if (/^\\/i\\/[^/]+\\/?$/.test(pathname))'));
+  assert.match(server, /canonicalInvitationPath/);
+  assert.match(server, /\[a-f0-9\]\{32\}/);
+  assert.match(server, /canonicalInvitePath/);
   assert.match(html, /tokenMatch/);
   assert.match(html, /previouslyOpened/);
   assert.match(html, /showSecondStage\(false\)/);

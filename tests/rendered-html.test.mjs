@@ -87,7 +87,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /preload="auto"/);
   assert.match(source, /autoPlay = false/);
   assert.match(source, /viewportFit: "cover"/);
-  assert.match(source, /title: "Invitez \| Erika's Sweet 16"/);
+  assert.match(source, /title: "Invitez \| Digital Invitation"/);
   assert.match(source, /device-shell/);
   assert.match(source, /device-camera/);
   assert.match(source, /device-home-indicator/);

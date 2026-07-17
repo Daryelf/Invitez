@@ -41,8 +41,8 @@ export default function AdminAuthForm() {
 
   return (
     <>
-      <h1>Invitation Studio</h1>
-      <p>Enter your PIN to manage guests, responses, and the invitation.</p>
+      <h1>Creator access</h1>
+      <p>Enter your PIN to open Argentum Studio and manage your current event project.</p>
       <form className={styles.authForm} onSubmit={submit}>
         <label>
           <span>4-digit PIN</span>

@@ -8,15 +8,26 @@ const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
 
 const { d1, r2 } = hostingConfig;
 
+const localVars: Record<string, string> = {};
+for (const key of [
+  "ADMIN_PIN",
+  "ADMIN_EMAILS",
+  "TWILIO_ACCOUNT_SID",
+  "TWILIO_AUTH_TOKEN",
+  "TWILIO_MESSAGING_SERVICE_SID",
+  "TWILIO_FROM_NUMBER",
+]) {
+  const value = process.env[key]?.trim();
+  if (value) localVars[key] = value;
+}
+
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 
 const localBindingConfig = {
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
-  vars: process.env.ADMIN_PASSWORD_PEPPER
-    ? { ADMIN_PASSWORD_PEPPER: process.env.ADMIN_PASSWORD_PEPPER }
-    : undefined,
+  vars: Object.keys(localVars).length ? localVars : undefined,
   d1_databases: d1
     ? [
         {

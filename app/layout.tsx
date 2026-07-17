@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Invitez | Erika's Sweet 16",
-  description: "Erika's Sweet 16 invitation and RSVP.",
+  title: "Invitez | Digital Invitation",
+  description: "A private digital invitation and RSVP experience.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

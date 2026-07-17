@@ -30,6 +30,11 @@ function resolveRequestPath(pathname) {
   return join(publicRoot, safePath);
 }
 
+function canonicalInvitationPath(pathname) {
+  const match = /^\/i\/([a-f0-9]{32})(?:\/?$|https?:)/i.exec(pathname);
+  return match ? `/i/${match[1].toLowerCase()}` : null;
+}
+
 function shouldProxyDashboard(pathname) {
   return pathname === "/admin"
     || pathname.startsWith("/admin/")
@@ -147,6 +152,15 @@ createServer(async (request, response) => {
   try {
     const requestUrl = new URL(request.url || "/", "http://localhost");
     const pathname = requestUrl.pathname;
+    const canonicalInvitePath = canonicalInvitationPath(pathname);
+    if (canonicalInvitePath && canonicalInvitePath !== pathname) {
+      response.writeHead(308, {
+        "Cache-Control": "no-store",
+        Location: `${canonicalInvitePath}${requestUrl.search}`,
+      });
+      response.end();
+      return;
+    }
     if (shouldProxyDashboard(pathname)) {
       await proxyDashboardRequest(request, response, requestUrl);
       return;

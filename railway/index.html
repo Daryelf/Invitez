@@ -4,19 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#141414" />
-    <meta name="description" content="Open Erika's Sweet 16 invitation." />
-    <title>Erika's Sweet 16 Invitation</title>
+    <meta name="description" content="Open your private digital invitation." />
+    <title>Invitez | Digital Invitation</title>
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/globals.css?v=railway-7" />
   </head>
   <body>
     <div class="device-shell invitation-pending" id="device-shell">
       <div class="device-camera" aria-hidden="true"><span></span></div>
-      <main id="invitation" class="intro-sequence intro-sequence--locked" aria-label="Erika's Sweet 16 invitation">
+      <main id="invitation" class="intro-sequence intro-sequence--locked" aria-label="Digital invitation">
       <audio id="party-song" src="/Nicki%20Minaj%20-%20Moment%204%20Life%20(Remastered)%20(Official%20Video)%20ft.%20Drake%20-%20NickiMinajAtVEVO.mp3" preload="auto"></audio>
 
       <section class="intro-panel" id="intro-first">
-        <video class="intro-video" id="first-video" src="/first.mp4" poster="/first-poster.png" autoplay muted playsinline preload="auto" aria-label="Sweet 16 invitation"></video>
+        <video class="intro-video" id="first-video" src="/first.mp4" poster="/first-poster.png" autoplay muted playsinline preload="auto" aria-label="Invitation opening"></video>
         <img class="intro-video autoplay-poster" id="first-poster" src="/first-poster.png" alt="" aria-hidden="true" hidden />
         <button type="button" class="intro-action" id="open-invitation" aria-label="Open invitation">OPEN INVITATION</button>
       </section>
@@ -27,7 +27,7 @@
           <button type="button" class="vinyl-toggle" id="vinyl-toggle" aria-label="Pause vinyl" aria-pressed="false"><span aria-hidden="true">❚❚</span></button>
         </div>
 
-        <video class="intro-video intro-video--full" id="second-video" src="/secondv2.mp4" poster="/secondv2-poster.png" autoplay muted playsinline preload="auto" aria-label="Erika's Sweet 16 invitation details"></video>
+        <video class="intro-video intro-video--full" id="second-video" src="/secondv2.mp4" poster="/secondv2-poster.png" autoplay muted playsinline preload="auto" aria-label="Invitation details"></video>
         <img class="intro-video intro-video--full autoplay-poster autoplay-poster--full" id="second-poster" src="/secondv2-poster.png" alt="" aria-hidden="true" hidden />
 
         <form class="rsvp-hotspots" id="rsvp-form" aria-label="RSVP form fields">
@@ -207,6 +207,9 @@
         if (!event) return;
         currentEvent = { ...currentEvent, ...event };
         eventTime = new Date(currentEvent.eventIso).getTime();
+        document.title = `${currentEvent.eventName} | Invitez`;
+        document.querySelector('meta[name="description"]').setAttribute("content", `Open your private invitation to ${currentEvent.eventName}.`);
+        invitation.setAttribute("aria-label", `${currentEvent.eventName} invitation`);
         document.querySelector("#countdown-event-label").textContent = `${currentEvent.eventDate} · ${currentEvent.eventTime}`;
       }
 

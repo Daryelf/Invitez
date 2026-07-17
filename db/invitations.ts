@@ -70,6 +70,19 @@ export async function ensureInvitationSchema() {
     )`),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS invitation_guests_token_unique ON invitation_guests (invite_token)"),
     db.prepare("CREATE INDEX IF NOT EXISTS invitation_guests_status_idx ON invitation_guests (status)"),
+    db.prepare(`CREATE TABLE IF NOT EXISTS invitation_sms_deliveries (
+      id TEXT PRIMARY KEY NOT NULL,
+      guest_id TEXT NOT NULL,
+      provider TEXT NOT NULL DEFAULT 'twilio',
+      provider_message_id TEXT,
+      recipient TEXT NOT NULL,
+      message_body TEXT NOT NULL,
+      status TEXT NOT NULL,
+      error TEXT,
+      sent_at TEXT,
+      created_at TEXT NOT NULL
+    )`),
+    db.prepare("CREATE INDEX IF NOT EXISTS invitation_sms_deliveries_guest_idx ON invitation_sms_deliveries (guest_id, created_at)"),
     db.prepare(`CREATE TABLE IF NOT EXISTS event_settings (
       id TEXT PRIMARY KEY NOT NULL,
       event_name TEXT NOT NULL,

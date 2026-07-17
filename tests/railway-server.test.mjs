@@ -19,6 +19,9 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(server, /invitez_admin_session=/);
   assert.match(server, /replaceAll\(dashboardOrigin, publicOrigin\)/);
   assert.match(server, /Accept-Ranges/);
+  assert.match(server, /canonicalInvitationPath/);
+  assert.match(server, /\[a-f0-9\]\{32\}/);
+  assert.match(server, /Cache-Control\": \"no-store\"/);
   assert.match(html, /\/first\.mp4/);
   assert.match(html, /\/secondv2\.mp4/);
   assert.match(html, /\/first-poster\.png/);
@@ -43,6 +46,8 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(html, /showConfirmation/);
   assert.match(html, /rsvp-confirmation/);
   assert.match(html, /eventDayActive/);
+  assert.match(html, /document\.title = `\$\{currentEvent\.eventName\} \| Invitez`/);
+  assert.match(html, /Open your private digital invitation/);
   assert.ok(server.includes('if (/^\\/i\\/[^/]+\\/?$/.test(pathname))'));
   assert.doesNotMatch(server, /Location: "https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/admin"/);
   assert.match(server, /after-hours-party\.adventraa\.chatgpt\.site\/event-day/);

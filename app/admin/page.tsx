@@ -6,6 +6,10 @@ import AdminClient from "./admin-client";
 import styles from "./admin.module.css";
 
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Argentum Studio | Invitation Creator",
+  description: "Create, deliver, and monitor event invitations.",
+};
 
 export default async function AdminPage() {
   const access = await getAdminAccess();
@@ -14,8 +18,8 @@ export default async function AdminPage() {
     return (
       <main className={styles.authPage}>
         <section className={styles.authCard}>
-          <div className={styles.authMark}>E</div>
-          <p className={styles.eyebrow}>Erika&apos;s Sweet 16</p>
+          <div className={styles.authMark}>A</div>
+          <p className={styles.eyebrow}>Argentum Studio</p>
           <AdminAuthForm />
           <a className={styles.backLink} href="https://www.invitez.xyz">Return to invitation</a>
         </section>
@@ -26,7 +30,6 @@ export default async function AdminPage() {
   return (
     <AdminClient
       adminName={access.user.displayName}
-      adminEmail={access.user.email}
       signOutPath="/api/admin/auth/logout"
     />
   );
