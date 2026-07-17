@@ -95,8 +95,12 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /window\.addEventListener\("pageshow", onPageShow\)/);
   assert.match(source, /invitez-opening-viewed/);
   assert.match(source, /invitez-rsvp-confirmation/);
-  assert.match(source, /ConfirmationScreen/);
-  assert.match(source, /setIntroStage\("confirmation"\)/);
+  assert.match(source, /CompactRSVPConfirmation/);
+  assert.match(source, /className="rsvp-confirmation-card"/);
+  assert.match(source, /Your RSVP is in/);
+  assert.match(source, /form\.reset\(\)/);
+  assert.doesNotMatch(source, /setIntroStage\("confirmation"\)/);
+  assert.doesNotMatch(source, /confirmation-screen/);
 
   assert.doesNotMatch(source, /The Night Shift|event-page|gallery|hero|eventDetails|starterPhotos/i);
   assert.doesNotMatch(source, /codex-preview|Your site is taking shape|react-loading-skeleton/i);

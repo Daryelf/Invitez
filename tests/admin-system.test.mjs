@@ -128,13 +128,16 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(html, /showSecondStage\(false\)/);
   assert.match(html, /showConfirmation\(guestContext\)/);
   assert.match(html, /confirmationPreview/);
+  assert.match(html, /rsvpForm\.reset\(\)/);
+  assert.match(html, /Your RSVP is in/);
   assert.match(html, /eventDayActive/);
   assert.match(html, /window\.location\.replace/);
   assert.match(inviteApi, /opened_count = opened_count \+ 1/);
   assert.match(inviteApi, /previouslyOpened/);
   assert.match(rsvpApi, /status = input\.attending === "yes" \? "attending"/);
   assert.match(eventApi, /isEventDayActive/);
-  assert.match(styles, /\.confirmation-screen/);
+  assert.match(styles, /\.rsvp-confirmation-card/);
+  assert.doesNotMatch(styles, /\.confirmation-screen/);
 });
 
 test("event-day photo wall supports camera uploads but enforces host and date controls", async () => {

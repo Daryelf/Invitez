@@ -7,7 +7,7 @@
     <meta name="description" content="Open your private digital invitation." />
     <title>Invitez | Digital Invitation</title>
     <link rel="icon" href="/favicon.svg" />
-    <link rel="stylesheet" href="/globals.css?v=railway-7" />
+    <link rel="stylesheet" href="/globals.css?v=railway-8" />
   </head>
   <body>
     <div class="device-shell invitation-pending" id="device-shell">
@@ -56,6 +56,15 @@
           <p class="rsvp-submit-status rsvp-submit-status--idle" id="rsvp-submit-status" aria-live="polite"></p>
         </form>
 
+        <aside class="rsvp-confirmation-card" id="rsvp-confirmation" hidden role="status" aria-live="polite" aria-label="RSVP confirmation">
+          <span class="rsvp-confirmation-mark" aria-hidden="true">✓</span>
+          <div class="rsvp-confirmation-copy">
+            <strong>Your RSVP is in</strong>
+            <span id="confirmation-message">Your response was saved.</span>
+          </div>
+          <button type="button" id="update-rsvp">Edit</button>
+        </aside>
+
         <div class="countdown-panel" id="details" aria-label="Countdown to October 3 at 7 PM">
           <div class="countdown-bloom countdown-bloom--left" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><i></i></div>
           <div class="countdown-bloom countdown-bloom--right" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><i></i></div>
@@ -71,30 +80,6 @@
         </div>
       </section>
       </main>
-      <section class="confirmation-screen" id="rsvp-confirmation" hidden aria-label="RSVP confirmation">
-        <div class="confirmation-orbit confirmation-orbit--one" aria-hidden="true"></div>
-        <div class="confirmation-orbit confirmation-orbit--two" aria-hidden="true"></div>
-        <div class="confirmation-butterfly" aria-hidden="true">♡</div>
-        <div class="confirmation-card">
-          <div class="confirmation-monogram">E</div>
-          <p class="confirmation-kicker" id="confirmation-kicker">RSVP received</p>
-          <h1 id="confirmation-title">You&apos;re on the list!</h1>
-          <p class="confirmation-message" id="confirmation-message">We can&apos;t wait to celebrate with you.</p>
-          <div class="confirmation-status" id="confirmation-status">Attending</div>
-          <div class="confirmation-event-card">
-            <div><span>Date</span><strong id="confirmation-date">October 3, 2026</strong></div>
-            <div><span>Time</span><strong id="confirmation-time">7:00 PM</strong></div>
-            <div><span>Venue</span><strong id="confirmation-venue">Centerville Banquet Hall</strong></div>
-            <div id="confirmation-address-row" hidden><span>Address</span><strong id="confirmation-address"></strong></div>
-          </div>
-          <a class="confirmation-map" id="confirmation-map" href="#" target="_blank" rel="noreferrer" hidden>Open in Maps ↗</a>
-          <div class="confirmation-actions">
-            <button type="button" id="view-invitation-details">View invitation details</button>
-            <button type="button" id="update-rsvp">Update RSVP</button>
-          </div>
-          <p class="confirmation-note">Keep this link — on event day it becomes the party photo wall.</p>
-        </div>
-      </section>
       <div class="device-home-indicator" aria-hidden="true"></div>
     </div>
 
@@ -180,6 +165,7 @@
 
       function showOpeningScreen() {
         confirmation.hidden = true;
+        rsvpForm.hidden = false;
         invitation.hidden = false;
         pauseMedia();
         firstPanel.hidden = false;
@@ -214,7 +200,6 @@
       }
 
       function showSecondStage(playSong = false, scrollToForm = false) {
-        confirmation.hidden = true;
         invitation.hidden = false;
         firstPanel.hidden = true;
         secondPanel.hidden = false;
@@ -238,28 +223,18 @@
         const guest = context.guest || {};
         const event = context.event || currentEvent;
         applyEvent(event);
-        pauseMedia();
-        invitation.hidden = true;
+        const secondStageIsVisible = !invitation.hidden && !secondPanel.hidden;
+        if (!secondStageIsVisible) showSecondStage(false);
+        rsvpForm.reset();
+        rsvpStatus.className = "rsvp-submit-status rsvp-submit-status--idle";
+        rsvpStatus.textContent = "";
+        rsvpForm.hidden = true;
         confirmation.hidden = false;
-        confirmation.scrollTop = 0;
         const attending = guest.status === "attending";
-        document.querySelector("#confirmation-kicker").textContent = guest.name ? `RSVP received · ${guest.name}` : "RSVP received";
-        document.querySelector("#confirmation-title").textContent = attending ? "You're on the list!" : "We'll miss you!";
-        document.querySelector("#confirmation-message").textContent = attending ? "We can't wait to celebrate this magical night with you." : "Thank you for letting us know. You'll be part of the celebration in spirit.";
-        const status = document.querySelector("#confirmation-status");
-        status.textContent = attending ? "Attending" : "Not attending";
-        status.classList.toggle("confirmation-status--declined", !attending);
-        document.querySelector("#confirmation-date").textContent = event.eventDate;
-        document.querySelector("#confirmation-time").textContent = event.eventTime;
-        document.querySelector("#confirmation-venue").textContent = event.venue;
-        const addressRow = document.querySelector("#confirmation-address-row");
-        const address = document.querySelector("#confirmation-address");
-        addressRow.hidden = !event.address;
-        address.textContent = event.address || "";
-        const map = document.querySelector("#confirmation-map");
-        const mapUrl = event.mapUrl || (event.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}` : "");
-        map.hidden = !mapUrl;
-        map.href = mapUrl || "#";
+        const guestName = guest.name || "Guest";
+        document.querySelector("#confirmation-message").textContent = attending
+          ? `See you there, ${guestName}!`
+          : `Thank you, ${guestName}.`;
       }
 
       async function initializeInvitation() {
@@ -385,8 +360,12 @@
       updateCountdown();
       window.setInterval(updateCountdown, 1000);
 
-      document.querySelector("#view-invitation-details").addEventListener("click", () => showSecondStage(false));
-      document.querySelector("#update-rsvp").addEventListener("click", () => showSecondStage(false, true));
+      document.querySelector("#update-rsvp").addEventListener("click", () => {
+        confirmation.hidden = true;
+        rsvpForm.hidden = false;
+        rsvpForm.reset();
+        showSecondStage(false, true);
+      });
     </script>
   </body>
 </html>

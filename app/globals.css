@@ -60,230 +60,104 @@ video {
   border: 0;
 }
 
-.confirmation-screen {
-  position: fixed;
-  z-index: 20;
-  inset: 0;
-  min-height: 100%;
-  padding: max(54px, env(safe-area-inset-top)) 22px max(42px, env(safe-area-inset-bottom));
-  overflow-x: hidden;
-  overflow-y: auto;
-  color: #29473d;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(242, 166, 181, 0.5) 0 5%, transparent 5.4%),
-    radial-gradient(circle at 22% 2%, rgba(252, 205, 212, 0.58) 0 8%, transparent 8.4%),
-    radial-gradient(circle at 89% 88%, rgba(139, 160, 119, 0.42) 0 11%, transparent 11.5%),
-    repeating-linear-gradient(0deg, rgba(110, 91, 62, 0.022) 0 1px, transparent 1px 4px),
-    linear-gradient(150deg, #e3ead5 0%, #f3dfdf 48%, #fbf1df 100%);
-}
-
-.confirmation-card {
-  position: relative;
-  z-index: 2;
+.rsvp-confirmation-card {
+  position: absolute;
+  z-index: 9;
+  top: 75%;
+  left: 12%;
   display: grid;
-  width: min(100%, 540px);
-  min-height: calc(100% - 12px);
-  margin: 0 auto;
-  place-items: center;
-  align-content: center;
-  padding: clamp(38px, 9vw, 68px) clamp(24px, 7vw, 48px);
-  border: 1px solid rgba(90, 111, 77, 0.3);
-  border-radius: 42px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  width: 76%;
+  min-height: 2.5%;
+  align-items: center;
+  gap: clamp(7px, 1.8vw, 14px);
+  padding: clamp(8px, 2.15vw, 15px) clamp(10px, 2.6vw, 18px);
+  border: 1px solid rgba(94, 112, 79, 0.38);
+  border-radius: clamp(12px, 3vw, 20px);
+  color: #29473d;
   background:
     repeating-linear-gradient(0deg, rgba(115, 90, 58, 0.018) 0 1px, transparent 1px 4px),
-    rgba(255, 250, 239, 0.94);
-  text-align: center;
-  box-shadow: 0 24px 65px rgba(65, 77, 53, 0.23), inset 0 0 0 7px rgba(255, 255, 255, 0.45);
+    rgba(255, 250, 239, 0.97);
+  box-shadow: 0 10px 24px rgba(61, 73, 48, 0.24), inset 0 0 0 3px rgba(255, 255, 255, 0.48);
+  transform: rotate(-15deg);
+  transform-origin: center;
 }
 
-.confirmation-card::before {
+.rsvp-confirmation-card::before {
   content: "";
   position: absolute;
-  inset: 13px;
+  inset: 4px;
   border: 1px solid rgba(223, 148, 161, 0.38);
-  border-radius: 31px;
+  border-radius: inherit;
   pointer-events: none;
 }
 
-.confirmation-monogram {
+.rsvp-confirmation-mark {
+  position: relative;
+  z-index: 1;
   display: grid;
-  width: 54px;
+  width: clamp(27px, 7vw, 46px);
   aspect-ratio: 1;
-  margin-bottom: 24px;
   place-items: center;
   border-radius: 50%;
-  color: #fff8ec;
-  background: #29473d;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 29px;
-  box-shadow: 0 8px 18px rgba(41, 71, 61, 0.22);
-}
-
-.confirmation-kicker,
-.confirmation-event-card span,
-.confirmation-status,
-.confirmation-note {
-  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.confirmation-kicker {
-  margin: 0 0 12px;
-  color: #c47d89;
-  font-size: clamp(0.56rem, 2.1vw, 0.68rem);
-  font-weight: 700;
-}
-
-.confirmation-card h1 {
-  max-width: 390px;
-  margin: 0;
-  color: #29473d;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(3.2rem, 14vw, 5.6rem);
-  font-weight: 400;
-  letter-spacing: -0.055em;
-  line-height: 0.86;
-}
-
-.confirmation-message {
-  max-width: 380px;
-  margin: 23px 0 18px;
-  color: #708067;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(0.96rem, 3.2vw, 1.14rem);
-  line-height: 1.55;
-}
-
-.confirmation-status {
-  padding: 8px 13px;
-  border-radius: 999px;
-  color: #3f654f;
-  background: #dbe8d5;
-  font-size: 0.58rem;
-  font-weight: 700;
-}
-
-.confirmation-status--declined {
-  color: #8a5260;
-  background: #f3dce1;
-}
-
-.confirmation-event-card {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: 100%;
-  margin-top: 30px;
-  overflow: hidden;
-  border: 1px solid rgba(100, 119, 87, 0.23);
-  border-radius: 19px;
-  background: rgba(233, 238, 218, 0.48);
-}
-
-.confirmation-event-card > div {
-  display: grid;
-  gap: 6px;
-  padding: 17px 13px;
-  border-right: 1px solid rgba(100, 119, 87, 0.18);
-  border-bottom: 1px solid rgba(100, 119, 87, 0.18);
-}
-
-.confirmation-event-card > div:nth-child(even) {
-  border-right: 0;
-}
-
-.confirmation-event-card > div:nth-last-child(-n + 2) {
-  border-bottom: 0;
-}
-
-.confirmation-event-card span {
-  color: #bf7885;
-  font-size: 0.5rem;
-  font-weight: 700;
-}
-
-.confirmation-event-card strong {
-  color: #40594d;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(0.76rem, 2.8vw, 0.95rem);
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.confirmation-map {
-  margin-top: 13px;
-  color: #7d8b71;
-  font-size: 0.72rem;
-  text-underline-offset: 3px;
-}
-
-.confirmation-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100%;
-  gap: 9px;
-  margin-top: 28px;
-}
-
-.confirmation-actions button {
-  min-height: 48px;
-  padding: 10px 12px;
-  border: 1px solid #29473d;
-  border-radius: 13px;
   color: #fff9ed;
-  background: #29473d;
-  font-size: clamp(0.58rem, 2.2vw, 0.7rem);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  cursor: pointer;
+  background: #516a58;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(0.82rem, 3.2vw, 1.28rem);
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(41, 71, 61, 0.2);
 }
 
-.confirmation-actions button + button {
-  color: #29473d;
-  background: transparent;
-}
-
-.confirmation-note {
-  max-width: 330px;
-  margin: 20px 0 0;
-  color: #8e9985;
-  font-size: 0.48rem;
-  line-height: 1.6;
-}
-
-.confirmation-orbit {
-  position: absolute;
+.rsvp-confirmation-copy {
+  position: relative;
   z-index: 1;
-  width: 270px;
-  height: 430px;
-  border: 2px solid rgba(112, 140, 94, 0.26);
-  border-radius: 50%;
-  pointer-events: none;
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  text-align: left;
 }
 
-.confirmation-orbit--one {
-  top: -230px;
-  right: -100px;
-  transform: rotate(30deg);
+.rsvp-confirmation-copy strong {
+  overflow: hidden;
+  color: #29473d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(0.72rem, 3vw, 1.05rem);
+  font-weight: 600;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.confirmation-orbit--two {
-  bottom: -280px;
-  left: -130px;
-  border-color: rgba(216, 133, 150, 0.26);
-  transform: rotate(-24deg);
+.rsvp-confirmation-copy span {
+  overflow: hidden;
+  color: #879079;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(0.43rem, 1.7vw, 0.66rem);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.confirmation-butterfly {
-  position: absolute;
-  z-index: 3;
-  top: 8%;
-  right: 5%;
-  color: rgba(207, 119, 138, 0.58);
-  font-family: Georgia, serif;
-  font-size: 54px;
-  transform: rotate(18deg);
-  pointer-events: none;
+.rsvp-confirmation-card button {
+  position: relative;
+  z-index: 1;
+  min-width: 40px;
+  min-height: 28px;
+  padding: 5px 8px;
+  border: 1px solid rgba(81, 106, 88, 0.48);
+  border-radius: 999px;
+  color: #40594d;
+  background: rgba(232, 238, 218, 0.86);
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(0.44rem, 1.8vw, 0.64rem);
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.rsvp-confirmation-card button:focus-visible {
+  outline: 2px solid #29473d;
+  outline-offset: 2px;
 }
 
 .intro-sequence {
@@ -1089,28 +963,6 @@ video {
       0 0 0 4px #525257,
       0 28px 70px rgba(0, 0, 0, 0.72),
       inset 0 0 0 1px rgba(255, 255, 255, 0.17);
-  }
-
-  .confirmation-screen {
-    position: absolute;
-    inset: 12px;
-    min-height: 0;
-    padding: 40px 18px 32px;
-    border-radius: 46px;
-    scrollbar-width: none;
-  }
-
-  .confirmation-screen::-webkit-scrollbar {
-    display: none;
-  }
-
-  .confirmation-card {
-    min-height: 100%;
-    padding: 48px 30px 40px;
-  }
-
-  .confirmation-card h1 {
-    font-size: 4rem;
   }
 
   .device-shell::before,

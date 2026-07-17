@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState, type CSSProperties } from "react";
 import { DEFAULT_RSVP_LAYOUT, normalizeRsvpLayout, rsvpLayoutVariables } from "@/lib/rsvp-layout";
 
-type IntroStage = "first" | "second" | "confirmation";
+type IntroStage = "first" | "second";
 
 type EventInfo = {
   eventName: string;
@@ -124,6 +124,7 @@ function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: Confirmatio
         event: result.event || fallbackEvent,
       };
       window.localStorage.setItem("invitez-rsvp-confirmation", JSON.stringify(confirmation));
+      form.reset();
       setSubmitState("success");
       onConfirmed(confirmation);
     } catch {
@@ -187,6 +188,8 @@ function IntroVideo({
   vinylPaused = false,
   onVinylToggle,
   onRSVPConfirmed,
+  confirmation,
+  onRSVPEdit,
 }: {
   id: string;
   src: string;
@@ -200,6 +203,8 @@ function IntroVideo({
   vinylPaused?: boolean;
   onVinylToggle?: () => void;
   onRSVPConfirmed?: (confirmation: ConfirmationData) => void;
+  confirmation?: ConfirmationData | null;
+  onRSVPEdit?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [showAutoplayFallback, setShowAutoplayFallback] = useState(false);
@@ -308,7 +313,11 @@ function IntroVideo({
       ) : null}
       {fullFrame ? (
         <>
-          <RSVPHotspots onConfirmed={onRSVPConfirmed || (() => undefined)} />
+          {confirmation ? (
+            <CompactRSVPConfirmation confirmation={confirmation} onEdit={onRSVPEdit || (() => undefined)} />
+          ) : (
+            <RSVPHotspots onConfirmed={onRSVPConfirmed || (() => undefined)} />
+          )}
           <Countdown />
         </>
       ) : null}
@@ -316,41 +325,21 @@ function IntroVideo({
   );
 }
 
-function ConfirmationScreen({
-  confirmation,
-  onViewDetails,
-  onUpdate,
-}: {
+function CompactRSVPConfirmation({ confirmation, onEdit }: {
   confirmation: ConfirmationData;
-  onViewDetails: () => void;
-  onUpdate: () => void;
+  onEdit: () => void;
 }) {
   const attending = confirmation.guest.status === "attending";
-  const event = confirmation.event;
-  const mapUrl = event.mapUrl || (event.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}` : "");
 
   return (
-    <section className="confirmation-screen" aria-label="RSVP confirmation">
-      <div className="confirmation-orbit confirmation-orbit--one" aria-hidden="true" />
-      <div className="confirmation-orbit confirmation-orbit--two" aria-hidden="true" />
-      <div className="confirmation-butterfly" aria-hidden="true">♡</div>
-      <div className="confirmation-card">
-        <div className="confirmation-monogram">E</div>
-        <p className="confirmation-kicker">RSVP received · {confirmation.guest.name}</p>
-        <h1>{attending ? "You're on the list!" : "We'll miss you!"}</h1>
-        <p className="confirmation-message">{attending ? "We can't wait to celebrate this magical night with you." : "Thank you for letting us know. You'll be part of the celebration in spirit."}</p>
-        <div className={`confirmation-status ${attending ? "" : "confirmation-status--declined"}`}>{attending ? "Attending" : "Not attending"}</div>
-        <div className="confirmation-event-card">
-          <div><span>Date</span><strong>{event.eventDate}</strong></div>
-          <div><span>Time</span><strong>{event.eventTime}</strong></div>
-          <div><span>Venue</span><strong>{event.venue}</strong></div>
-          {event.address ? <div><span>Address</span><strong>{event.address}</strong></div> : null}
-        </div>
-        {mapUrl ? <a className="confirmation-map" href={mapUrl} target="_blank" rel="noreferrer">Open in Maps ↗</a> : null}
-        <div className="confirmation-actions"><button type="button" onClick={onViewDetails}>View invitation details</button><button type="button" onClick={onUpdate}>Update RSVP</button></div>
-        <p className="confirmation-note">Keep this link — on event day it becomes the party photo wall.</p>
+    <aside className="rsvp-confirmation-card" role="status" aria-live="polite" aria-label="RSVP confirmation">
+      <span className="rsvp-confirmation-mark" aria-hidden="true">✓</span>
+      <div className="rsvp-confirmation-copy">
+        <strong>Your RSVP is in</strong>
+        <span>{attending ? `See you there, ${confirmation.guest.name}!` : `Thank you, ${confirmation.guest.name}.`}</span>
       </div>
-    </section>
+      <button type="button" onClick={onEdit}>Edit</button>
+    </aside>
   );
 }
 
@@ -385,7 +374,7 @@ export default function Home() {
         try {
           const parsed = JSON.parse(savedConfirmation) as ConfirmationData;
           setConfirmation(parsed);
-          setIntroStage("confirmation");
+          setIntroStage("second");
         } catch {
           window.localStorage.removeItem("invitez-rsvp-confirmation");
         }
@@ -413,9 +402,13 @@ export default function Home() {
   }
 
   function showConfirmation(next: ConfirmationData) {
-    audioRef.current?.pause();
     setConfirmation(next);
-    setIntroStage("confirmation");
+    setIntroStage("second");
+  }
+
+  function editRSVP() {
+    window.localStorage.removeItem("invitez-rsvp-confirmation");
+    setConfirmation(null);
   }
 
   function toggleVinylAndSong() {
@@ -433,9 +426,7 @@ export default function Home() {
   return (
     <div className="device-shell">
       <div className="device-camera" aria-hidden="true"><span /></div>
-      {introStage === "confirmation" && confirmation ? (
-        <ConfirmationScreen confirmation={confirmation} onViewDetails={() => setIntroStage("second")} onUpdate={() => setIntroStage("second")} />
-      ) : <main
+      <main
         className={`intro-sequence ${introStage === "first" ? "intro-sequence--locked" : "intro-sequence--unlocked"}`}
         aria-label="After Hours invitation"
       >
@@ -467,9 +458,11 @@ export default function Home() {
             vinylPaused={vinylPaused}
             onVinylToggle={toggleVinylAndSong}
             onRSVPConfirmed={showConfirmation}
+            confirmation={confirmation}
+            onRSVPEdit={editRSVP}
           />
         )}
-      </main>}
+      </main>
       <div className="device-home-indicator" aria-hidden="true" />
     </div>
   );
