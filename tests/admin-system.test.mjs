@@ -6,13 +6,12 @@ async function source(path) {
   return readFile(new URL(path, import.meta.url), "utf8");
 }
 
-test("admin dashboard uses first-time password setup and protected owner sessions", async () => {
-  const [auth, page, form, loginApi, setupApi, logoutApi, client, guestApi, guestUpdateApi, layoutApi, publicLayoutApi, layoutEditor, schema, invitations] = await Promise.all([
+test("admin dashboard uses PIN-only login and protected owner sessions", async () => {
+  const [auth, page, form, loginApi, logoutApi, client, guestApi, guestUpdateApi, layoutApi, publicLayoutApi, layoutEditor, schema, invitations] = await Promise.all([
     source("../app/admin-auth.ts"),
     source("../app/admin/page.tsx"),
     source("../app/admin/auth-form.tsx"),
     source("../app/api/admin/auth/login/route.ts"),
-    source("../app/api/admin/auth/setup/route.ts"),
     source("../app/api/admin/auth/logout/route.ts"),
     source("../app/admin/admin-client.tsx"),
     source("../app/api/admin/guests/route.ts"),
@@ -23,25 +22,27 @@ test("admin dashboard uses first-time password setup and protected owner session
     source("../db/schema.ts"),
     source("../db/invitations.ts"),
   ]);
-  const adminSource = `${auth}\n${page}\n${form}\n${loginApi}\n${setupApi}\n${logoutApi}\n${client}\n${guestApi}\n${guestUpdateApi}`;
+  const adminSource = `${auth}\n${page}\n${form}\n${loginApi}\n${logoutApi}\n${client}\n${guestApi}\n${guestUpdateApi}`;
 
   assert.match(auth, /gamingboi567@gmail\.com/);
-  assert.match(form, /Create your password/);
-  assert.match(form, /Log in/);
-  assert.match(form, /new-password/);
-  assert.match(form, /const setupMode = !configured/);
+  assert.match(form, /4-digit PIN/);
+  assert.match(form, /inputMode="numeric"/);
+  assert.match(form, /maxLength=\{4\}/);
+  assert.match(form, /JSON\.stringify\(\{ pin \}\)/);
+  assert.match(form, /Enter studio/);
+  assert.doesNotMatch(form, />Email<|>Password<|new-password|setupMode/);
+  assert.doesNotMatch(page, /isAdminPasswordConfigured|getAdminOwnerEmail/);
   assert.doesNotMatch(adminSource, /ADMIN_SETUP_TOKEN|setupToken|private one-time/);
   assert.doesNotMatch(adminSource, /Sign in with ChatGPT/);
-  assert.match(auth, /ADMIN_PASSWORD_PEPPER/);
-  assert.match(auth, /PEPPERED_HMAC_SCHEME/);
-  assert.match(auth, /HMAC/);
-  assert.match(auth, /PBKDF2/);
-  assert.match(auth, /password_hash/);
+  assert.match(auth, /ADMIN_PIN/);
+  assert.match(auth, /authenticateAdminPin/);
+  assert.match(auth, /constantTimeEqual/);
+  assert.doesNotMatch(auth, /ADMIN_PASSWORD_PEPPER|PBKDF2|HMAC|password_hash/);
   assert.match(auth, /admin_sessions/);
   assert.match(auth, /HttpOnly; SameSite=Lax/);
   assert.match(auth, /MAX_FAILED_LOGINS = 5/);
-  assert.match(setupApi, /createInitialAdminPassword/);
-  assert.match(loginApi, /authenticateAdmin/);
+  assert.match(auth, /LOGIN_LOCK_SECONDS = 60/);
+  assert.match(loginApi, /authenticateAdminPin/);
   assert.match(logoutApi, /revokeAdminSession/);
   assert.match(adminSource, /requireAdminApi/);
   assert.match(client, /Invitation overview/);

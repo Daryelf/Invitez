@@ -1,6 +1,6 @@
 import {
   AdminAuthError,
-  authenticateAdmin,
+  authenticateAdminPin,
   createAdminSession,
   requestIsSecure,
   sessionCookie,
@@ -14,9 +14,8 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json() as Record<string, unknown>;
-    const email = typeof body.email === "string" ? body.email : "";
-    const password = typeof body.password === "string" ? body.password : "";
-    const user = await authenticateAdmin(email, password);
+    const pin = typeof body.pin === "string" ? body.pin : "";
+    const user = await authenticateAdminPin(pin);
     const session = await createAdminSession(user.email);
     const response = Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
     response.headers.append("Set-Cookie", sessionCookie(session.token, session.expiresAt, requestIsSecure(request)));

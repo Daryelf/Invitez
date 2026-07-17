@@ -6,13 +6,13 @@ const DEFAULT_OWNER_EMAIL = "gamingboi567@gmail.com";
 const ADMIN_DISPLAY_NAME = "Daryel";
 const SESSION_COOKIE = "invitez_admin_session";
 const SESSION_LIFETIME_SECONDS = 60 * 60 * 24 * 7;
-const PEPPERED_HMAC_SCHEME = 0;
 const MAX_FAILED_LOGINS = 5;
-const LOGIN_LOCK_SECONDS = 15 * 60;
+const LOGIN_LOCK_SECONDS = 60;
+const PIN_ATTEMPT_KEY = "admin-pin";
 
 type RuntimeEnvironment = {
   ADMIN_EMAILS?: string;
-  ADMIN_PASSWORD_PEPPER?: string;
+  ADMIN_PIN?: string;
 };
 
 export type AdminUser = {
@@ -40,7 +40,7 @@ function runtimeEnvironment() {
   const localEnvironment = typeof process !== "undefined" ? process.env : {};
   return {
     ADMIN_EMAILS: workerEnvironment.ADMIN_EMAILS || localEnvironment.ADMIN_EMAILS,
-    ADMIN_PASSWORD_PEPPER: workerEnvironment.ADMIN_PASSWORD_PEPPER || localEnvironment.ADMIN_PASSWORD_PEPPER,
+    ADMIN_PIN: workerEnvironment.ADMIN_PIN || localEnvironment.ADMIN_PIN,
   };
 }
 
@@ -67,14 +67,6 @@ function isAllowedEmail(email: string) {
 export async function ensureAdminAuthSchema() {
   const db = getD1();
   await db.batch([
-    db.prepare(`CREATE TABLE IF NOT EXISTS admin_credentials (
-      email TEXT PRIMARY KEY NOT NULL,
-      password_salt TEXT NOT NULL,
-      password_hash TEXT NOT NULL,
-      password_iterations INTEGER NOT NULL,
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    )`),
     db.prepare(`CREATE TABLE IF NOT EXISTS admin_sessions (
       token_hash TEXT PRIMARY KEY NOT NULL,
       email TEXT NOT NULL,
@@ -90,15 +82,6 @@ export async function ensureAdminAuthSchema() {
       updated_at TEXT NOT NULL
     )`),
   ]);
-}
-
-export async function isAdminPasswordConfigured() {
-  await ensureAdminAuthSchema();
-  const row = await getD1()
-    .prepare("SELECT email FROM admin_credentials WHERE email = ? LIMIT 1")
-    .bind(getAdminOwnerEmail())
-    .first<{ email: string }>();
-  return Boolean(row);
 }
 
 function randomBytes(length: number) {
@@ -118,108 +101,11 @@ async function sha256(value: string) {
   return new Uint8Array(digest);
 }
 
-function passwordPepper() {
-  const value = runtimeEnvironment().ADMIN_PASSWORD_PEPPER?.trim() || "";
-  if (value.length < 32) {
-    throw new AdminAuthError("Password setup is temporarily unavailable. Please try again shortly.", 503);
-  }
-  return value;
-}
-
 function constantTimeEqual(left: Uint8Array, right: Uint8Array) {
   if (left.length !== right.length) return false;
   let difference = 0;
   for (let index = 0; index < left.length; index += 1) difference |= left[index] ^ right[index];
   return difference === 0;
-}
-
-async function deriveLegacyPbkdf2Password(password: string, salt: Uint8Array, iterations: number) {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(password),
-    "PBKDF2",
-    false,
-    ["deriveBits"],
-  );
-  const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", hash: "SHA-256", salt, iterations },
-    key,
-    256,
-  );
-  return new Uint8Array(bits);
-}
-
-async function derivePepperedPassword(password: string, salt: Uint8Array) {
-  const encoder = new TextEncoder();
-  const prefix = encoder.encode("invitez-admin-password-v1\0");
-  const passwordBytes = encoder.encode(password);
-  const payload = new Uint8Array(prefix.length + salt.length + passwordBytes.length);
-  payload.set(prefix, 0);
-  payload.set(salt, prefix.length);
-  payload.set(passwordBytes, prefix.length + salt.length);
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(passwordPepper()),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign("HMAC", key, payload);
-  return new Uint8Array(signature);
-}
-
-async function derivePassword(password: string, salt: Uint8Array, scheme: number) {
-  if (scheme === PEPPERED_HMAC_SCHEME) return derivePepperedPassword(password, salt);
-  return deriveLegacyPbkdf2Password(password, salt, scheme);
-}
-
-function base64UrlToBytes(value: string) {
-  const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
-  const binary = atob(padded);
-  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
-}
-
-function validatePassword(password: string) {
-  if (password.length < 8) throw new AdminAuthError("Use at least 8 characters for your password.");
-  if (password.length > 128) throw new AdminAuthError("Your password must be 128 characters or fewer.");
-}
-
-export async function createInitialAdminPassword(input: {
-  email: string;
-  password: string;
-}) {
-  const email = normalizedEmail(input.email);
-  if (!isAllowedEmail(email)) throw new AdminAuthError("This email cannot manage this invitation.", 403);
-  validatePassword(input.password);
-
-  await ensureAdminAuthSchema();
-  if (await isAdminPasswordConfigured()) {
-    throw new AdminAuthError("Your password is already set. Sign in instead.", 409);
-  }
-
-  const salt = randomBytes(16);
-  const passwordHash = await derivePassword(input.password, salt, PEPPERED_HMAC_SCHEME);
-  const now = new Date().toISOString();
-
-  try {
-    await getD1().prepare(`INSERT INTO admin_credentials (
-      email, password_salt, password_hash, password_iterations, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?)`)
-      .bind(
-        email,
-        bytesToBase64Url(salt),
-        bytesToBase64Url(passwordHash),
-        PEPPERED_HMAC_SCHEME,
-        now,
-        now,
-      )
-      .run();
-  } catch {
-    throw new AdminAuthError("Your password is already set. Sign in instead.", 409);
-  }
-
-  return { displayName: ADMIN_DISPLAY_NAME, email } satisfies AdminUser;
 }
 
 async function loginAttempt(email: string) {
@@ -256,46 +142,29 @@ async function clearLoginFailures(email: string) {
   await getD1().prepare("DELETE FROM admin_login_attempts WHERE email = ?").bind(email).run();
 }
 
-export async function authenticateAdmin(emailInput: string, password: string) {
-  const email = normalizedEmail(emailInput);
-  if (!isAllowedEmail(email)) throw new AdminAuthError("The email or password is incorrect.", 401);
-  if (password.length > 128) throw new AdminAuthError("The email or password is incorrect.", 401);
-
-  const attempt = await loginAttempt(email);
-  const now = new Date();
-  if (attempt?.locked_until && new Date(attempt.locked_until) > now) {
-    throw new AdminAuthError("Too many attempts. Try again in 15 minutes.", 429);
+export async function authenticateAdminPin(pin: string) {
+  const expectedPin = runtimeEnvironment().ADMIN_PIN?.trim() || "";
+  if (!/^\d{4}$/.test(expectedPin)) {
+    throw new AdminAuthError("PIN login is temporarily unavailable.", 503);
   }
 
-  const credential = await getD1().prepare(`SELECT
-    password_salt, password_hash, password_iterations
-    FROM admin_credentials WHERE email = ?`)
-    .bind(email)
-    .first<{ password_salt: string; password_hash: string; password_iterations: number }>();
-
-  if (!credential) throw new AdminAuthError("Your password has not been set up yet.", 409);
-
-  let passwordMatches = false;
-  try {
-    const candidate = await derivePassword(
-      password,
-      base64UrlToBytes(credential.password_salt),
-      credential.password_iterations,
-    );
-    passwordMatches = constantTimeEqual(candidate, base64UrlToBytes(credential.password_hash));
-  } catch (error) {
-    if (error instanceof AdminAuthError) throw error;
-    passwordMatches = false;
+  await ensureAdminAuthSchema();
+  const pinMatches = constantTimeEqual(await sha256(pin), await sha256(expectedPin));
+  if (pinMatches) {
+    await Promise.all([
+      clearLoginFailures(PIN_ATTEMPT_KEY),
+      clearLoginFailures(getAdminOwnerEmail()),
+    ]);
+    return { displayName: ADMIN_DISPLAY_NAME, email: getAdminOwnerEmail() } satisfies AdminUser;
   }
 
-  if (!passwordMatches) {
-    const lockedUntil = await recordLoginFailure(email);
-    if (lockedUntil) throw new AdminAuthError("Too many attempts. Try again in 15 minutes.", 429);
-    throw new AdminAuthError("The email or password is incorrect.", 401);
+  const attempt = await loginAttempt(PIN_ATTEMPT_KEY);
+  if (attempt?.locked_until && new Date(attempt.locked_until) > new Date()) {
+    throw new AdminAuthError("Too many attempts. Try again in 1 minute.", 429);
   }
-
-  await clearLoginFailures(email);
-  return { displayName: ADMIN_DISPLAY_NAME, email } satisfies AdminUser;
+  const lockedUntil = await recordLoginFailure(PIN_ATTEMPT_KEY);
+  if (lockedUntil) throw new AdminAuthError("Too many attempts. Try again in 1 minute.", 429);
+  throw new AdminAuthError("That PIN is incorrect.", 401);
 }
 
 export async function createAdminSession(emailInput: string) {

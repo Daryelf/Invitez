@@ -7,37 +7,26 @@ type AuthResponse = {
   error?: string;
 };
 
-export default function AdminAuthForm({
-  configured,
-  ownerEmail,
-}: {
-  configured: boolean;
-  ownerEmail: string;
-}) {
-  const [email, setEmail] = useState(ownerEmail);
-  const [password, setPassword] = useState("");
-  const [confirmation, setConfirmation] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+export default function AdminAuthForm() {
+  const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const setupMode = !configured;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    if (setupMode && password !== confirmation) {
-      setError("The passwords do not match.");
+    if (!/^\d{4}$/.test(pin)) {
+      setError("Enter your 4-digit PIN.");
       return;
     }
 
     setSubmitting(true);
     try {
-      const response = await fetch(setupMode ? "/api/admin/auth/setup" : "/api/admin/auth/login", {
+      const response = await fetch("/api/admin/auth/login", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ pin }),
       });
       const result = await response.json() as AuthResponse;
       if (!response.ok) throw new Error(result.error || "Could not sign in.");
@@ -52,63 +41,31 @@ export default function AdminAuthForm({
 
   return (
     <>
-      <h1>{setupMode ? "Create your password" : "Invitation Studio"}</h1>
-      <p>
-        {setupMode
-          ? "Set the password you will use to manage guests and responses."
-          : "Sign in to manage guests, monitor responses, preview the invitation, and prepare event day."}
-      </p>
+      <h1>Invitation Studio</h1>
+      <p>Enter your PIN to manage guests, responses, and the invitation.</p>
       <form className={styles.authForm} onSubmit={submit}>
         <label>
-          <span>Email</span>
+          <span>4-digit PIN</span>
           <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            autoComplete="username"
-            readOnly={setupMode}
+            className={styles.pinInput}
+            type="password"
+            value={pin}
+            onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+            inputMode="numeric"
+            pattern="[0-9]{4}"
+            autoComplete="current-password"
+            maxLength={4}
+            aria-label="4-digit admin PIN"
+            autoFocus
             required
           />
         </label>
-        <label>
-          <span>{setupMode ? "Create password" : "Password"}</span>
-          <div className={styles.passwordField}>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete={setupMode ? "new-password" : "current-password"}
-              minLength={setupMode ? 8 : undefined}
-              maxLength={128}
-              autoFocus
-              required
-            />
-            <button type="button" onClick={() => setShowPassword((current) => !current)}>
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          {setupMode ? <small>Use at least 8 characters.</small> : null}
-        </label>
-        {setupMode ? (
-          <label>
-            <span>Confirm password</span>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={confirmation}
-              onChange={(event) => setConfirmation(event.target.value)}
-              autoComplete="new-password"
-              minLength={8}
-              maxLength={128}
-              required
-            />
-          </label>
-        ) : null}
         {error ? <div className={styles.authError} role="alert">{error}</div> : null}
         <button className={styles.primaryButton} disabled={submitting}>
-          {submitting ? (setupMode ? "Creating password…" : "Signing in…") : (setupMode ? "Create password & enter" : "Log in")}
+          {submitting ? "Unlocking…" : "Enter studio"}
         </button>
       </form>
-      <div className={styles.authSecurity}>Your password is encrypted and your dashboard stays private.</div>
+      <div className={styles.authSecurity}>Private PIN access.</div>
     </>
   );
 }
