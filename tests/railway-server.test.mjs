@@ -37,6 +37,7 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(html, /api\/invite\/\$\{encodeURIComponent\(invitationToken\)\}\/rsvp/);
   assert.match(html, /countdown-panel/);
   assert.match(html, /vinyl-record--paused/);
+  assert.match(html, /fetchpriority="high"/);
   assert.match(html, /device-shell/);
   assert.match(html, /device-camera/);
   assert.match(html, /window\.addEventListener\("pageshow", initializeOnce\)/);

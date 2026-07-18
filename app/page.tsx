@@ -271,6 +271,7 @@ function IntroVideo({
             src="/vinyl-record.png"
             alt=""
             aria-hidden="true"
+            fetchPriority="high"
           />
           <button
             type="button"
