@@ -709,7 +709,6 @@ video {
 .countdown-panel {
   position: absolute;
   z-index: 4;
-  left: 50%;
   top: var(--rsvp-countdown-top, 80.5%);
   left: var(--rsvp-countdown-left, 10%);
   width: var(--rsvp-countdown-width, 80%);
@@ -720,7 +719,7 @@ video {
   background: url("/%20countdown.png") center / cover no-repeat;
   color: #59694e;
   text-align: center;
-  transform: translateX(-50%) rotate(var(--rsvp-countdown-rotation, 0deg));
+  transform: rotate(var(--rsvp-countdown-rotation, 0deg));
   box-shadow: none;
 }
 
