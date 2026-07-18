@@ -37,7 +37,7 @@ const MAXIMUM_HEIGHT: Record<RsvpLayoutKey, number> = {
   yes: 18,
   no: 18,
   submit: 18,
-  countdown: 32,
+  countdown: 22,
 };
 
 function finiteNumber(value: unknown, fallback: number) {
@@ -59,11 +59,15 @@ export function normalizeRsvpLayout(value: unknown): RsvpLayout {
   return Object.fromEntries(RSVP_LAYOUT_KEYS.map((key) => {
     const fallback = DEFAULT_RSVP_LAYOUT[key];
     const candidate = input[key] || {};
+    const rawHeight = finiteNumber(candidate.height, fallback.height);
+    const height = key === "countdown" && rawHeight > MAXIMUM_HEIGHT[key]
+      ? fallback.height
+      : rawHeight;
     const box: RsvpLayoutBox = {
       top: rounded(clamp(finiteNumber(candidate.top, fallback.top), 0, 98.5)),
       left: rounded(clamp(finiteNumber(candidate.left, fallback.left), -10, 105)),
       width: rounded(clamp(finiteNumber(candidate.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
-      height: rounded(clamp(finiteNumber(candidate.height, fallback.height), MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
+      height: rounded(clamp(height, MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
       rotation: rounded(clamp(finiteNumber(candidate.rotation, fallback.rotation), -45, 45)),
     };
     if (key === "name" || key === "notes" || key === "submit") {

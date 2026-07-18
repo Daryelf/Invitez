@@ -753,7 +753,7 @@ video {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   position: absolute;
-  top: 58%;
+  top: 53%;
   left: 14%;
   width: 72%;
   margin: 0;
@@ -774,11 +774,11 @@ video {
 .countdown-grid strong {
   color: #59694e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.5rem, 6.2vw, 2.9rem);
+  font-size: clamp(1.25rem, 5.4vw, 2.4rem);
   font-weight: 400;
   font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: -0.04em;
-  line-height: 0.88;
+  line-height: 0.78;
   text-shadow: 0 1px 0 #fff;
 }
 
@@ -1082,7 +1082,7 @@ video {
   }
 
   .countdown-grid strong {
-    font-size: 2.25rem;
+    font-size: 2rem;
   }
 }
 

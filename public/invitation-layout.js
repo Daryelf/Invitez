@@ -18,7 +18,7 @@
     submit: { width: 5, height: 0.7 },
     countdown: { width: 25, height: 4 },
   };
-  const MAXIMUM_HEIGHT = { name: 18, notes: 18, yes: 18, no: 18, submit: 18, countdown: 32 };
+  const MAXIMUM_HEIGHT = { name: 18, notes: 18, yes: 18, no: 18, submit: 18, countdown: 22 };
   const LABELS = { name: "Name", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit", countdown: "Countdown card" };
 
   function clamp(value, minimum, maximum) {
@@ -40,11 +40,13 @@
     return Object.fromEntries(KEYS.map((key) => {
       const fallback = DEFAULT_LAYOUT[key];
       const candidate = input[key] && typeof input[key] === "object" ? input[key] : {};
+      const rawHeight = number(candidate.height, fallback.height);
+      const height = key === "countdown" && rawHeight > MAXIMUM_HEIGHT[key] ? fallback.height : rawHeight;
       const box = {
         top: rounded(clamp(number(candidate.top, fallback.top), 0, 98.5)),
         left: rounded(clamp(number(candidate.left, fallback.left), -10, 105)),
         width: rounded(clamp(number(candidate.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
-        height: rounded(clamp(number(candidate.height, fallback.height), MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
+        height: rounded(clamp(height, MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
         rotation: rounded(clamp(number(candidate.rotation, fallback.rotation), -45, 45)),
       };
       if (key === "name" || key === "notes" || key === "submit") {
