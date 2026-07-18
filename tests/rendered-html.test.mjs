@@ -41,7 +41,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /164% 215%/);
   assert.match(source, /top: 53%/);
   assert.match(source, /--rsvp-countdown-height, 8%/);
-  assert.match(source, /--rsvp-countdown-top, 90\.25%/);
+  assert.match(source, /--rsvp-countdown-top, 91\.25%/);
   assert.match(source, /--rsvp-countdown-left, 11\.36%/);
   assert.match(source, /--rsvp-countdown-top/);
   assert.match(source, /transform: rotate\(var\(--rsvp-countdown-rotation, 0deg\)\)/);
