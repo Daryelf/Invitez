@@ -59,4 +59,5 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(server, /after-hours-party\.adventraa\.chatgpt\.site\/event-day/);
   assert.match(styles, /@media \(min-width: 700px\)/);
   assert.match(styles, /\[hidden\][\s\S]*display: none !important/);
+  assert.match(styles, /url\("\/%20countdown\.png"\)/);
 });

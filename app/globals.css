@@ -708,30 +708,15 @@ video {
   left: 50%;
   bottom: clamp(20px, 4vw, 44px);
   width: min(calc(100% - 38px), 590px);
-  padding: clamp(42px, 8vw, 58px) clamp(18px, 5vw, 38px) clamp(22px, 5vw, 34px);
-  border: 2px solid rgba(126, 142, 102, 0.72);
-  border-radius: 34px 34px 48px 48px;
-  background:
-    repeating-linear-gradient(0deg, rgba(132, 111, 76, 0.025) 0 1px, transparent 1px 4px),
-    linear-gradient(145deg, #fffaf0 0%, #f8efdf 100%);
+  aspect-ratio: 1.9 / 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: url("/%20countdown.png") center / cover no-repeat;
   color: #59694e;
   text-align: center;
   transform: translateX(-50%) rotate(-0.35deg);
-  box-shadow:
-    0 0 0 6px rgba(255, 249, 238, 0.94),
-    0 0 0 8px rgba(221, 164, 176, 0.72),
-    0 16px 32px rgba(83, 72, 55, 0.2);
-  isolation: isolate;
-}
-
-.countdown-panel::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 9px;
-  border: 1px solid rgba(221, 164, 176, 0.56);
-  border-radius: 26px 26px 40px 40px;
-  pointer-events: none;
+  box-shadow: none;
 }
 
 .countdown-kicker,
@@ -742,6 +727,11 @@ video {
   text-transform: uppercase;
 }
 
+.countdown-bloom,
+.countdown-bow {
+  display: none;
+}
+
 .countdown-kicker {
   position: relative;
   z-index: 2;
@@ -750,6 +740,7 @@ video {
   font-size: clamp(0.72rem, 2.5vw, 1rem);
   font-weight: 600;
   letter-spacing: 0.2em;
+  display: none;
 }
 
 .countdown-grid {
@@ -757,15 +748,19 @@ video {
   z-index: 2;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  width: min(100%, 520px);
-  margin: 0 auto clamp(18px, 4vw, 26px);
+  position: absolute;
+  top: 58%;
+  left: 14%;
+  width: 72%;
+  margin: 0;
+  transform: translateY(-50%);
 }
 
 .countdown-grid > div {
   display: grid;
-  gap: 8px;
+  gap: 0;
   padding: 0 12px;
-  border-right: 1px solid rgba(221, 164, 176, 0.72);
+  border-right: 0;
 }
 
 .countdown-grid > div:last-child {
@@ -775,7 +770,7 @@ video {
 .countdown-grid strong {
   color: #59694e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.7rem, 7vw, 3.2rem);
+  font-size: clamp(1.5rem, 6.2vw, 2.9rem);
   font-weight: 400;
   font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: -0.04em;
@@ -788,6 +783,7 @@ video {
   font-size: clamp(0.48rem, 1.8vw, 0.68rem);
   font-weight: 600;
   letter-spacing: 0.14em;
+  display: none;
 }
 
 .countdown-date {
@@ -796,6 +792,7 @@ video {
   color: #7b896d;
   font-size: clamp(0.62rem, 2.2vw, 0.82rem);
   letter-spacing: 0.09em;
+  display: none;
 }
 
 .countdown-date span {
@@ -1075,11 +1072,11 @@ video {
   .countdown-panel {
     bottom: 28px;
     width: calc(100% - 38px);
-    padding: 48px 22px 26px;
+    padding: 0;
   }
 
   .countdown-grid strong {
-    font-size: 2rem;
+    font-size: 2.25rem;
   }
 }
 
