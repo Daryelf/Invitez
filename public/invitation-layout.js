@@ -8,7 +8,7 @@
     yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
     no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
     submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
-    countdown: { top: 84.614, left: 5.97, width: 80, height: 8, rotation: 0 },
+    countdown: { top: 92, left: 5.97, width: 80, height: 8, rotation: 0 },
   };
   const MINIMUM_SIZE = {
     name: { width: 8, height: 0.7 },
@@ -41,7 +41,7 @@
       const fallback = DEFAULT_LAYOUT[key];
       const candidate = input[key] && typeof input[key] === "object" ? input[key] : {};
       const usesPreviousCountdownDefault = key === "countdown"
-        && (number(candidate.top, Number.NaN) === 83.614 || number(candidate.top, Number.NaN) === 89.5 || number(candidate.top, Number.NaN) === 90.25)
+        && [83.614, 84.614, 89.5, 90.25, 91.25].includes(number(candidate.top, Number.NaN))
         && (number(candidate.left, Number.NaN) === 4.61 || number(candidate.left, Number.NaN) === 10 || number(candidate.left, Number.NaN) === 11.36)
         && number(candidate.width, Number.NaN) === 80
         && number(candidate.height, Number.NaN) === 8;
