@@ -102,6 +102,8 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(layoutEditor, /handleName === "rotate"/);
   assert.match(layoutEditor, /Fields and Submit appearance/);
   assert.match(layoutEditor, /setControlFill/);
+  assert.match(layoutEditor, /Countdown card/);
+  assert.match(layoutEditor, /const countdown = options\.countdown/);
   assert.match(layoutEditor, /\["nw", "n", "ne", "e", "se", "s", "sw", "w", "rotate"\]/);
   assert.match(layoutEditor, /pointerdown/);
   assert.match(layoutEditor, /\/api\/admin\/layout/);

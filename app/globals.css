@@ -542,6 +542,10 @@ video {
   pointer-events: none;
 }
 
+.layout-editor-active .countdown-panel {
+  pointer-events: none;
+}
+
 .rsvp-layout-editor-box {
   position: absolute;
   z-index: 25;
@@ -706,16 +710,17 @@ video {
   position: absolute;
   z-index: 4;
   left: 50%;
-  bottom: clamp(20px, 4vw, 44px);
-  width: min(calc(100% - 38px), 590px);
-  aspect-ratio: 1.9 / 1;
+  top: var(--rsvp-countdown-top, 80.5%);
+  left: var(--rsvp-countdown-left, 10%);
+  width: var(--rsvp-countdown-width, 80%);
+  height: var(--rsvp-countdown-height, 17%);
   padding: 0;
   border: 0;
   border-radius: 0;
   background: url("/%20countdown.png") center / cover no-repeat;
   color: #59694e;
   text-align: center;
-  transform: translateX(-50%) rotate(-0.35deg);
+  transform: translateX(-50%) rotate(var(--rsvp-countdown-rotation, 0deg));
   box-shadow: none;
 }
 
@@ -1070,8 +1075,10 @@ video {
   }
 
   .countdown-panel {
-    bottom: 28px;
-    width: calc(100% - 38px);
+    top: var(--rsvp-countdown-top, 80.5%);
+    left: var(--rsvp-countdown-left, 10%);
+    width: var(--rsvp-countdown-width, 80%);
+    height: var(--rsvp-countdown-height, 17%);
     padding: 0;
   }
 

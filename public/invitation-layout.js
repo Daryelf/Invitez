@@ -1,13 +1,14 @@
 (function () {
   "use strict";
 
-  const KEYS = ["name", "notes", "yes", "no", "submit"];
+  const KEYS = ["name", "notes", "yes", "no", "submit", "countdown"];
   const DEFAULT_LAYOUT = {
     name: { top: 74.8, left: 14, width: 40, height: 1.6, rotation: -15, fill: "yellow" },
     notes: { top: 77.55, left: 19, width: 61, height: 1.6, rotation: -15, fill: "yellow" },
     yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
     no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
     submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
+    countdown: { top: 80.5, left: 10, width: 80, height: 17, rotation: 0 },
   };
   const MINIMUM_SIZE = {
     name: { width: 8, height: 0.7 },
@@ -15,8 +16,9 @@
     yes: { width: 3, height: 0.55 },
     no: { width: 3, height: 0.55 },
     submit: { width: 5, height: 0.7 },
+    countdown: { width: 25, height: 8 },
   };
-  const LABELS = { name: "Name", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit" };
+  const LABELS = { name: "Name", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit", countdown: "Countdown card" };
 
   function clamp(value, minimum, maximum) {
     return Math.min(maximum, Math.max(minimum, value));
@@ -107,8 +109,11 @@
       });
     }
 
+    const countdown = options.countdown || null;
+
     function update(nextLayout) {
       layout = applyLayout(form, nextLayout);
+      if (countdown) applyLayout(countdown, nextLayout);
       renderEditorBoxes();
     }
 

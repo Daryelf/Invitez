@@ -82,7 +82,7 @@
       <div class="device-home-indicator" aria-hidden="true"></div>
     </div>
 
-    <script src="/invitation-layout.js?v=4"></script>
+    <script src="/invitation-layout.js?v=5"></script>
     <script>
       const API_ORIGIN = "https://after-hours-party.adventraa.chatgpt.site";
       const OPENED_KEY = "invitez-opening-viewed";
@@ -98,6 +98,7 @@
       const vinyl = document.querySelector("#vinyl-record");
       const vinylToggle = document.querySelector("#vinyl-toggle");
       const rsvpForm = document.querySelector("#rsvp-form");
+      const countdownPanel = document.querySelector("#details");
       const rsvpSubmit = document.querySelector("#rsvp-submit");
       const rsvpStatus = document.querySelector("#rsvp-submit-status");
       const confirmation = document.querySelector("#rsvp-confirmation");
@@ -112,6 +113,7 @@
       const rsvpLayoutController = window.InvitezLayout.createRsvpLayoutController({
         form: rsvpForm,
         apiOrigin: API_ORIGIN,
+        countdown: countdownPanel,
       });
       let vinylPaused = false;
       let guestContext = null;

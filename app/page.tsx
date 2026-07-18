@@ -41,6 +41,18 @@ const eventTime = new Date("2026-10-03T19:00:00-04:00").getTime();
 
 function Countdown() {
   const [remaining, setRemaining] = useState<CountdownValue | null>(null);
+  const [layout, setLayout] = useState(DEFAULT_RSVP_LAYOUT);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/invitation-layout", { cache: "no-store", signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Layout unavailable")))
+      .then((result: { layout?: unknown }) => setLayout(normalizeRsvpLayout(result.layout)))
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) setLayout(DEFAULT_RSVP_LAYOUT);
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -63,7 +75,7 @@ function Countdown() {
   const format = (value: number) => String(value).padStart(2, "0");
 
   return (
-    <div className="countdown-panel" id="details" aria-label="Countdown to October 3 at 7 PM">
+    <div className="countdown-panel" id="details" style={rsvpLayoutVariables(layout) as CSSProperties} aria-label="Countdown to October 3 at 7 PM">
       <div className="countdown-bloom countdown-bloom--left" aria-hidden="true">
         <span /><span /><span /><span /><span /><i />
       </div>

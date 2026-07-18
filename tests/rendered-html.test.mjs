@@ -38,7 +38,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /autoplay-poster/);
   assert.match(source, /countdown-panel/);
   assert.match(source, /url\("\/%20countdown\.png"\)/);
-  assert.match(source, /aspect-ratio: 1\.9 \/ 1/);
+  assert.match(source, /--rsvp-countdown-top/);
   assert.match(source, /\.countdown-kicker[\s\S]*display: none/);
   assert.match(source, /\.countdown-grid span[\s\S]*display: none/);
   assert.match(source, /RSVPHotspots/);
