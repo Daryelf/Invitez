@@ -19,7 +19,7 @@ export const DEFAULT_RSVP_LAYOUT: RsvpLayout = {
   yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
   no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
   submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
-  countdown: { top: 80.5, left: 10, width: 80, height: 17, rotation: 0 },
+  countdown: { top: 89.5, left: 10, width: 80, height: 8, rotation: 0 },
 };
 
 const MINIMUM_SIZE: Record<RsvpLayoutKey, Pick<RsvpLayoutBox, "width" | "height">> = {
@@ -37,7 +37,7 @@ const MAXIMUM_HEIGHT: Record<RsvpLayoutKey, number> = {
   yes: 18,
   no: 18,
   submit: 18,
-  countdown: 22,
+  countdown: 14,
 };
 
 function finiteNumber(value: unknown, fallback: number) {
