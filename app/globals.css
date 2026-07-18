@@ -63,7 +63,7 @@ video {
 .rsvp-confirmation-card {
   position: absolute;
   z-index: 9;
-  top: calc(75% - 20px);
+  top: calc(75% - 40px);
   left: calc(10% + 5px);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -124,8 +124,8 @@ video {
   overflow: hidden;
   color: #29473d;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(0.82rem, 3.35vw, 1.16rem);
-  font-weight: 600;
+  font-size: clamp(1rem, 4.3vw, 1.48rem);
+  font-weight: 700;
   line-height: 1.12;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -135,9 +135,9 @@ video {
   overflow: hidden;
   color: #60775f;
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: clamp(0.58rem, 2.45vw, 0.88rem);
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: clamp(0.78rem, 3.35vw, 1.12rem);
+  font-weight: 700;
+  line-height: 1.22;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

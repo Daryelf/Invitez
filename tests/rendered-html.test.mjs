@@ -101,7 +101,9 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /CompactRSVPConfirmation/);
   assert.match(source, /className="rsvp-confirmation-card"/);
   assert.match(source, /Your RSVP is in/);
-  assert.match(source, /font-size: clamp\(0\.58rem, 2\.45vw, 0\.88rem\)/);
+  assert.match(source, /top: calc\(75% - 40px\)/);
+  assert.match(source, /font-size: clamp\(1rem, 4\.3vw, 1\.48rem\)/);
+  assert.match(source, /font-size: clamp\(0\.78rem, 3\.35vw, 1\.12rem\)/);
   assert.doesNotMatch(source, /rsvp-confirmation-copy small/);
   assert.match(source, /invitation\??\.scrollTo\(\{ top: invitation\.scrollHeight/);
   assert.match(source, /form\.reset\(\)/);
