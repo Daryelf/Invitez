@@ -61,8 +61,6 @@
           <div class="rsvp-confirmation-copy">
             <strong>Your RSVP is in</strong>
             <span id="confirmation-message">Your response was saved.</span>
-            <small id="confirmation-detail"></small>
-            <small id="confirmation-venue"></small>
           </div>
         </aside>
 
@@ -236,8 +234,6 @@
         document.querySelector("#confirmation-message").textContent = attending
           ? `See you there, ${guestName}!`
           : `Thank you, ${guestName}.`;
-        document.querySelector("#confirmation-detail").textContent = `${attending ? "Attending" : "Not attending"} · ${event.eventDate} · ${event.eventTime}`;
-        document.querySelector("#confirmation-venue").textContent = event.venue || "";
       }
 
       async function initializeInvitation() {

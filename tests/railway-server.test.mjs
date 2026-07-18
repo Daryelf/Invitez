@@ -47,7 +47,7 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(html, /showConfirmation/);
   assert.match(html, /rsvp-confirmation/);
   assert.match(html, /Your RSVP is in/);
-  assert.match(html, /confirmation-detail/);
+  assert.doesNotMatch(html, /confirmation-detail|confirmation-venue/);
   assert.match(html, /invitation\.scrollTo\(\{ top: invitation\.scrollHeight/);
   assert.match(html, /rsvpForm\.reset\(\)/);
   assert.doesNotMatch(html, /id="update-rsvp"|>Edit<\/button>/);

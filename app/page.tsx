@@ -330,7 +330,6 @@ function CompactRSVPConfirmation({ confirmation }: {
   confirmation: ConfirmationData;
 }) {
   const attending = confirmation.guest.status === "attending";
-  const event = confirmation.event;
 
   return (
     <aside className="rsvp-confirmation-card" role="status" aria-live="polite" aria-label="RSVP confirmation">
@@ -338,8 +337,6 @@ function CompactRSVPConfirmation({ confirmation }: {
       <div className="rsvp-confirmation-copy">
         <strong>Your RSVP is in</strong>
         <span>{attending ? `See you there, ${confirmation.guest.name}!` : `Thank you, ${confirmation.guest.name}.`}</span>
-        <small>{attending ? "Attending" : "Not attending"} · {event.eventDate} · {event.eventTime}</small>
-        <small>{event.venue}</small>
       </div>
     </aside>
   );
