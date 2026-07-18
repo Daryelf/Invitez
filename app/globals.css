@@ -716,7 +716,7 @@ video {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: url("/%20countdown.png") center / cover no-repeat;
+  background: url("/%20countdown.png") center / 164% 215% no-repeat;
   color: #59694e;
   text-align: center;
   transform: rotate(var(--rsvp-countdown-rotation, 0deg));

@@ -16,8 +16,9 @@
     yes: { width: 3, height: 0.55 },
     no: { width: 3, height: 0.55 },
     submit: { width: 5, height: 0.7 },
-    countdown: { width: 25, height: 8 },
+    countdown: { width: 25, height: 4 },
   };
+  const MAXIMUM_HEIGHT = { name: 18, notes: 18, yes: 18, no: 18, submit: 18, countdown: 32 };
   const LABELS = { name: "Name", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit", countdown: "Countdown card" };
 
   function clamp(value, minimum, maximum) {
@@ -43,7 +44,7 @@
         top: rounded(clamp(number(candidate.top, fallback.top), 0, 98.5)),
         left: rounded(clamp(number(candidate.left, fallback.left), -10, 105)),
         width: rounded(clamp(number(candidate.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
-        height: rounded(clamp(number(candidate.height, fallback.height), MINIMUM_SIZE[key].height, 18)),
+        height: rounded(clamp(number(candidate.height, fallback.height), MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
         rotation: rounded(clamp(number(candidate.rotation, fallback.rotation), -45, 45)),
       };
       if (key === "name" || key === "notes" || key === "submit") {
