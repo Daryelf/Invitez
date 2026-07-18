@@ -8,7 +8,7 @@
     yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
     no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
     submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
-    countdown: { top: 89.5, left: 10, width: 80, height: 8, rotation: 0 },
+    countdown: { top: 90.25, left: 11.36, width: 80, height: 8, rotation: 0 },
   };
   const MINIMUM_SIZE = {
     name: { width: 8, height: 0.7 },
@@ -40,14 +40,20 @@
     return Object.fromEntries(KEYS.map((key) => {
       const fallback = DEFAULT_LAYOUT[key];
       const candidate = input[key] && typeof input[key] === "object" ? input[key] : {};
-      const rawHeight = number(candidate.height, fallback.height);
+      const usesPreviousCountdownDefault = key === "countdown"
+        && number(candidate.top, Number.NaN) === 89.5
+        && number(candidate.left, Number.NaN) === 10
+        && number(candidate.width, Number.NaN) === 80
+        && number(candidate.height, Number.NaN) === 8;
+      const source = usesPreviousCountdownDefault ? {} : candidate;
+      const rawHeight = number(source.height, fallback.height);
       const height = key === "countdown" && rawHeight > MAXIMUM_HEIGHT[key] ? fallback.height : rawHeight;
       const box = {
-        top: rounded(clamp(number(candidate.top, fallback.top), 0, 98.5)),
-        left: rounded(clamp(number(candidate.left, fallback.left), -10, 105)),
-        width: rounded(clamp(number(candidate.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
+        top: rounded(clamp(number(source.top, fallback.top), 0, 98.5)),
+        left: rounded(clamp(number(source.left, fallback.left), -10, 105)),
+        width: rounded(clamp(number(source.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
         height: rounded(clamp(height, MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
-        rotation: rounded(clamp(number(candidate.rotation, fallback.rotation), -45, 45)),
+        rotation: rounded(clamp(number(source.rotation, fallback.rotation), -45, 45)),
       };
       if (key === "name" || key === "notes" || key === "submit") {
         box.fill = candidate.fill === "transparent" || (key === "submit" && candidate.fill === undefined && legacyTransparent)

@@ -19,7 +19,7 @@ export const DEFAULT_RSVP_LAYOUT: RsvpLayout = {
   yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
   no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
   submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
-  countdown: { top: 89.5, left: 10, width: 80, height: 8, rotation: 0 },
+  countdown: { top: 90.25, left: 11.36, width: 80, height: 8, rotation: 0 },
 };
 
 const MINIMUM_SIZE: Record<RsvpLayoutKey, Pick<RsvpLayoutBox, "width" | "height">> = {
@@ -59,16 +59,22 @@ export function normalizeRsvpLayout(value: unknown): RsvpLayout {
   return Object.fromEntries(RSVP_LAYOUT_KEYS.map((key) => {
     const fallback = DEFAULT_RSVP_LAYOUT[key];
     const candidate = input[key] || {};
-    const rawHeight = finiteNumber(candidate.height, fallback.height);
+    const usesPreviousCountdownDefault = key === "countdown"
+      && finiteNumber(candidate.top, Number.NaN) === 89.5
+      && finiteNumber(candidate.left, Number.NaN) === 10
+      && finiteNumber(candidate.width, Number.NaN) === 80
+      && finiteNumber(candidate.height, Number.NaN) === 8;
+    const source = usesPreviousCountdownDefault ? {} : candidate;
+    const rawHeight = finiteNumber(source.height, fallback.height);
     const height = key === "countdown" && rawHeight > MAXIMUM_HEIGHT[key]
       ? fallback.height
       : rawHeight;
     const box: RsvpLayoutBox = {
-      top: rounded(clamp(finiteNumber(candidate.top, fallback.top), 0, 98.5)),
-      left: rounded(clamp(finiteNumber(candidate.left, fallback.left), -10, 105)),
-      width: rounded(clamp(finiteNumber(candidate.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
+      top: rounded(clamp(finiteNumber(source.top, fallback.top), 0, 98.5)),
+      left: rounded(clamp(finiteNumber(source.left, fallback.left), -10, 105)),
+      width: rounded(clamp(finiteNumber(source.width, fallback.width), MINIMUM_SIZE[key].width, 110)),
       height: rounded(clamp(height, MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
-      rotation: rounded(clamp(finiteNumber(candidate.rotation, fallback.rotation), -45, 45)),
+      rotation: rounded(clamp(finiteNumber(source.rotation, fallback.rotation), -45, 45)),
     };
     if (key === "name" || key === "notes" || key === "submit") {
       box.fill = candidate.fill === "transparent" || (key === "submit" && candidate.fill === undefined && legacyTransparent)

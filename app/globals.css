@@ -709,8 +709,8 @@ video {
 .countdown-panel {
   position: absolute;
   z-index: 4;
-  top: var(--rsvp-countdown-top, 89.5%);
-  left: var(--rsvp-countdown-left, 10%);
+  top: var(--rsvp-countdown-top, 90.25%);
+  left: var(--rsvp-countdown-left, 11.36%);
   width: var(--rsvp-countdown-width, 80%);
   height: var(--rsvp-countdown-height, 8%);
   padding: 0;
@@ -1074,8 +1074,8 @@ video {
   }
 
   .countdown-panel {
-    top: var(--rsvp-countdown-top, 89.5%);
-    left: var(--rsvp-countdown-left, 10%);
+    top: var(--rsvp-countdown-top, 90.25%);
+    left: var(--rsvp-countdown-left, 11.36%);
     width: var(--rsvp-countdown-width, 80%);
     height: var(--rsvp-countdown-height, 8%);
     padding: 0;
