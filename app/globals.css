@@ -360,15 +360,27 @@ video {
 }
 
 .rsvp-name-hotspot input {
-  border-color: var(--rsvp-name-border, #ffd400);
-  background: var(--rsvp-name-background, rgba(255, 212, 0, 0.58));
-  box-shadow: var(--rsvp-name-shadow, 0 0 0 2px rgba(255, 255, 255, 0.72));
+  border-color: var(--rsvp-name-border, transparent);
+  background: var(--rsvp-name-background, transparent);
+  box-shadow: var(--rsvp-name-shadow, none);
+}
+
+.rsvp-adults-hotspot input {
+  border-color: var(--rsvp-adults-border, transparent);
+  background: var(--rsvp-adults-background, transparent);
+  box-shadow: var(--rsvp-adults-shadow, none);
+}
+
+.rsvp-kids-hotspot input {
+  border-color: var(--rsvp-kids-border, transparent);
+  background: var(--rsvp-kids-background, transparent);
+  box-shadow: var(--rsvp-kids-shadow, none);
 }
 
 .rsvp-notes-hotspot textarea {
-  border-color: var(--rsvp-notes-border, #ffd400);
-  background: var(--rsvp-notes-background, rgba(255, 212, 0, 0.58));
-  box-shadow: var(--rsvp-notes-shadow, 0 0 0 2px rgba(255, 255, 255, 0.72));
+  border-color: var(--rsvp-notes-border, transparent);
+  background: var(--rsvp-notes-background, transparent);
+  box-shadow: var(--rsvp-notes-shadow, none);
 }
 
 .rsvp-text-hotspot input:focus,
@@ -384,6 +396,18 @@ video {
   box-shadow: var(--rsvp-name-focus-shadow, 0 0 0 3px rgba(255, 176, 0, 0.32));
 }
 
+.rsvp-adults-hotspot input:focus {
+  border-color: var(--rsvp-adults-focus-border, rgba(36, 59, 49, 0.58));
+  background: var(--rsvp-adults-focus-background, rgba(255, 255, 255, 0.18));
+  box-shadow: var(--rsvp-adults-focus-shadow, 0 0 0 2px rgba(255, 255, 255, 0.65));
+}
+
+.rsvp-kids-hotspot input:focus {
+  border-color: var(--rsvp-kids-focus-border, rgba(36, 59, 49, 0.58));
+  background: var(--rsvp-kids-focus-background, rgba(255, 255, 255, 0.18));
+  box-shadow: var(--rsvp-kids-focus-shadow, 0 0 0 2px rgba(255, 255, 255, 0.65));
+}
+
 .rsvp-notes-hotspot textarea:focus {
   border-color: var(--rsvp-notes-focus-border, #ffb000);
   background: var(--rsvp-notes-focus-background, rgba(255, 226, 70, 0.76));
@@ -396,33 +420,61 @@ video {
 }
 
 .rsvp-name-hotspot {
-  top: var(--rsvp-name-top, 74.8%);
-  left: var(--rsvp-name-left, 14%);
-  width: var(--rsvp-name-width, 40%);
-  height: var(--rsvp-name-height, 1.6%);
+  top: var(--rsvp-name-top, 74.1%);
+  left: var(--rsvp-name-left, 11.5%);
+  width: var(--rsvp-name-width, 42%);
+  height: var(--rsvp-name-height, 1.65%);
   transform: rotate(var(--rsvp-name-rotation, -15deg));
 }
 
+.rsvp-adults-hotspot {
+  top: var(--rsvp-adults-top, 76.2%);
+  left: var(--rsvp-adults-left, 38.6%);
+  width: var(--rsvp-adults-width, 14%);
+  height: var(--rsvp-adults-height, 1.15%);
+  transform: rotate(var(--rsvp-adults-rotation, -15deg));
+}
+
+.rsvp-kids-hotspot {
+  top: var(--rsvp-kids-top, 77.45%);
+  left: var(--rsvp-kids-left, 40%);
+  width: var(--rsvp-kids-width, 14%);
+  height: var(--rsvp-kids-height, 1.15%);
+  transform: rotate(var(--rsvp-kids-rotation, -15deg));
+}
+
+.rsvp-guest-count-hotspot input {
+  padding: 0.05em 0.25em;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.rsvp-guest-count-hotspot input::-webkit-inner-spin-button,
+.rsvp-guest-count-hotspot input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
 .rsvp-notes-hotspot {
-  top: var(--rsvp-notes-top, 77.55%);
-  left: var(--rsvp-notes-left, 19%);
-  width: var(--rsvp-notes-width, 61%);
-  height: var(--rsvp-notes-height, 1.6%);
+  top: var(--rsvp-notes-top, 74%);
+  left: var(--rsvp-notes-left, 57%);
+  width: var(--rsvp-notes-width, 41%);
+  height: var(--rsvp-notes-height, 2.8%);
   transform: rotate(var(--rsvp-notes-rotation, -15deg));
 }
 
 .rsvp-submit-hotspot {
   position: absolute;
-  top: var(--rsvp-submit-top, 74.8%);
-  left: var(--rsvp-submit-left, 83.5%);
-  width: var(--rsvp-submit-width, 24%);
-  height: var(--rsvp-submit-height, 1.8%);
+  top: var(--rsvp-submit-top, 75.15%);
+  left: var(--rsvp-submit-left, 77%);
+  width: var(--rsvp-submit-width, 20%);
+  height: var(--rsvp-submit-height, 1.9%);
   padding: 0;
-  border: 2px solid var(--rsvp-submit-border, #ffd400);
+  border: 2px solid var(--rsvp-submit-border, transparent);
   border-radius: 8px;
-  background: var(--rsvp-submit-background, rgba(255, 212, 0, 0.58));
+  background: var(--rsvp-submit-background, transparent);
   color: transparent;
-  box-shadow: var(--rsvp-submit-shadow, 0 0 0 2px rgba(255, 255, 255, 0.72));
+  box-shadow: var(--rsvp-submit-shadow, none);
   transform: rotate(var(--rsvp-submit-rotation, -15deg));
   transform-origin: center;
   cursor: pointer;

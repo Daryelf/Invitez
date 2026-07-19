@@ -11,7 +11,7 @@ test("contains only the two gated invitation videos", async () => {
   const source = `${page}\n${layout}\n${styles}`;
 
   assert.match(source, /\/first\.mp4/);
-  assert.match(source, /\/secondv2\.mp4/);
+  assert.match(source, /\/newsecond\.mp4/);
   assert.match(source, /className=.*intro-video/i);
   assert.match(source, /aria-label="Open invitation"/i);
   assert.match(source, /OPEN INVITATION/);
@@ -30,7 +30,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /object-fit: contain/);
   assert.match(source, /aspect-ratio: 736 \/ 4088/);
   assert.match(source, /video\.addEventListener\("canplay", playIfVisible\)/);
-  assert.match(source, /src="\/secondv2\.mp4"[\s\S]*autoPlay[\s\S]*preload="auto"/);
+  assert.match(source, /src="\/newsecond\.mp4"[\s\S]*autoPlay[\s\S]*preload="auto"/);
   assert.match(source, /poster="\/first-poster\.png"/);
   assert.match(source, /poster="\/secondv2-poster\.png"/);
   assert.match(source, /showAutoplayFallback/);
@@ -50,6 +50,11 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /RSVPHotspots/);
   assert.match(source, /name="name"/);
   assert.match(source, /name="additionalInformation"/);
+  assert.match(source, /name="adults"/);
+  assert.match(source, /name="kids"/);
+  assert.match(source, /rsvp-adults-hotspot/);
+  assert.match(source, /rsvp-kids-hotspot/);
+  assert.match(source, /partySize/);
   assert.match(source, /name="attending" value="yes"/);
   assert.match(source, /name="attending" value="no"/);
   assert.match(source, /className="rsvp-submit-hotspot"/);
@@ -83,6 +88,8 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /left: 66\.5%/);
   assert.match(source, /id="details"/);
   assert.match(source, /--rsvp-name-top/);
+  assert.match(source, /--rsvp-adults-top/);
+  assert.match(source, /--rsvp-kids-top/);
   assert.match(source, /--rsvp-notes-top/);
   assert.match(source, /--rsvp-submit-top/);
   assert.match(source, /--rsvp-name-rotation/);

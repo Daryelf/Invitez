@@ -114,6 +114,18 @@ function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: Confirmatio
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
+    const attending = formData.get("attending");
+    const adults = Math.min(20, Math.max(0, Number(formData.get("adults")) || 0));
+    const kids = Math.min(20, Math.max(0, Number(formData.get("kids")) || 0));
+    const partySize = Math.min(20, adults + kids);
+    const adultsInput = form.elements.namedItem("adults") as HTMLInputElement | null;
+    if (attending === "yes" && partySize < 1) {
+      adultsInput?.setCustomValidity("Enter at least one adult or child");
+      adultsInput?.reportValidity();
+      setSubmitState("error");
+      return;
+    }
+    adultsInput?.setCustomValidity("");
     setSubmitState("submitting");
 
     try {
@@ -122,7 +134,11 @@ function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: Confirmatio
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.get("name"),
-          attending: formData.get("attending"),
+          attending,
+          adults,
+          kids,
+          guests: partySize,
+          partySize,
           additionalInformation: formData.get("additionalInformation"),
         }),
       });
@@ -131,7 +147,7 @@ function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: Confirmatio
       const confirmation: ConfirmationData = {
         guest: {
           name: String(formData.get("name") || "Guest"),
-          status: formData.get("attending") === "yes" ? "attending" : "declined",
+          status: attending === "yes" ? "attending" : "declined",
         },
         event: result.event || fallbackEvent,
       };
@@ -170,6 +186,14 @@ function RSVPHotspots({ onConfirmed }: { onConfirmed: (confirmation: Confirmatio
           <span className="sr-only">Sorry, I cannot make it</span>
         </label>
       </fieldset>
+      <label className="rsvp-text-hotspot rsvp-guest-count-hotspot rsvp-adults-hotspot">
+        <span className="sr-only">Number of adults attending</span>
+        <input type="number" name="adults" min="0" max="20" step="1" inputMode="numeric" placeholder="0" aria-label="Number of adults attending" />
+      </label>
+      <label className="rsvp-text-hotspot rsvp-guest-count-hotspot rsvp-kids-hotspot">
+        <span className="sr-only">Number of children attending</span>
+        <input type="number" name="kids" min="0" max="20" step="1" inputMode="numeric" placeholder="0" aria-label="Number of children attending" />
+      </label>
       <label className="rsvp-text-hotspot rsvp-notes-hotspot">
         <span className="sr-only">Additional information</span>
         <textarea name="additionalInformation" placeholder="Additional information" />
@@ -455,7 +479,7 @@ export default function Home() {
         ) : (
           <IntroVideo
             id="intro-second"
-            src="/secondv2.mp4"
+            src="/newsecond.mp4"
             poster="/secondv2-poster.png"
             title="After Hours invitation transition"
             autoPlay

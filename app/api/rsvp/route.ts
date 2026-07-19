@@ -5,6 +5,8 @@ type RSVPInput = {
   name?: string;
   email?: string;
   guests?: string | number;
+  adults?: string | number;
+  kids?: string | number;
   notes?: string;
   attending?: string;
   additionalInformation?: string;
@@ -56,12 +58,20 @@ export async function POST(request: Request) {
   const name = input.name?.trim();
   const attending = input.attending === "yes" ? "yes" : input.attending === "no" ? "no" : "";
   const email = input.email?.trim().toLowerCase() || `guest-${crypto.randomUUID()}@invite.local`;
-  const guests = attending === "no" ? 0 : Math.min(4, Math.max(1, Number(input.guests) || 1));
   if (!name || !attending) return json(request, { error: "Name and attendance are required" }, { status: 400 });
+  const hasGuestBreakdown = input.adults !== undefined || input.kids !== undefined;
+  const adults = attending === "no" ? 0 : Math.min(20, Math.max(0, Number(input.adults) || 0));
+  const kids = attending === "no" ? 0 : Math.min(20, Math.max(0, Number(input.kids) || 0));
+  const requestedGuests = hasGuestBreakdown ? adults + kids : Number(input.guests) || 1;
+  if (attending === "yes" && requestedGuests < 1) return json(request, { error: "Enter at least one adult or child" }, { status: 400 });
+  const guests = attending === "no" ? 0 : Math.min(20, Math.max(1, requestedGuests));
   if (!env.DB) return json(request, { error: "RSVP storage is not configured yet" }, { status: 503 });
 
   const additionalInformation = input.additionalInformation?.trim() || input.notes?.trim() || "";
-  const notes = `[Attending: ${attending}]${additionalInformation ? ` ${additionalInformation}` : ""}`;
+  const guestBreakdown = hasGuestBreakdown && attending === "yes" ? `Adults: ${adults} · Kids: ${kids}` : "";
+  const trackedInformation = [guestBreakdown, additionalInformation].filter(Boolean).join(" · ");
+  const trackedPartySize = attending === "no" ? 0 : guests;
+  const notes = `[Attending: ${attending}]${trackedInformation ? ` ${trackedInformation}` : ""}`;
 
   const now = new Date().toISOString();
   try {
@@ -78,7 +88,7 @@ export async function POST(request: Request) {
         additional_information = ?, first_opened_at = COALESCE(first_opened_at, ?),
         last_opened_at = ?, opened_count = CASE WHEN opened_count < 1 THEN 1 ELSE opened_count END,
         responded_at = ?, updated_at = ? WHERE id = ?`)
-        .bind(trackedStatus, Math.max(1, guests), additionalInformation || null, now, now, now, now, trackedGuest.id)
+        .bind(trackedStatus, trackedPartySize, trackedInformation || null, now, now, now, now, trackedGuest.id)
         .run();
     } else {
       await getD1().prepare(`INSERT INTO invitation_guests (
@@ -90,9 +100,9 @@ export async function POST(request: Request) {
           crypto.randomUUID().replaceAll("-", ""),
           name,
           input.email?.trim().toLowerCase() || null,
-          Math.max(1, guests),
+          trackedPartySize,
           trackedStatus,
-          additionalInformation || null,
+          trackedInformation || null,
           now,
           now,
           now,

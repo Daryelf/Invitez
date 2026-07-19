@@ -1,4 +1,4 @@
-export const RSVP_LAYOUT_KEYS = ["name", "notes", "yes", "no", "submit", "countdown"] as const;
+export const RSVP_LAYOUT_KEYS = ["name", "adults", "kids", "notes", "yes", "no", "submit", "countdown"] as const;
 
 export type RsvpLayoutKey = (typeof RSVP_LAYOUT_KEYS)[number];
 
@@ -14,16 +14,20 @@ export type RsvpLayoutBox = {
 export type RsvpLayout = Record<RsvpLayoutKey, RsvpLayoutBox>;
 
 export const DEFAULT_RSVP_LAYOUT: RsvpLayout = {
-  name: { top: 74.8, left: 14, width: 40, height: 1.6, rotation: -15, fill: "yellow" },
-  notes: { top: 77.55, left: 19, width: 61, height: 1.6, rotation: -15, fill: "yellow" },
+  name: { top: 74.1, left: 11.5, width: 42, height: 1.65, rotation: -15, fill: "transparent" },
+  adults: { top: 76.2, left: 38.6, width: 14, height: 1.15, rotation: -15, fill: "transparent" },
+  kids: { top: 77.45, left: 40, width: 14, height: 1.15, rotation: -15, fill: "transparent" },
+  notes: { top: 74, left: 57, width: 41, height: 2.8, rotation: -15, fill: "transparent" },
   yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
   no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
-  submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
+  submit: { top: 75.15, left: 77, width: 20, height: 1.9, rotation: -15, fill: "transparent" },
   countdown: { top: 92, left: 5.97, width: 80, height: 8, rotation: 0 },
 };
 
 const MINIMUM_SIZE: Record<RsvpLayoutKey, Pick<RsvpLayoutBox, "width" | "height">> = {
   name: { width: 8, height: 0.7 },
+  adults: { width: 5, height: 0.7 },
+  kids: { width: 5, height: 0.7 },
   notes: { width: 8, height: 0.7 },
   yes: { width: 3, height: 0.55 },
   no: { width: 3, height: 0.55 },
@@ -33,6 +37,8 @@ const MINIMUM_SIZE: Record<RsvpLayoutKey, Pick<RsvpLayoutBox, "width" | "height"
 
 const MAXIMUM_HEIGHT: Record<RsvpLayoutKey, number> = {
   name: 18,
+  adults: 18,
+  kids: 18,
   notes: 18,
   yes: 18,
   no: 18,
@@ -55,10 +61,11 @@ function rounded(value: number) {
 
 export function normalizeRsvpLayout(value: unknown): RsvpLayout {
   const input = value && typeof value === "object" ? value as Partial<Record<RsvpLayoutKey, Partial<RsvpLayoutBox>>> : {};
+  const usesPreviousCardLayout = !input.adults && !input.kids;
   const legacyTransparent = input.name?.fill === "transparent" && input.notes?.fill === "transparent";
   return Object.fromEntries(RSVP_LAYOUT_KEYS.map((key) => {
     const fallback = DEFAULT_RSVP_LAYOUT[key];
-    const candidate = input[key] || {};
+    const candidate = usesPreviousCardLayout && key !== "countdown" ? {} : input[key] || {};
     const usesPreviousCountdownDefault = key === "countdown"
       && [83.614, 84.614, 89.5, 90.25, 91.25].includes(finiteNumber(candidate.top, Number.NaN))
       && (finiteNumber(candidate.left, Number.NaN) === 4.61 || finiteNumber(candidate.left, Number.NaN) === 10 || finiteNumber(candidate.left, Number.NaN) === 11.36)
@@ -76,8 +83,10 @@ export function normalizeRsvpLayout(value: unknown): RsvpLayout {
       height: rounded(clamp(height, MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
       rotation: rounded(clamp(finiteNumber(source.rotation, fallback.rotation), -45, 45)),
     };
-    if (key === "name" || key === "notes" || key === "submit") {
-      box.fill = candidate.fill === "transparent" || (key === "submit" && candidate.fill === undefined && legacyTransparent)
+    if (key === "name" || key === "adults" || key === "kids" || key === "notes" || key === "submit") {
+      box.fill = source.fill === "transparent"
+        || (source.fill === undefined && fallback.fill === "transparent")
+        || (key === "submit" && source.fill === undefined && legacyTransparent)
         ? "transparent"
         : "yellow";
     }
@@ -94,7 +103,7 @@ export function rsvpLayoutVariables(layout: RsvpLayout) {
     variables[`--rsvp-${key}-width`] = `${box.width}%`;
     variables[`--rsvp-${key}-height`] = `${box.height}%`;
     variables[`--rsvp-${key}-rotation`] = `${box.rotation}deg`;
-    if (key === "name" || key === "notes" || key === "submit") {
+    if (key === "name" || key === "adults" || key === "kids" || key === "notes" || key === "submit") {
       const transparent = box.fill === "transparent";
       variables[`--rsvp-${key}-background`] = transparent ? "transparent" : "rgba(255, 212, 0, 0.58)";
       variables[`--rsvp-${key}-border`] = transparent ? "transparent" : "#ffd400";

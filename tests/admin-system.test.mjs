@@ -103,6 +103,8 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(layoutEditor, /Fields and Submit appearance/);
   assert.match(layoutEditor, /setControlFill/);
   assert.match(layoutEditor, /Countdown card/);
+  assert.match(layoutEditor, /Adults/);
+  assert.match(layoutEditor, /Kids/);
   assert.match(layoutEditor, /const countdown = options\.countdown/);
   assert.match(layoutEditor, /MAXIMUM_HEIGHT/);
   assert.match(layoutEditor, /\["nw", "n", "ne", "e", "se", "s", "sw", "w", "rotate"\]/);
@@ -138,6 +140,8 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(inviteApi, /opened_count = opened_count \+ 1/);
   assert.match(inviteApi, /previouslyOpened/);
   assert.match(rsvpApi, /status = input\.attending === "yes" \? "attending"/);
+  assert.match(rsvpApi, /Adults:/);
+  assert.match(rsvpApi, /Kids:/);
   assert.match(eventApi, /isEventDayActive/);
   assert.match(styles, /\.rsvp-confirmation-card/);
   assert.doesNotMatch(styles, /\.confirmation-screen/);
@@ -172,4 +176,6 @@ test("general invitation responses are included in dashboard tracking", async ()
   assert.match(rsvpApi, /UPDATE invitation_guests SET status/);
   assert.match(rsvpApi, /additional_information/);
   assert.match(rsvpApi, /opened_count/);
+  assert.match(rsvpApi, /requestedGuests/);
+  assert.match(rsvpApi, /Adults:/);
 });

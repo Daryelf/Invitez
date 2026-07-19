@@ -1,25 +1,29 @@
 (function () {
   "use strict";
 
-  const KEYS = ["name", "notes", "yes", "no", "submit", "countdown"];
+  const KEYS = ["name", "adults", "kids", "notes", "yes", "no", "submit", "countdown"];
   const DEFAULT_LAYOUT = {
-    name: { top: 74.8, left: 14, width: 40, height: 1.6, rotation: -15, fill: "yellow" },
-    notes: { top: 77.55, left: 19, width: 61, height: 1.6, rotation: -15, fill: "yellow" },
+    name: { top: 74.1, left: 11.5, width: 42, height: 1.65, rotation: -15, fill: "transparent" },
+    adults: { top: 76.2, left: 38.6, width: 14, height: 1.15, rotation: -15, fill: "transparent" },
+    kids: { top: 77.45, left: 40, width: 14, height: 1.15, rotation: -15, fill: "transparent" },
+    notes: { top: 74, left: 57, width: 41, height: 2.8, rotation: -15, fill: "transparent" },
     yes: { top: 73.6, left: 55.8, width: 6.7, height: 1.2, rotation: 0 },
     no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
-    submit: { top: 74.8, left: 83.5, width: 24, height: 1.8, rotation: -15, fill: "yellow" },
+    submit: { top: 75.15, left: 77, width: 20, height: 1.9, rotation: -15, fill: "transparent" },
     countdown: { top: 92, left: 5.97, width: 80, height: 8, rotation: 0 },
   };
   const MINIMUM_SIZE = {
     name: { width: 8, height: 0.7 },
+    adults: { width: 5, height: 0.7 },
+    kids: { width: 5, height: 0.7 },
     notes: { width: 8, height: 0.7 },
     yes: { width: 3, height: 0.55 },
     no: { width: 3, height: 0.55 },
     submit: { width: 5, height: 0.7 },
     countdown: { width: 25, height: 4 },
   };
-  const MAXIMUM_HEIGHT = { name: 18, notes: 18, yes: 18, no: 18, submit: 18, countdown: 14 };
-  const LABELS = { name: "Name", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit", countdown: "Countdown card" };
+  const MAXIMUM_HEIGHT = { name: 18, adults: 18, kids: 18, notes: 18, yes: 18, no: 18, submit: 18, countdown: 14 };
+  const LABELS = { name: "Name", adults: "Adults", kids: "Kids", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit", countdown: "Countdown card" };
 
   function clamp(value, minimum, maximum) {
     return Math.min(maximum, Math.max(minimum, value));
@@ -36,10 +40,13 @@
 
   function normalizeLayout(value) {
     const input = value && typeof value === "object" ? value : {};
+    const usesPreviousCardLayout = !input.adults && !input.kids;
     const legacyTransparent = input.name?.fill === "transparent" && input.notes?.fill === "transparent";
     return Object.fromEntries(KEYS.map((key) => {
       const fallback = DEFAULT_LAYOUT[key];
-      const candidate = input[key] && typeof input[key] === "object" ? input[key] : {};
+      const candidate = usesPreviousCardLayout && key !== "countdown"
+        ? {}
+        : input[key] && typeof input[key] === "object" ? input[key] : {};
       const usesPreviousCountdownDefault = key === "countdown"
         && [83.614, 84.614, 89.5, 90.25, 91.25].includes(number(candidate.top, Number.NaN))
         && (number(candidate.left, Number.NaN) === 4.61 || number(candidate.left, Number.NaN) === 10 || number(candidate.left, Number.NaN) === 11.36)
@@ -55,8 +62,10 @@
         height: rounded(clamp(height, MINIMUM_SIZE[key].height, MAXIMUM_HEIGHT[key])),
         rotation: rounded(clamp(number(source.rotation, fallback.rotation), -45, 45)),
       };
-      if (key === "name" || key === "notes" || key === "submit") {
-        box.fill = candidate.fill === "transparent" || (key === "submit" && candidate.fill === undefined && legacyTransparent)
+      if (key === "name" || key === "adults" || key === "kids" || key === "notes" || key === "submit") {
+        box.fill = source.fill === "transparent"
+          || (source.fill === undefined && fallback.fill === "transparent")
+          || (key === "submit" && source.fill === undefined && legacyTransparent)
           ? "transparent"
           : "yellow";
       }
@@ -73,7 +82,7 @@
       form.style.setProperty(`--rsvp-${key}-width`, `${box.width}%`);
       form.style.setProperty(`--rsvp-${key}-height`, `${box.height}%`);
       form.style.setProperty(`--rsvp-${key}-rotation`, `${box.rotation}deg`);
-      if (key === "name" || key === "notes" || key === "submit") {
+      if (key === "name" || key === "adults" || key === "kids" || key === "notes" || key === "submit") {
         const transparent = box.fill === "transparent";
         form.style.setProperty(`--rsvp-${key}-background`, transparent ? "transparent" : "rgba(255, 212, 0, 0.58)");
         form.style.setProperty(`--rsvp-${key}-border`, transparent ? "transparent" : "#ffd400");
@@ -112,7 +121,7 @@
         box.style.transform = value.rotation ? `rotate(${value.rotation}deg)` : "none";
       });
       fillButtons.forEach((button, fill) => {
-        const selected = layout.name.fill === fill && layout.notes.fill === fill && layout.submit.fill === fill;
+        const selected = layout.name.fill === fill && layout.adults.fill === fill && layout.kids.fill === fill && layout.notes.fill === fill && layout.submit.fill === fill;
         button.classList.toggle("is-active", selected);
         button.setAttribute("aria-pressed", String(selected));
       });
@@ -166,6 +175,8 @@
       update({
         ...layout,
         name: { ...layout.name, fill },
+        adults: { ...layout.adults, fill },
+        kids: { ...layout.kids, fill },
         notes: { ...layout.notes, fill },
         submit: { ...layout.submit, fill },
       });
