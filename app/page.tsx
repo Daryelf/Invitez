@@ -242,7 +242,20 @@ function IntroVideo({
   onRSVPConfirmed?: (confirmation: ConfirmationData) => void;
   confirmation?: ConfirmationData | null;
 }) {
+  const [vinylLayout, setVinylLayout] = useState(DEFAULT_RSVP_LAYOUT);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (!fullFrame) return;
+    const controller = new AbortController();
+    fetch("/api/invitation-layout", { cache: "no-store", signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Layout unavailable")))
+      .then((result: { layout?: unknown }) => setVinylLayout(normalizeRsvpLayout(result.layout)))
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) setVinylLayout(DEFAULT_RSVP_LAYOUT);
+      });
+    return () => controller.abort();
+  }, [fullFrame]);
   const [showAutoplayFallback, setShowAutoplayFallback] = useState(false);
 
   useEffect(() => {
@@ -299,16 +312,22 @@ function IntroVideo({
   }
 
   return (
-    <section className={`intro-panel ${fullFrame ? "intro-panel--full" : ""}`} id={id}>
+    <section
+      className={`intro-panel ${fullFrame ? "intro-panel--full" : ""}`}
+      id={id}
+      style={fullFrame ? rsvpLayoutVariables(vinylLayout) as CSSProperties : undefined}
+    >
       {fullFrame ? (
-        <div className="vinyl-stage">
-          <img
-            className={`vinyl-record ${vinylPaused ? "vinyl-record--paused" : ""}`}
-            src="/vinyl-record.png"
-            alt=""
-            aria-hidden="true"
-            fetchPriority="high"
-          />
+        <>
+          <div className="vinyl-stage">
+            <img
+              className={`vinyl-record ${vinylPaused ? "vinyl-record--paused" : ""}`}
+              src="/vinyl-record.png"
+              alt=""
+              aria-hidden="true"
+              fetchPriority="high"
+            />
+          </div>
           <button
             type="button"
             className="vinyl-toggle"
@@ -318,7 +337,7 @@ function IntroVideo({
           >
             <span aria-hidden="true" />
           </button>
-        </div>
+        </>
       ) : null}
       <video
         className={`intro-video ${fullFrame ? "intro-video--full" : ""}`}

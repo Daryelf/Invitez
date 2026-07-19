@@ -1,4 +1,4 @@
-export const RSVP_LAYOUT_KEYS = ["name", "adults", "kids", "notes", "yes", "no", "submit", "countdown"] as const;
+export const RSVP_LAYOUT_KEYS = ["name", "adults", "kids", "notes", "yes", "no", "submit", "countdown", "vinyl"] as const;
 
 export type RsvpLayoutKey = (typeof RSVP_LAYOUT_KEYS)[number];
 
@@ -22,6 +22,7 @@ export const DEFAULT_RSVP_LAYOUT: RsvpLayout = {
   no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
   submit: { top: 75.15, left: 77, width: 20, height: 1.9, rotation: -15, fill: "transparent" },
   countdown: { top: 92, left: 5.97, width: 80, height: 8, rotation: 0 },
+  vinyl: { top: 25.75, left: 62, width: 9, height: 1.62, rotation: 0 },
 };
 
 const MINIMUM_SIZE: Record<RsvpLayoutKey, Pick<RsvpLayoutBox, "width" | "height">> = {
@@ -33,6 +34,7 @@ const MINIMUM_SIZE: Record<RsvpLayoutKey, Pick<RsvpLayoutBox, "width" | "height"
   no: { width: 3, height: 0.55 },
   submit: { width: 5, height: 0.7 },
   countdown: { width: 25, height: 4 },
+  vinyl: { width: 4, height: 0.7 },
 };
 
 const MAXIMUM_HEIGHT: Record<RsvpLayoutKey, number> = {
@@ -44,6 +46,7 @@ const MAXIMUM_HEIGHT: Record<RsvpLayoutKey, number> = {
   no: 18,
   submit: 18,
   countdown: 14,
+  vinyl: 8,
 };
 
 function finiteNumber(value: unknown, fallback: number) {

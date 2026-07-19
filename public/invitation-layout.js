@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const KEYS = ["name", "adults", "kids", "notes", "yes", "no", "submit", "countdown"];
+  const KEYS = ["name", "adults", "kids", "notes", "yes", "no", "submit", "countdown", "vinyl"];
   const DEFAULT_LAYOUT = {
     name: { top: 74.1, left: 11.5, width: 42, height: 1.65, rotation: -15, fill: "transparent" },
     adults: { top: 76.2, left: 38.6, width: 14, height: 1.15, rotation: -15, fill: "transparent" },
@@ -11,6 +11,7 @@
     no: { top: 72.12, left: 77.5, width: 6.7, height: 1.2, rotation: 0 },
     submit: { top: 75.15, left: 77, width: 20, height: 1.9, rotation: -15, fill: "transparent" },
     countdown: { top: 92, left: 5.97, width: 80, height: 8, rotation: 0 },
+    vinyl: { top: 25.75, left: 62, width: 9, height: 1.62, rotation: 0 },
   };
   const MINIMUM_SIZE = {
     name: { width: 8, height: 0.7 },
@@ -21,9 +22,10 @@
     no: { width: 3, height: 0.55 },
     submit: { width: 5, height: 0.7 },
     countdown: { width: 25, height: 4 },
+    vinyl: { width: 4, height: 0.7 },
   };
-  const MAXIMUM_HEIGHT = { name: 18, adults: 18, kids: 18, notes: 18, yes: 18, no: 18, submit: 18, countdown: 14 };
-  const LABELS = { name: "Name", adults: "Adults", kids: "Kids", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit", countdown: "Countdown card" };
+  const MAXIMUM_HEIGHT = { name: 18, adults: 18, kids: 18, notes: 18, yes: 18, no: 18, submit: 18, countdown: 14, vinyl: 8 };
+  const LABELS = { name: "Name", adults: "Adults", kids: "Kids", notes: "Additional info", yes: "Yes", no: "No", submit: "Submit", countdown: "Countdown card", vinyl: "Vinyl play / pause" };
 
   function clamp(value, minimum, maximum) {
     return Math.min(maximum, Math.max(minimum, value));
@@ -128,10 +130,12 @@
     }
 
     const countdown = options.countdown || null;
+    const surface = options.surface || null;
 
     function update(nextLayout) {
       layout = applyLayout(form, nextLayout);
       if (countdown) applyLayout(countdown, nextLayout);
+      if (surface) applyLayout(surface, nextLayout);
       renderEditorBoxes();
     }
 

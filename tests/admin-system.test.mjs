@@ -103,6 +103,7 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(layoutEditor, /Fields and Submit appearance/);
   assert.match(layoutEditor, /setControlFill/);
   assert.match(layoutEditor, /Countdown card/);
+  assert.match(layoutEditor, /Vinyl play \/ pause/);
   assert.match(layoutEditor, /Adults/);
   assert.match(layoutEditor, /Kids/);
   assert.match(layoutEditor, /const countdown = options\.countdown/);
