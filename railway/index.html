@@ -7,7 +7,7 @@
     <meta name="description" content="Open your private digital invitation." />
     <title>Invitez | Digital Invitation</title>
     <link rel="icon" href="/favicon.svg" />
-    <link rel="stylesheet" href="/globals.css?v=railway-12" />
+    <link rel="stylesheet" href="/globals.css?v=railway-13" />
   </head>
   <body>
     <div class="device-shell invitation-pending" id="device-shell">
@@ -24,7 +24,7 @@
       <section class="intro-panel intro-panel--full" id="intro-second" hidden>
         <div class="vinyl-stage">
           <img class="vinyl-record" id="vinyl-record" src="/vinyl-record.png" alt="" aria-hidden="true" fetchpriority="high" />
-          <button type="button" class="vinyl-toggle" id="vinyl-toggle" aria-label="Pause vinyl" aria-pressed="false"><span aria-hidden="true">❚❚</span></button>
+          <button type="button" class="vinyl-toggle" id="vinyl-toggle" aria-label="Pause vinyl" aria-pressed="false"><span aria-hidden="true"></span></button>
         </div>
 
         <video class="intro-video intro-video--full" id="second-video" src="/newsecond.mp4" poster="/secondv2-poster.png" autoplay muted playsinline preload="auto" aria-label="Invitation details"></video>
@@ -143,7 +143,6 @@
         vinyl.classList.toggle("vinyl-record--paused", paused);
         vinylToggle.setAttribute("aria-pressed", String(paused));
         vinylToggle.setAttribute("aria-label", paused ? "Play vinyl" : "Pause vinyl");
-        vinylToggle.querySelector("span").textContent = paused ? "▶" : "❚❚";
       }
 
       function playVideoOrShowFallback(video, fallback) {

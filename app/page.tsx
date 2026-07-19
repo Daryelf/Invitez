@@ -316,7 +316,7 @@ function IntroVideo({
             aria-pressed={vinylPaused}
             onClick={onVinylToggle}
           >
-            <span aria-hidden="true">{vinylPaused ? "▶" : "❚❚"}</span>
+            <span aria-hidden="true" />
           </button>
         </div>
       ) : null}
