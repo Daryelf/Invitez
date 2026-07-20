@@ -451,7 +451,7 @@ export default function AdminClient({
               </div>
               <div className={styles.editorGuide}>
                 <strong>Layout editor is on</strong>
-                <span>Move, resize, or rotate every RSVP control and the vinyl play/pause icon. Choose Yellow or Transparent for the fields and Submit button. Changes save automatically.</span>
+                <span>Move, resize, or rotate every RSVP control, the vinyl icon, and the View Map button. Choose Yellow or Transparent for the fields and Submit button. Changes save automatically.</span>
               </div>
               <div className={styles.segmented}>
                 <button className={previewSize === "mobile" ? styles.segmentActive : ""} onClick={() => setPreviewSize("mobile")}>Mobile</button>

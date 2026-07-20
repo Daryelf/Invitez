@@ -355,6 +355,29 @@ video {
   outline-offset: 3px;
 }
 
+.map-link-hotspot {
+  position: absolute;
+  z-index: 5;
+  top: var(--rsvp-map-top, 40.4%);
+  left: var(--rsvp-map-left, 36.5%);
+  width: var(--rsvp-map-width, 40%);
+  height: var(--rsvp-map-height, 1.45%);
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: transparent;
+  font-size: 0;
+  transform: rotate(var(--rsvp-map-rotation, 0deg));
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.map-link-hotspot:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.96);
+  outline-offset: 3px;
+}
+
 @keyframes vinyl-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -642,6 +665,10 @@ video {
 }
 
 .layout-editor-active .vinyl-toggle {
+  pointer-events: none;
+}
+
+.layout-editor-active .map-link-hotspot {
   pointer-events: none;
 }
 

@@ -337,6 +337,15 @@ function IntroVideo({
           >
             <span aria-hidden="true" />
           </button>
+          <a
+            className="map-link-hotspot"
+            href="https://www.google.com/maps/search/?api=1&query=372%20Middle%20Rd%2C%20Hazlet%2C%20NJ%2007730"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="View 372 Middle Road, Hazlet, New Jersey in Google Maps"
+          >
+            View location in Google Maps
+          </a>
         </>
       ) : null}
       <video

@@ -82,6 +82,8 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /aria-label=\{vinylPaused \? "Play vinyl" : "Pause vinyl"\}/);
   assert.match(source, /vinyl-toggle\[aria-pressed="true"\] span::before/);
   assert.match(source, /vinyl-toggle\[aria-pressed="false"\] span::after/);
+  assert.match(source, /372%20Middle%20Rd%2C%20Hazlet%2C%20NJ%2007730/);
+  assert.match(source, /map-link-hotspot/);
   assert.match(source, /Nicki Minaj - Moment 4 Life.*NickiMinajAtVEVO\.mp3/);
   assert.match(source, /song\.play\(\).*setVinylPaused\(false\)/);
   assert.match(source, /song\.pause\(\);[\s\S]*setVinylPaused\(true\)/);
