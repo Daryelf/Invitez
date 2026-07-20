@@ -75,6 +75,7 @@ test("contains only the two gated invitation videos", async () => {
   assert.match(source, /fetchPriority="high"/);
   assert.match(source, /vinyl-spin 7s linear infinite/);
   assert.match(source, /vinyl-grow-in 800ms/);
+  assert.match(source, /vinyl-control-grow-in 800ms[\s\S]*1s both/);
   assert.match(source, /transform: translate\(-50%, -50%\) scale\(0\.18\)/);
   assert.match(source, /rotate\(360deg\)/);
   assert.match(source, /vinyl-record--paused/);
