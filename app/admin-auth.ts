@@ -144,7 +144,7 @@ async function clearLoginFailures(email: string) {
 }
 
 export async function authenticateAdminPin(pin: string) {
-  const expectedPin = (await getAccessPins()).designerPin;
+  const expectedPin = (await getAccessPins()).adminPin;
   if (!/^\d{4}$/.test(expectedPin)) {
     throw new AdminAuthError("PIN login is temporarily unavailable.", 503);
   }
@@ -168,7 +168,7 @@ export async function authenticateAdminPin(pin: string) {
   throw new AdminAuthError("That PIN is incorrect.", 401);
 }
 
-export async function matchesAdminPin(pin: string) {
+export async function matchesDesignerPin(pin: string) {
   const expectedPin = (await getAccessPins()).designerPin;
   return /^\d{4}$/.test(pin) && constantTimeEqual(await sha256(pin), await sha256(expectedPin));
 }

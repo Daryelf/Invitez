@@ -65,10 +65,12 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(client, /Designer 🔒/);
   assert.match(client, /Event day 🔒/);
   assert.match(client, /SectionLock/);
-  assert.match(sectionUnlock, /matchesAdminPin/);
+  assert.match(sectionUnlock, /matchesDesignerPin/);
   assert.match(sectionUnlock, /eventDayPin/);
   assert.match(client, /AccessPinSettings/);
-  assert.match(client, /Designer &amp; Admin PIN/);
+  assert.match(client, /Admin login PIN/);
+  assert.match(client, /Designer PIN/);
+  assert.match(client, /Admin login PIN/);
   assert.doesNotMatch(client, /No reply|Unopened|Opened [^·]|openedCount/);
   assert.match(client, /Not going/);
   assert.match(client, /Additional information/);
