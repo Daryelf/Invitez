@@ -28,9 +28,6 @@ export default async function AdminPage() {
   }
 
   return (
-    <AdminClient
-      adminName={access.user.displayName}
-      signOutPath="/api/admin/auth/logout"
-    />
+    <AdminClient />
   );
 }
