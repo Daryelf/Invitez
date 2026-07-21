@@ -63,6 +63,8 @@ test("Railway entrypoint serves the complete invitation without Cloudflare impor
   assert.match(html, /Open your private digital invitation/);
   assert.match(html, /https:\/\/www\.invitez\.xyz\/rsvp/);
   assert.match(html, /https:\/\/www\.invitez\.xyz\/og-rsvp\.jpg/);
+  assert.match(html, /content="You Have Mail"/);
+  assert.doesNotMatch(html, /You’re Invited \| Invitez/);
   assert.match(html, /window\.location\.pathname === "\/rsvp"/);
   assert.ok(server.includes('if (/^\\/i\\/[^/]+\\/?$/.test(pathname))'));
   assert.doesNotMatch(server, /Location: "https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/admin"/);
