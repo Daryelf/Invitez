@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#141414" />
     <meta name="description" content="Open your private digital invitation." />
+    <meta property="og:title" content="You’re Invited | Invitez" />
+    <meta property="og:description" content="Open your invitation and RSVP." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.invitez.xyz/rsvp" />
+    <meta property="og:image" content="https://www.invitez.xyz/og-rsvp.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A premium floral invitation envelope" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="You’re Invited | Invitez" />
+    <meta name="twitter:description" content="Open your invitation and RSVP." />
+    <meta name="twitter:image" content="https://www.invitez.xyz/og-rsvp.jpg" />
     <title>Invitez | Digital Invitation</title>
     <link rel="icon" href="/favicon.svg" />
     <link rel="stylesheet" href="/globals.css?v=railway-16" />
@@ -118,7 +130,9 @@
       const tokenMatch = window.location.pathname.match(/^\/i\/([^/]+)\/?$/);
       const invitationToken = tokenMatch ? decodeURIComponent(tokenMatch[1]) : "";
       const query = new URLSearchParams(window.location.search);
-      const freshPreview = query.get("fresh") === "1";
+      const freshPreview = window.location.pathname === "/rsvp"
+        || window.location.pathname === "/rsvp/"
+        || query.get("fresh") === "1";
       const confirmationPreview = query.get("confirmation") === "1";
       const layoutEditorMode = query.get("editor") === "1";
       const rsvpLayoutController = window.InvitezLayout.createRsvpLayoutController({

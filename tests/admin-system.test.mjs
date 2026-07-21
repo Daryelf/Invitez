@@ -67,7 +67,7 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(client, /copyInvite/);
   assert.match(client, /Copy invitation link/);
   assert.match(client, /Invitation link copied/);
-  assert.match(client, /PUBLIC_INVITE_URL = "https:\/\/www\.invitez\.xyz\/\?fresh=1"/);
+  assert.match(client, /PUBLIC_INVITE_URL = "https:\/\/www\.invitez\.xyz\/rsvp"/);
   assert.doesNotMatch(client, /SMS|Twilio|Text invite|Open Messages|Mobile number/);
   assert.match(client, /document\.execCommand\("copy"\)/);
   assert.match(client, /Safari and embedded browsers/);

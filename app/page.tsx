@@ -442,7 +442,9 @@ export default function Home() {
           window.localStorage.removeItem("invitez-rsvp-confirmation");
         }
       } else {
-        const fresh = new URLSearchParams(window.location.search).get("fresh") === "1";
+        const fresh = window.location.pathname === "/rsvp"
+          || window.location.pathname === "/rsvp/"
+          || new URLSearchParams(window.location.search).get("fresh") === "1";
         setIntroStage(window.localStorage.getItem("invitez-opening-viewed") === "1" && !fresh ? "second" : "first");
       }
       window.scrollTo(0, 0);

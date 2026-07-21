@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 
@@ -21,6 +21,7 @@ const contentTypes = {
 
 function resolveRequestPath(pathname) {
   if (pathname === "/" || pathname === "/index.html") return join(root, "railway", "index.html");
+  if (pathname === "/rsvp" || pathname === "/rsvp/") return join(root, "railway", "index.html");
   if (/^\/i\/[^/]+\/?$/.test(pathname)) return join(root, "railway", "index.html");
   if (pathname === "/globals.css") return join(root, "app", "globals.css");
 
@@ -28,6 +29,17 @@ function resolveRequestPath(pathname) {
   const safePath = normalize(decoded);
   if (safePath.startsWith("..") || safePath.includes("/../")) return null;
   return join(publicRoot, safePath);
+}
+
+async function sendSocialPreview(request, response) {
+  const encoded = await readFile(join(publicRoot, "og-rsvp.jpg.b64"), "utf8");
+  const image = Buffer.from(encoded.replace(/\s+/g, ""), "base64");
+  response.writeHead(200, {
+    "Cache-Control": "public, max-age=86400, immutable",
+    "Content-Length": image.length,
+    "Content-Type": "image/jpeg",
+  });
+  response.end(request.method === "HEAD" ? undefined : image);
 }
 
 function canonicalInvitationPath(pathname) {
@@ -168,6 +180,10 @@ createServer(async (request, response) => {
     if (pathname === "/event-day" || pathname === "/event-day/") {
       response.writeHead(302, { Location: `https://after-hours-party.adventraa.chatgpt.site/event-day${requestUrl.search}` });
       response.end();
+      return;
+    }
+    if (pathname === "/og-rsvp.jpg") {
+      await sendSocialPreview(request, response);
       return;
     }
     const filePath = resolveRequestPath(pathname);

@@ -19,7 +19,7 @@ type DashboardData = {
   guests: Guest[];
 };
 
-const PUBLIC_INVITE_URL = "https://www.invitez.xyz/?fresh=1";
+const PUBLIC_INVITE_URL = "https://www.invitez.xyz/rsvp";
 
 const statusLabel: Record<Exclude<GuestStatus, "pending">, string> = {
   attending: "Attending",
@@ -263,8 +263,8 @@ export default function AdminClient({
                 <button className={previewSize === "web" ? styles.segmentActive : ""} onClick={() => setPreviewSize("web")}>Web / iPad</button>
               </div>
               <div className={styles.previewActions}>
-                <a className={styles.primaryButton} href="https://www.invitez.xyz/?fresh=1" target="_blank" rel="noreferrer">Open clean preview</a>
-                <a className={styles.secondaryButton} href="https://www.invitez.xyz/?fresh=1&preview=mobile" target="_blank" rel="noreferrer">Open phone preview</a>
+                <a className={styles.primaryButton} href="https://www.invitez.xyz/rsvp" target="_blank" rel="noreferrer">Open clean preview</a>
+                <a className={styles.secondaryButton} href="https://www.invitez.xyz/rsvp?preview=mobile" target="_blank" rel="noreferrer">Open phone preview</a>
               </div>
             </div>
             <div className={`${styles.previewStage} ${previewSize === "web" ? styles.previewWeb : ""}`}>
