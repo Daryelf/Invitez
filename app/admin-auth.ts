@@ -167,6 +167,11 @@ export async function authenticateAdminPin(pin: string) {
   throw new AdminAuthError("That PIN is incorrect.", 401);
 }
 
+export async function matchesAdminPin(pin: string) {
+  const expectedPin = runtimeEnvironment().ADMIN_PIN?.trim() || "7350";
+  return /^\d{4}$/.test(pin) && constantTimeEqual(await sha256(pin), await sha256(expectedPin));
+}
+
 export async function createAdminSession(emailInput: string) {
   await ensureAdminAuthSchema();
   const email = normalizedEmail(emailInput);

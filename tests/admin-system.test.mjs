@@ -7,7 +7,7 @@ async function source(path) {
 }
 
 test("Argentum Studio uses PIN-only login, clean invite links, and protected owner sessions", async () => {
-  const [auth, page, form, loginApi, logoutApi, client, guestApi, guestUpdateApi, smsApi, sms, layoutApi, publicLayoutApi, layoutEditor, schema, invitations, viteConfig] = await Promise.all([
+  const [auth, page, form, loginApi, logoutApi, client, guestApi, guestUpdateApi, smsApi, sms, layoutApi, publicLayoutApi, layoutEditor, schema, invitations, viteConfig, sectionUnlock] = await Promise.all([
     source("../app/admin-auth.ts"),
     source("../app/admin/page.tsx"),
     source("../app/admin/auth-form.tsx"),
@@ -24,6 +24,7 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
     source("../db/schema.ts"),
     source("../db/invitations.ts"),
     source("../vite.config.ts"),
+    source("../app/api/admin/section-unlock/route.ts"),
   ]);
   const adminSource = `${auth}\n${page}\n${form}\n${loginApi}\n${logoutApi}\n${client}\n${guestApi}\n${guestUpdateApi}\n${smsApi}`;
 
@@ -61,6 +62,11 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(client, /This space is reserved for the experience guests will use during the event/);
   assert.doesNotMatch(`${page}\n${form}\n${client}`, /Erika(?:&apos;|'|’)?s Sweet 16/);
   assert.doesNotMatch(client, /Creator account|sidebarFooter/);
+  assert.match(client, /Designer 🔒/);
+  assert.match(client, /Event day 🔒/);
+  assert.match(client, /SectionLock/);
+  assert.match(sectionUnlock, /matchesAdminPin/);
+  assert.match(sectionUnlock, /EVENT_DAY_PIN/);
   assert.doesNotMatch(client, /No reply|Unopened|Opened [^·]|openedCount/);
   assert.match(client, /Not going/);
   assert.match(client, /Additional information/);

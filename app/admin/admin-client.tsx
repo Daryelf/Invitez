@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./admin.module.css";
 
 type GuestStatus = "pending" | "attending" | "declined";
@@ -31,6 +31,22 @@ function shortDate(value: string | null) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 }
 
+function SectionLock({ section, title, onUnlock }: { section: "designer" | "event"; title: string; onUnlock: () => void }) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setError(""); setSubmitting(true);
+    try {
+      const response = await fetch("/api/admin/section-unlock", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ section, pin }) });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || "Could not unlock this section.");
+      onUnlock();
+    } catch (unlockError) { setError(unlockError instanceof Error ? unlockError.message : "Could not unlock this section."); setSubmitting(false); }
+  }
+  return <section className={styles.sectionLock}><div className={styles.sectionLockIcon}>⌑</div><p className={styles.eyebrow}>PIN protected</p><h2>{title} is locked</h2><p>Enter the four-digit PIN to open this section.</p><form onSubmit={submit}><input type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="••••" aria-label={`${title} PIN`} autoFocus required />{error ? <span role="alert">{error}</span> : null}<button className={styles.primaryButton} disabled={submitting}>{submitting ? "Unlocking…" : `Unlock ${title}`}</button></form></section>;
+}
+
 export default function AdminClient() {
   const [data, setData] = useState<DashboardData>({ guests: [] });
   const [loading, setLoading] = useState(true);
@@ -41,6 +57,8 @@ export default function AdminClient() {
   const [notice, setNotice] = useState("");
   const [previewSize, setPreviewSize] = useState<"mobile" | "web">("mobile");
   const [manualLink, setManualLink] = useState<{ url: string } | null>(null);
+  const [unlockedSections, setUnlockedSections] = useState<Set<"designer" | "event">>(new Set());
+  const unlockSection = (section: "designer" | "event") => setUnlockedSections((current) => new Set(current).add(section));
 
   const loadDashboard = useCallback(async () => {
     setError("");
@@ -144,7 +162,7 @@ export default function AdminClient() {
           {(["overview", "guests", "preview", "event"] as const).map((item) => (
             <button key={item} className={tab === item ? styles.activeNav : ""} onClick={() => setTab(item)}>
               <span aria-hidden="true">{item === "overview" ? "⌂" : item === "guests" ? "♙" : item === "preview" ? "▣" : "✦"}</span>
-              {item === "overview" ? "Studio" : item === "guests" ? "Responses" : item === "preview" ? "Designer" : "Event day"}
+              {item === "overview" ? "Studio" : item === "guests" ? "Responses" : item === "preview" ? "Designer 🔒" : "Event day 🔒"}
             </button>
           ))}
         </nav>
@@ -235,7 +253,8 @@ export default function AdminClient() {
           </section>
         ) : null}
 
-        {tab === "preview" ? (
+        {tab === "preview" && !unlockedSections.has("designer") ? <SectionLock section="designer" title="Designer" onUnlock={() => unlockSection("designer")} /> : null}
+        {tab === "preview" && unlockedSections.has("designer") ? (
           <section className={styles.previewLayout}>
             <div className={styles.previewControls}>
               <div>
@@ -262,7 +281,8 @@ export default function AdminClient() {
           </section>
         ) : null}
 
-        {tab === "event" ? (
+        {tab === "event" && !unlockedSections.has("event") ? <SectionLock section="event" title="Event Day" onUnlock={() => unlockSection("event")} /> : null}
+        {tab === "event" && unlockedSections.has("event") ? (
           <section className={styles.eventPlaceholder}>
             <div className={styles.eventPlaceholderIcon} aria-hidden="true">✦</div>
             <p className={styles.eyebrow}>Coming later</p>
