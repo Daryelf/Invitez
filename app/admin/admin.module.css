@@ -106,7 +106,7 @@
 .heroActions{display:flex;flex:0 0 auto;gap:9px}
 .studioHero .primaryButton{background:#8a78f2;color:#fff}
 .studioHero .secondaryButton{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;backdrop-filter:blur(8px)}
-.metricsGrid{gap:13px}
+.metricsGrid{grid-template-columns:repeat(3,minmax(160px,1fr));gap:13px}
 .metricCard{padding:20px;border-radius:18px;background:#fff}
 .metricCard strong{font-family:inherit;font-size:2.05rem;font-weight:740;letter-spacing:-.05em}
 .overviewColumns{grid-template-columns:minmax(0,1.35fr) repeat(2,minmax(240px,.62fr))}

@@ -59,7 +59,7 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(client, /Invitation designer/);
   assert.match(client, /This space is reserved for the experience guests will use during the event/);
   assert.doesNotMatch(`${page}\n${form}\n${client}`, /Erika(?:&apos;|'|’)?s Sweet 16/);
-  assert.match(client, /No reply/);
+  assert.doesNotMatch(client, /No reply|Unopened|Opened [^·]|openedCount/);
   assert.match(client, /Not going/);
   assert.match(client, /Additional information/);
   assert.match(client, /Export CSV/);

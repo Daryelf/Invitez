@@ -10,9 +10,6 @@ type Guest = {
   partySize: number;
   status: GuestStatus;
   additionalInformation: string;
-  firstOpenedAt: string | null;
-  lastOpenedAt: string | null;
-  openedCount: number;
   respondedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -24,8 +21,7 @@ type DashboardData = {
 
 const PUBLIC_INVITE_URL = "https://www.invitez.xyz/?fresh=1";
 
-const statusLabel: Record<GuestStatus, string> = {
-  pending: "No reply",
+const statusLabel: Record<Exclude<GuestStatus, "pending">, string> = {
   attending: "Attending",
   declined: "Not going",
 };
@@ -46,7 +42,7 @@ export default function AdminClient({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [tab, setTab] = useState<"overview" | "guests" | "preview" | "event">("overview");
-  const [filter, setFilter] = useState<"all" | GuestStatus | "unopened">("all");
+  const [filter, setFilter] = useState<"all" | "attending" | "declined">("all");
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [previewSize, setPreviewSize] = useState<"mobile" | "web">("mobile");
@@ -72,22 +68,19 @@ export default function AdminClient({
   }, [loadDashboard]);
 
   const metrics = useMemo(() => {
-    const total = data.guests.length;
-    const attending = data.guests.filter((guest) => guest.status === "attending");
+    const responses = data.guests.filter((guest) => guest.status !== "pending");
+    const attending = responses.filter((guest) => guest.status === "attending");
     return {
-      total,
-      opened: data.guests.filter((guest) => guest.openedCount > 0).length,
-      pending: data.guests.filter((guest) => guest.status === "pending").length,
+      total: responses.length,
       attending: attending.length,
-      declined: data.guests.filter((guest) => guest.status === "declined").length,
+      declined: responses.filter((guest) => guest.status === "declined").length,
       headcount: attending.reduce((sum, guest) => sum + guest.partySize, 0),
     };
   }, [data.guests]);
 
-  const visibleGuests = useMemo(() => data.guests.filter((guest) => {
+  const visibleGuests = useMemo(() => data.guests.filter((guest) => guest.status !== "pending").filter((guest) => {
     const matchesQuery = !query || `${guest.name} ${guest.additionalInformation}`.toLowerCase().includes(query.toLowerCase());
     const matchesFilter = filter === "all"
-      || (filter === "unopened" && guest.openedCount === 0)
       || guest.status === filter;
     return matchesQuery && matchesFilter;
   }), [data.guests, filter, query]);
@@ -199,9 +192,7 @@ export default function AdminClient({
             <section className={styles.metricsGrid}>
               {[
                 ["Responses", metrics.total, "All submitted RSVPs"],
-                ["Opened", metrics.opened, `${metrics.total - metrics.opened} unopened`],
                 ["Attending", metrics.attending, `${metrics.headcount} total people`],
-                ["No reply", metrics.pending, "Follow up needed"],
                 ["Not going", metrics.declined, "Declined responses"],
               ].map(([label, value, detail]) => <article className={styles.metricCard} key={String(label)}><span>{label}</span><strong>{value}</strong><small>{detail}</small></article>)}
             </section>
@@ -209,10 +200,10 @@ export default function AdminClient({
               <article className={styles.panel}>
                 <div className={styles.panelHeader}><div><p className={styles.eyebrow}>Live activity</p><h2>Latest guest updates</h2></div><button onClick={() => setTab("guests")}>See all</button></div>
                 <div className={styles.activityList}>
-                  {data.guests.slice(0, 6).map((guest) => (
-                    <div key={guest.id}><span className={`${styles.statusDot} ${styles[guest.status]}`} /><div><strong>{guest.name}</strong><small>{guest.respondedAt ? `${statusLabel[guest.status]} · ${shortDate(guest.respondedAt)}` : guest.firstOpenedAt ? `Opened · ${shortDate(guest.firstOpenedAt)}` : "Invitation not opened"}</small></div><em>{guest.openedCount ? `${guest.openedCount}×` : "—"}</em></div>
+                  {data.guests.filter((guest) => guest.status !== "pending").slice(0, 6).map((guest) => (
+                    <div key={guest.id}><span className={`${styles.statusDot} ${styles[guest.status]}`} /><div><strong>{guest.name}</strong><small>{statusLabel[guest.status as "attending" | "declined"]} · {shortDate(guest.respondedAt || guest.createdAt)}</small></div></div>
                   ))}
-                  {!data.guests.length ? <div className={styles.emptyState}><strong>No responses yet</strong><small>Copy the invitation link and send it to your guests.</small></div> : null}
+                  {!metrics.total ? <div className={styles.emptyState}><strong>No responses yet</strong><small>Copy the invitation link and send it to your guests.</small></div> : null}
                 </div>
               </article>
               <article className={[styles.panel, styles.deliveryCard].join(" ")}>
@@ -234,18 +225,18 @@ export default function AdminClient({
               <button className={styles.primaryButton} onClick={() => void copyInvite()}>Copy invitation link</button>
             </div>
             <div className={styles.guestToolbar}>
-              <div className={styles.filters}>{(["all", "attending", "pending", "declined", "unopened"] as const).map((item) => <button key={item} className={filter === item ? styles.activeFilter : ""} onClick={() => setFilter(item)}>{item === "all" ? `All ${metrics.total}` : item === "pending" ? `No reply ${metrics.pending}` : item === "attending" ? `Going ${metrics.attending}` : item === "declined" ? `Not going ${metrics.declined}` : "Unopened"}</button>)}</div>
+              <div className={styles.filters}>{(["all", "attending", "declined"] as const).map((item) => <button key={item} className={filter === item ? styles.activeFilter : ""} onClick={() => setFilter(item)}>{item === "all" ? `All ${metrics.total}` : item === "attending" ? `Going ${metrics.attending}` : `Not going ${metrics.declined}`}</button>)}</div>
               <div className={styles.guestTools}><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search guests" /><a href="/api/admin/export">Export CSV</a></div>
             </div>
             <div className={styles.tableWrap}>
               <table><thead><tr><th>Guest</th><th>Response</th><th>Party</th><th>Additional information</th><th>Last activity</th><th /></tr></thead>
                 <tbody>{visibleGuests.map((guest) => (
                   <tr key={guest.id}>
-                    <td><strong>{guest.name}</strong><small>{guest.openedCount ? `Opened ${guest.openedCount} time${guest.openedCount === 1 ? "" : "s"}` : "RSVP submission"}</small></td>
-                    <td><select value={guest.status} onChange={(event) => void updateGuest(guest.id, { status: event.target.value }, "Response updated")}><option value="pending">No reply</option><option value="attending">Attending</option><option value="declined">Not going</option></select></td>
+                    <td><strong>{guest.name}</strong><small>RSVP submission</small></td>
+                    <td><select value={guest.status} onChange={(event) => void updateGuest(guest.id, { status: event.target.value }, "Response updated")}><option value="attending">Attending</option><option value="declined">Not going</option></select></td>
                     <td><strong>{guest.partySize}</strong></td>
                     <td className={styles.notesCell}>{guest.additionalInformation || "—"}</td>
-                    <td><small>{shortDate(guest.respondedAt || guest.lastOpenedAt)}</small></td>
+                    <td><small>{shortDate(guest.respondedAt || guest.createdAt)}</small></td>
                     <td><button className={styles.deleteButton} onClick={() => void deleteGuest(guest)} aria-label={`Remove ${guest.name}`}>×</button></td>
                   </tr>
                 ))}</tbody>
