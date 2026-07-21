@@ -1,0 +1,4 @@
+import { getAccessPins, saveAccessPins } from "@/app/access-pins";
+import { requireAdminApi } from "@/app/admin-auth";
+export async function GET() { const auth = await requireAdminApi(); if (auth.response) return auth.response; return Response.json(await getAccessPins(), { headers: { "Cache-Control": "no-store" } }); }
+export async function PATCH(request: Request) { const auth = await requireAdminApi(); if (auth.response) return auth.response; const input = await request.json().catch(() => ({})) as { designerPin?: unknown; eventDayPin?: unknown }; try { const pins = await saveAccessPins({ designerPin: String(input.designerPin || ""), eventDayPin: String(input.eventDayPin || "") }); return Response.json({ ok: true, pins }); } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Could not save PINs." }, { status: 400 }); } }

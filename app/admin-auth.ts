@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { headers } from "next/headers";
 import { getD1 } from "@/db/invitations";
+import { getAccessPins } from "@/app/access-pins";
 
 const DEFAULT_OWNER_EMAIL = "gamingboi567@gmail.com";
 const ADMIN_DISPLAY_NAME = "Daryel";
@@ -143,7 +144,7 @@ async function clearLoginFailures(email: string) {
 }
 
 export async function authenticateAdminPin(pin: string) {
-  const expectedPin = runtimeEnvironment().ADMIN_PIN?.trim() || "7350";
+  const expectedPin = (await getAccessPins()).designerPin;
   if (!/^\d{4}$/.test(expectedPin)) {
     throw new AdminAuthError("PIN login is temporarily unavailable.", 503);
   }
@@ -168,7 +169,7 @@ export async function authenticateAdminPin(pin: string) {
 }
 
 export async function matchesAdminPin(pin: string) {
-  const expectedPin = runtimeEnvironment().ADMIN_PIN?.trim() || "7350";
+  const expectedPin = (await getAccessPins()).designerPin;
   return /^\d{4}$/.test(pin) && constantTimeEqual(await sha256(pin), await sha256(expectedPin));
 }
 

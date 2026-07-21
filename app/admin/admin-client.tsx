@@ -47,6 +47,13 @@ function SectionLock({ section, title, onUnlock }: { section: "designer" | "even
   return <section className={styles.sectionLock}><div className={styles.sectionLockIcon}>⌑</div><p className={styles.eyebrow}>PIN protected</p><h2>{title} is locked</h2><p>Enter the four-digit PIN to open this section.</p><form onSubmit={submit}><input type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="••••" aria-label={`${title} PIN`} autoFocus required />{error ? <span role="alert">{error}</span> : null}<button className={styles.primaryButton} disabled={submitting}>{submitting ? "Unlocking…" : `Unlock ${title}`}</button></form></section>;
 }
 
+function AccessPinSettings() {
+  const [designerPin, setDesignerPin] = useState(""); const [eventDayPin, setEventDayPin] = useState(""); const [status, setStatus] = useState("Loading PINs…"); const [saving, setSaving] = useState(false);
+  useEffect(() => { void fetch("/api/admin/access-pins", { cache: "no-store" }).then(async (response) => { const pins = await response.json() as { designerPin?: string; eventDayPin?: string }; if (!response.ok) throw new Error(); setDesignerPin(pins.designerPin || ""); setEventDayPin(pins.eventDayPin || ""); setStatus(""); }).catch(() => setStatus("Could not load PINs.")); }, []);
+  async function save(event: FormEvent<HTMLFormElement>) { event.preventDefault(); setSaving(true); setStatus(""); try { const response = await fetch("/api/admin/access-pins", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ designerPin, eventDayPin }) }); const result = await response.json() as { error?: string }; if (!response.ok) throw new Error(result.error || "Could not save PINs."); setStatus("PINs saved."); } catch (saveError) { setStatus(saveError instanceof Error ? saveError.message : "Could not save PINs."); } finally { setSaving(false); } }
+  return <form className={styles.pinSettings} onSubmit={save}><div><strong>Section PINs</strong><span>Change access for Designer, Admin login, and Event Day.</span></div><label><span>Designer &amp; Admin PIN</span><input type="text" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} value={designerPin} onChange={(event) => setDesignerPin(event.target.value.replace(/\D/g, "").slice(0, 4))} required /></label><label><span>Event Day PIN</span><input type="text" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} value={eventDayPin} onChange={(event) => setEventDayPin(event.target.value.replace(/\D/g, "").slice(0, 4))} required /></label><button className={styles.primaryButton} disabled={saving}>{saving ? "Saving…" : "Save PINs"}</button>{status ? <small role="status">{status}</small> : null}</form>;
+}
+
 export default function AdminClient() {
   const [data, setData] = useState<DashboardData>({ guests: [] });
   const [loading, setLoading] = useState(true);
@@ -266,6 +273,7 @@ export default function AdminClient() {
                 <strong>Layout editor is on</strong>
                 <span>Move, resize, or rotate every RSVP control, the vinyl icon, and the View Map button. Choose Yellow or Transparent for the fields and Submit button. Changes save automatically.</span>
               </div>
+              <AccessPinSettings />
               <div className={styles.segmented}>
                 <button className={previewSize === "mobile" ? styles.segmentActive : ""} onClick={() => setPreviewSize("mobile")}>Mobile</button>
                 <button className={previewSize === "web" ? styles.segmentActive : ""} onClick={() => setPreviewSize("web")}>Web / iPad</button>

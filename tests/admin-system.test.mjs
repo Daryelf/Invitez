@@ -39,7 +39,7 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.doesNotMatch(adminSource, /ADMIN_SETUP_TOKEN|setupToken|private one-time/);
   assert.doesNotMatch(adminSource, /Sign in with ChatGPT/);
   assert.match(auth, /ADMIN_PIN/);
-  assert.match(auth, /\|\| "7350"/);
+  assert.match(auth, /getAccessPins/);
   assert.match(viteConfig, /"ADMIN_PIN"/);
   assert.match(viteConfig, /"TWILIO_ACCOUNT_SID"/);
   assert.doesNotMatch(viteConfig, /ADMIN_PASSWORD_PEPPER/);
@@ -66,7 +66,9 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(client, /Event day 🔒/);
   assert.match(client, /SectionLock/);
   assert.match(sectionUnlock, /matchesAdminPin/);
-  assert.match(sectionUnlock, /EVENT_DAY_PIN/);
+  assert.match(sectionUnlock, /eventDayPin/);
+  assert.match(client, /AccessPinSettings/);
+  assert.match(client, /Designer &amp; Admin PIN/);
   assert.doesNotMatch(client, /No reply|Unopened|Opened [^·]|openedCount/);
   assert.match(client, /Not going/);
   assert.match(client, /Additional information/);
@@ -178,7 +180,7 @@ test("event-day photo wall uses a PIN gate and supports controlled camera upload
   assert.match(photosApi, /Photo uploads are paused by the host/);
   assert.match(photosApi, /image\/jpeg/);
   assert.match(eventApi, /photoUploadsEnabled/);
-  assert.match(auth, /EVENT_DAY_PIN = "8412"/);
+  assert.match(auth, /eventDayAccessToken/);
   assert.match(authApi, /httpOnly: true/);
   assert.match(authApi, /path: "\/event-day"/);
   assert.match(layout, /hasEventDayAccess/);
