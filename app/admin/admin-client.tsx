@@ -17,6 +17,7 @@ type Guest = {
 
 type DashboardData = {
   guests: Guest[];
+  event?: { eventName: string };
 };
 
 const PUBLIC_INVITE_URL = "https://www.invitez.xyz/rsvp";
@@ -64,6 +65,7 @@ export default function AdminClient() {
   const [notice, setNotice] = useState("");
   const [previewSize, setPreviewSize] = useState<"mobile" | "web">("mobile");
   const [manualLink, setManualLink] = useState<{ url: string } | null>(null);
+  const [guestListOpen, setGuestListOpen] = useState(false);
   const [unlockedSections, setUnlockedSections] = useState<Set<"designer" | "event">>(new Set());
   const unlockSection = (section: "designer" | "event") => setUnlockedSections((current) => new Set(current).add(section));
 
@@ -103,6 +105,14 @@ export default function AdminClient() {
       || guest.status === filter;
     return matchesQuery && matchesFilter;
   }), [data.guests, filter, query]);
+  const printableGuests = useMemo(() => [...visibleGuests].sort((left, right) => left.name.localeCompare(right.name)), [visibleGuests]);
+
+  function guestListPdfUrl(download = false) {
+    const parameters = new URLSearchParams({ filter });
+    if (query.trim()) parameters.set("q", query.trim());
+    if (download) parameters.set("download", "1");
+    return `/api/admin/guest-list-pdf?${parameters.toString()}`;
+  }
 
   function toast(message: string) {
     setNotice(message);
@@ -240,7 +250,7 @@ export default function AdminClient() {
             </div>
             <div className={styles.guestToolbar}>
               <div className={styles.filters}>{(["all", "attending", "declined"] as const).map((item) => <button key={item} className={filter === item ? styles.activeFilter : ""} onClick={() => setFilter(item)}>{item === "all" ? `All ${metrics.total}` : item === "attending" ? `Going ${metrics.attending}` : `Not going ${metrics.declined}`}</button>)}</div>
-              <div className={styles.guestTools}><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search guests" /><a href="/api/admin/export">Export CSV</a></div>
+              <div className={styles.guestTools}><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search guests" /><button type="button" className={styles.printGuestButton} onClick={() => setGuestListOpen(true)}><span aria-hidden="true">✒</span> Print guest list</button><a href="/api/admin/export">Export CSV</a></div>
             </div>
             <div className={styles.tableWrap}>
               <table><thead><tr><th>Guest</th><th>Response</th><th>Party</th><th>Additional information</th><th>Last activity</th><th /></tr></thead>
@@ -315,6 +325,40 @@ export default function AdminClient() {
             <div className={styles.modalActions}>
               <button type="button" className={styles.secondaryButton} onClick={() => setManualLink(null)}>Close</button>
               <a className={styles.primaryButton} href={manualLink.url} target="_blank" rel="noreferrer">Open invitation</a>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {guestListOpen ? (
+        <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setGuestListOpen(false); }}>
+          <section className={[styles.modal, styles.guestListModal].join(" ")} role="dialog" aria-modal="true" aria-label="Guest list PDF preview">
+            <div className={styles.modalHeader}>
+              <div><p className={styles.eyebrow}>Print guest list</p><h2>Royal guest scroll</h2><p>Preview the current guest view, then open it for printing or download the finished PDF.</p></div>
+              <button type="button" onClick={() => setGuestListOpen(false)} aria-label="Close guest list preview">×</button>
+            </div>
+            <div className={styles.guestListPreviewShell}>
+              <article className={styles.guestScrollPreview}>
+                <span className={styles.scrollFlowerTop} aria-hidden="true">✿</span>
+                <span className={styles.scrollFlowerBottom} aria-hidden="true">✿</span>
+                <div className={styles.scrollQuill} aria-hidden="true">✒</div>
+                <p className={styles.scrollEvent}>{data.event?.eventName || "Guest Celebration"}</p>
+                <h3>Guest List</h3>
+                <p className={styles.scrollSubtitle}>A royal roll of guests</p>
+                <div className={styles.scrollRule}><span>♡</span></div>
+                <p className={styles.scrollSummary}>{printableGuests.length} responses · {printableGuests.filter((guest) => guest.status === "attending").reduce((sum, guest) => sum + guest.partySize, 0)} attending guests</p>
+                <ol className={styles.scrollGuestNames}>
+                  {printableGuests.slice(0, 10).map((guest) => <li key={guest.id}><div><strong>{guest.name}</strong><small>Party of {guest.partySize}{guest.additionalInformation ? ` · ${guest.additionalInformation}` : ""}</small></div><span>{guest.status === "attending" ? "Attending" : "Not going"}</span></li>)}
+                </ol>
+                {printableGuests.length > 10 ? <p className={styles.scrollMore}>+ {printableGuests.length - 10} more guests in the PDF</p> : null}
+                {!printableGuests.length ? <p className={styles.scrollEmpty}>No guest responses in this view yet.</p> : null}
+              </article>
+            </div>
+            <p className={styles.pdfViewNote}>The PDF follows the active response filter and search shown behind this window.</p>
+            <div className={styles.modalActions}>
+              <button type="button" className={styles.secondaryButton} onClick={() => setGuestListOpen(false)}>Close</button>
+              <a className={styles.secondaryButton} href={guestListPdfUrl()} target="_blank" rel="noreferrer">Open PDF / Print</a>
+              <a className={styles.primaryButton} href={guestListPdfUrl(true)} download>Download PDF</a>
             </div>
           </section>
         </div>

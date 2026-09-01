@@ -7,7 +7,7 @@ async function source(path) {
 }
 
 test("Argentum Studio uses PIN-only login, clean invite links, and protected owner sessions", async () => {
-  const [auth, page, form, loginApi, logoutApi, client, guestApi, guestUpdateApi, smsApi, sms, layoutApi, publicLayoutApi, layoutEditor, schema, invitations, viteConfig, sectionUnlock] = await Promise.all([
+  const [auth, page, form, loginApi, logoutApi, client, guestApi, guestUpdateApi, smsApi, sms, layoutApi, publicLayoutApi, layoutEditor, schema, invitations, viteConfig, sectionUnlock, guestListPdfApi, guestListPdf] = await Promise.all([
     source("../app/admin-auth.ts"),
     source("../app/admin/page.tsx"),
     source("../app/admin/auth-form.tsx"),
@@ -25,6 +25,8 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
     source("../db/invitations.ts"),
     source("../vite.config.ts"),
     source("../app/api/admin/section-unlock/route.ts"),
+    source("../app/api/admin/guest-list-pdf/route.ts"),
+    source("../lib/guest-list-pdf.ts"),
   ]);
   const adminSource = `${auth}\n${page}\n${form}\n${loginApi}\n${logoutApi}\n${client}\n${guestApi}\n${guestUpdateApi}\n${smsApi}`;
 
@@ -75,6 +77,16 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(client, /Not going/);
   assert.match(client, /Additional information/);
   assert.match(client, /Export CSV/);
+  assert.match(client, /Print guest list/);
+  assert.match(client, /Open PDF \/ Print/);
+  assert.match(client, /Download PDF/);
+  assert.match(client, /guest-list-pdf/);
+  assert.match(guestListPdfApi, /requireAdminApi/);
+  assert.match(guestListPdfApi, /application\/pdf/);
+  assert.match(guestListPdfApi, /Content-Disposition/);
+  assert.match(guestListPdf, /%PDF-1\.4/);
+  assert.match(guestListPdf, /ZapfChancery-MediumItalic/);
+  assert.match(guestListPdf, /A royal roll of guests/);
   assert.doesNotMatch(client, /navigator\.share/);
   assert.match(client, /copyInvite/);
   assert.match(client, /Copy invitation link/);

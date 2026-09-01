@@ -218,3 +218,50 @@
   .modalActions{flex-wrap:wrap}
   .modalActions>*{flex:1}
 }
+
+/* Themed printable guest scroll */
+.printGuestButton{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #d7c8a7;border-radius:10px;background:linear-gradient(145deg,#fffaf0,#f5ead4);color:#4b4938;cursor:pointer;font:inherit;font-size:.68rem;font-weight:750;white-space:nowrap;box-shadow:0 4px 12px rgba(90,72,41,.07)}
+.printGuestButton span{color:#a66271;font-size:.9rem}
+.printGuestButton:hover{border-color:#bda574;background:#fff8e9}
+.guestListModal{width:min(790px,100%);background:#f7f3e9}
+.guestListPreviewShell{padding:25px;background:radial-gradient(circle at 50% 10%,#fff8ea,#ded4c2)}
+.guestScrollPreview{position:relative;width:min(570px,100%);min-height:620px;margin:0 auto;padding:48px 55px 44px;overflow:hidden;border:3px double #849171;border-radius:8px;background:repeating-linear-gradient(0deg,rgba(118,102,68,.025) 0,rgba(118,102,68,.025) 1px,transparent 1px,transparent 5px),#fffaf0;box-shadow:0 18px 40px rgba(71,59,39,.2),inset 0 0 0 7px #f4dfe1,inset 0 0 0 9px #d8bf8f;color:#33483c}
+.guestScrollPreview:before,.guestScrollPreview:after{content:"";position:absolute;left:34px;right:34px;height:10px;border:1px solid #c6a46d;border-right:0;border-left:0}
+.guestScrollPreview:before{top:30px}
+.guestScrollPreview:after{bottom:29px}
+.scrollFlowerTop,.scrollFlowerBottom{position:absolute;z-index:2;color:#d8929e;font-size:2.9rem;line-height:1;text-shadow:2px 2px 0 #f2d7db}
+.scrollFlowerTop{top:11px;left:18px}
+.scrollFlowerBottom{right:17px;bottom:8px}
+.scrollQuill{position:absolute;right:48px;top:46px;transform:rotate(-16deg);color:#68765b;font-size:2rem}
+.scrollEvent{margin:0;text-align:center;color:#6a735d;font-family:Georgia,"Times New Roman",serif;font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.guestScrollPreview h3{margin:12px 0 0;text-align:center;color:#344b3d;font-family:"Snell Roundhand","Apple Chancery","URW Chancery L","Times New Roman",serif;font-size:2.8rem;font-style:italic;font-weight:600}
+.scrollSubtitle{margin:0;text-align:center;color:#a7606d;font-family:Georgia,"Times New Roman",serif;font-size:.9rem;font-style:italic}
+.scrollRule{display:flex;align-items:center;gap:11px;margin:17px auto 14px;color:#d48e9a}
+.scrollRule:before,.scrollRule:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#859272)}
+.scrollRule:after{background:linear-gradient(90deg,#859272,transparent)}
+.scrollSummary{margin:0 0 13px;text-align:center;color:#746c5a;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.scrollGuestNames{display:grid;gap:0;margin:0;padding:0;list-style:none;counter-reset:guest}
+.scrollGuestNames li{position:relative;counter-increment:guest;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:9px 3px 8px 30px;border-bottom:1px solid rgba(167,139,91,.28)}
+.scrollGuestNames li:before{content:counter(guest);position:absolute;left:1px;display:grid;place-items:center;width:20px;aspect-ratio:1;border-radius:50%;background:#ead9b8;color:#66715b;font-size:.58rem;font-weight:800}
+.scrollGuestNames strong,.scrollGuestNames small{display:block}
+.scrollGuestNames strong{font-family:"Snell Roundhand","Apple Chancery","URW Chancery L","Times New Roman",serif;font-size:1.17rem;font-style:italic;font-weight:650}
+.scrollGuestNames small{overflow:hidden;max-width:340px;margin-top:2px;color:#7c7363;font-family:Georgia,"Times New Roman",serif;font-size:.58rem;text-overflow:ellipsis;white-space:nowrap}
+.scrollGuestNames>li>span{color:#63745f;font-size:.55rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.scrollMore,.scrollEmpty{margin:18px 0 0;text-align:center;color:#8a6b6f;font-family:Georgia,"Times New Roman",serif;font-size:.72rem;font-style:italic}
+.scrollEmpty{margin-top:70px;font-size:1rem}
+.pdfViewNote{margin:0;padding:14px 24px 0;color:#6f6b61;font-size:.65rem;text-align:center}
+.guestListModal .modalActions{background:#fffaf2}
+.guestListModal .modalActions a{white-space:nowrap}
+
+@media(max-width:760px){
+  .guestTools{align-items:stretch;flex-wrap:wrap}
+  .guestTools input{flex:1 0 100%;width:auto}
+  .printGuestButton{justify-content:center}
+  .guestListPreviewShell{padding:12px}
+  .guestScrollPreview{min-height:560px;padding:45px 26px 40px}
+  .guestScrollPreview h3{font-size:2.25rem}
+  .scrollQuill{right:28px}
+  .scrollGuestNames li{grid-template-columns:1fr}
+  .scrollGuestNames>li>span{display:none}
+  .guestListModal .modalActions>*{flex:1 1 100%}
+}
