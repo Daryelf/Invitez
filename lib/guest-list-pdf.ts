@@ -15,11 +15,11 @@ export type GuestListPdfOptions = {
   guests: GuestListPdfEntry[];
 };
 
-type PreparedEntry = GuestListPdfEntry & { number: number; noteLines: string[]; height: number };
+type PreparedEntry = GuestListPdfEntry & { number: number; nameLines: string[]; noteLines: string[]; height: number };
 
 const PAGE_WIDTH = 612;
 const PAGE_HEIGHT = 792;
-const TOP_OF_LIST = 612;
+const TOP_OF_LIST = 580;
 const BOTTOM_OF_LIST = 92;
 
 function plainText(value: string) {
@@ -87,6 +87,19 @@ function flower(cx: number, cy: number, scale = 1) {
   return commands.join("\n");
 }
 
+function botanicalSprig(cx: number, cy: number, direction = 1) {
+  return [
+    "0.47 0.56 0.40 RG 1 w",
+    `${cx} ${cy} m ${cx + 20 * direction} ${cy + 9} ${cx + 34 * direction} ${cy + 25} ${cx + 43 * direction} ${cy + 43} c S`,
+    "0.58 0.65 0.49 rg",
+    `${ellipsePath(cx + 13 * direction, cy + 8, 3.2, 7)} f`,
+    `${ellipsePath(cx + 25 * direction, cy + 19, 3.4, 7.5)} f`,
+    `${ellipsePath(cx + 35 * direction, cy + 31, 3.2, 7)} f`,
+    "0.91 0.70 0.74 rg",
+    `${ellipsePath(cx + 44 * direction, cy + 45, 3.2, 3.2)} f`,
+  ].join("\n");
+}
+
 function pageDecoration(pageNumber: number, pageCount: number) {
   return [
     "1 0.985 0.94 rg 0 0 612 792 re f",
@@ -99,6 +112,8 @@ function pageDecoration(pageNumber: number, pageCount: number) {
     "0.88 0.62 0.68 RG 1.2 w 428 673 m 406 673 399 686 384 686 c 369 686 362 673 347 673 c S",
     flower(52, 735, 0.9),
     flower(560, 57, 0.82),
+    botanicalSprig(50, 50, 1),
+    botanicalSprig(562, 726, -1),
     "0.50 0.58 0.43 RG 1.1 w 58 719 m 71 706 81 697 92 690 c S",
     "0.50 0.58 0.43 rg",
     `${ellipsePath(74, 706, 3.4, 7)} f`,
@@ -109,8 +124,10 @@ function pageDecoration(pageNumber: number, pageCount: number) {
 
 function preparePages(guests: GuestListPdfEntry[]) {
   const prepared = guests.map((guest, index): PreparedEntry => {
-    const noteLines = wrapText(guest.additionalInformation, 82).slice(0, 3);
-    return { ...guest, number: index + 1, noteLines, height: 47 + Math.max(0, noteLines.length - 1) * 11 };
+    const nameLines = wrapText(guest.name || "Guest", 36).slice(0, 2);
+    const noteLines = wrapText(guest.additionalInformation, 82).slice(0, 2);
+    const height = 44 + Math.max(0, nameLines.length - 1) * 14 + Math.max(0, noteLines.length - 1) * 11;
+    return { ...guest, number: index + 1, nameLines, noteLines, height };
   });
   const pages: PreparedEntry[][] = [[]];
   let y = TOP_OF_LIST;
@@ -133,14 +150,14 @@ function renderPage(options: GuestListPdfOptions, entries: PreparedEntry[], page
   const commands = [
     pageDecoration(pageNumber, pageCount),
     centeredText(options.eventName, 744, 16, "F3", "0.20 0.32 0.25", "bold"),
-    centeredText("Guest List", 708, 29, "F4", "0.24 0.29 0.21", "italic"),
+    centeredText("Guest List", 708, 28, "F2", "0.24 0.29 0.21", "italic"),
     centeredText("A royal roll of guests", 687, 11, "F2", "0.62 0.38 0.42", "italic"),
     centeredText(eventLine, 649, 8.5, "F1", "0.40 0.43 0.36"),
     centeredText(`${options.viewLabel}  -  ${summary}`, 632, 8, "F5", "0.47 0.45 0.40"),
-    "0.65 0.55 0.39 RG 0.8 w 55 622 m 557 622 l S",
-    "0.24 0.29 0.21 RG 1.15 w 72 700 m 86 719 99 733 115 740 c S",
-    "0.24 0.29 0.21 RG 0.8 w 84 718 m 95 716 101 720 106 729 c S",
-    "0.24 0.29 0.21 rg 68 695 8 8 re f",
+    textCommand("GUEST NAME", 84, 606, 7, "F4", "0.42 0.43 0.36"),
+    textCommand("RSVP", 411, 606, 7, "F4", "0.42 0.43 0.36"),
+    textCommand("PARTY", 510, 606, 7, "F4", "0.42 0.43 0.36"),
+    "0.65 0.55 0.39 RG 0.8 w 55 596 m 557 596 l S",
   ];
 
   if (!entries.length) {
@@ -152,18 +169,26 @@ function renderPage(options: GuestListPdfOptions, entries: PreparedEntry[], page
   entries.forEach((guest) => {
     const status = guest.status === "attending" ? "ATTENDING" : "NOT GOING";
     const statusWidth = textWidth(status, 7.5, "bold");
+    const statusX = 390 + (76 - statusWidth) / 2;
+    const noteY = y - 19 - Math.max(0, guest.nameLines.length - 1) * 14;
     commands.push(
+      guest.number % 2 === 0 ? "0.99 0.97 0.92 rg" : "1 0.99 0.96 rg",
+      `54 ${(y - guest.height + 8).toFixed(2)} 504 ${(guest.height - 2).toFixed(2)} re f`,
       "0.87 0.80 0.65 rg",
       `${ellipsePath(64, y - 3, 12, 12)} f`,
       textCommand(String(guest.number), 60.5, y - 6, 8, "F5", "0.34 0.38 0.31"),
-      textCommand(guest.name || "Guest", 84, y, 14.5, "F4", "0.20 0.31 0.24"),
-      textCommand(status, 546 - statusWidth, y + 1, 7.5, "F5", guest.status === "attending" ? "0.31 0.49 0.36" : "0.65 0.37 0.42"),
-      textCommand(`Party of ${guest.partySize}`, 84, y - 17, 8.5, "F1", "0.45 0.43 0.37"),
+      guest.status === "attending" ? "0.92 0.96 0.91 rg" : "0.98 0.91 0.92 rg",
+      `390 ${(y - 9).toFixed(2)} 76 22 re f`,
+      textCommand(status, statusX, y - 1, 7.5, "F4", guest.status === "attending" ? "0.31 0.49 0.36" : "0.65 0.37 0.42"),
+      textCommand(String(guest.partySize), 520, y, 10, "F4", "0.33 0.39 0.31"),
     );
-    guest.noteLines.forEach((line, lineIndex) => {
-      commands.push(textCommand(line, 170, y - 17 - lineIndex * 11, 8.5, "F2", "0.42 0.40 0.36"));
+    guest.nameLines.forEach((line, lineIndex) => {
+      commands.push(textCommand(line, 84, y - lineIndex * 14, 12.5, "F4", "0.18 0.28 0.23"));
     });
-    commands.push(`0.87 0.81 0.70 RG 0.55 w 84 ${(y - guest.height + 12).toFixed(2)} m 546 ${(y - guest.height + 12).toFixed(2)} l S`);
+    guest.noteLines.forEach((line, lineIndex) => {
+      commands.push(textCommand(line, 84, noteY - lineIndex * 11, 8.5, "F1", "0.43 0.42 0.37"));
+    });
+    commands.push(`0.87 0.81 0.70 RG 0.55 w 84 ${(y - guest.height + 8).toFixed(2)} m 546 ${(y - guest.height + 8).toFixed(2)} l S`);
     y -= guest.height;
   });
   return commands.join("\n");
@@ -182,7 +207,7 @@ export function createGuestListPdf(options: GuestListPdfOptions) {
   objects[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding /WinAnsiEncoding >>";
   objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Times-Italic /Encoding /WinAnsiEncoding >>";
   objects[5] = "<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold /Encoding /WinAnsiEncoding >>";
-  objects[6] = "<< /Type /Font /Subtype /Type1 /BaseFont /ZapfChancery-MediumItalic /Encoding /WinAnsiEncoding >>";
+  objects[6] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
   objects[7] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
 
   const pageObjects: number[] = [];

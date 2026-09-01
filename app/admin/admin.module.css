@@ -244,7 +244,7 @@
 .scrollGuestNames li{position:relative;counter-increment:guest;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:9px 3px 8px 30px;border-bottom:1px solid rgba(167,139,91,.28)}
 .scrollGuestNames li:before{content:counter(guest);position:absolute;left:1px;display:grid;place-items:center;width:20px;aspect-ratio:1;border-radius:50%;background:#ead9b8;color:#66715b;font-size:.58rem;font-weight:800}
 .scrollGuestNames strong,.scrollGuestNames small{display:block}
-.scrollGuestNames strong{font-family:"Snell Roundhand","Apple Chancery","URW Chancery L","Times New Roman",serif;font-size:1.17rem;font-style:italic;font-weight:650}
+.scrollGuestNames strong{font-family:Georgia,"Times New Roman",serif;font-size:1rem;font-style:normal;font-weight:700;letter-spacing:.01em}
 .scrollGuestNames small{overflow:hidden;max-width:340px;margin-top:2px;color:#7c7363;font-family:Georgia,"Times New Roman",serif;font-size:.58rem;text-overflow:ellipsis;white-space:nowrap}
 .scrollGuestNames>li>span{color:#63745f;font-size:.55rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
 .scrollMore,.scrollEmpty{margin:18px 0 0;text-align:center;color:#8a6b6f;font-family:Georgia,"Times New Roman",serif;font-size:.72rem;font-style:italic}

@@ -85,7 +85,10 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(guestListPdfApi, /application\/pdf/);
   assert.match(guestListPdfApi, /Content-Disposition/);
   assert.match(guestListPdf, /%PDF-1\.4/);
-  assert.match(guestListPdf, /ZapfChancery-MediumItalic/);
+  assert.match(guestListPdf, /\/BaseFont \/Helvetica-Bold/);
+  assert.doesNotMatch(guestListPdf, /ZapfChancery-MediumItalic/);
+  assert.match(guestListPdf, /GUEST NAME/);
+  assert.match(guestListPdf, /botanicalSprig/);
   assert.match(guestListPdf, /A royal roll of guests/);
   assert.doesNotMatch(client, /navigator\.share/);
   assert.match(client, /copyInvite/);
