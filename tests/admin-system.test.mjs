@@ -61,7 +61,7 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
   assert.match(client, /Invitation dashboard/);
   assert.match(client, /RSVP responses/);
   assert.match(client, /Invitation designer/);
-  assert.match(client, /This space is reserved for the experience guests will use during the event/);
+  assert.match(client, /EventDayDashboard/);
   assert.doesNotMatch(`${page}\n${form}\n${client}`, /Erika(?:&apos;|'|’)?s Sweet 16/);
   assert.doesNotMatch(client, /Creator account|sidebarFooter/);
   assert.match(client, /Designer 🔒/);
@@ -176,8 +176,8 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.doesNotMatch(styles, /\.confirmation-screen/);
 });
 
-test("event-day photo wall uses a PIN gate and supports controlled camera uploads", async () => {
-  const [page, styles, photosApi, eventApi, gate, layout, authApi, auth] = await Promise.all([
+test("event-day photo wall uses a PIN gate and supports controlled private guest uploads", async () => {
+  const [page, styles, photosApi, eventApi, gate, layout, authApi, auth, dashboard] = await Promise.all([
     source("../app/event-day/page.tsx"),
     source("../app/event-day/event-day.module.css"),
     source("../app/api/photos/route.ts"),
@@ -186,16 +186,25 @@ test("event-day photo wall uses a PIN gate and supports controlled camera upload
     source("../app/event-day/layout.tsx"),
     source("../app/api/event-day/auth/route.ts"),
     source("../app/event-day/event-day-auth.ts"),
+    source("../app/admin/event-day-dashboard.tsx"),
   ]);
-  const eventSource = `${page}\n${styles}\n${photosApi}\n${eventApi}\n${gate}\n${layout}\n${authApi}\n${auth}`;
+  const eventSource = `${page}\n${styles}\n${photosApi}\n${eventApi}\n${gate}\n${layout}\n${authApi}\n${auth}\n${dashboard}`;
 
   assert.match(page, /capture="environment"/);
   assert.match(page, /Party wall/);
   assert.match(page, /Come back on/);
   assert.match(page, /preview/);
+  assert.match(page, /Your name <em>optional/);
+  assert.match(page, /will not appear in the gallery/);
+  assert.match(page, /body\.set\("guestName", guestName\)/);
   assert.match(photosApi, /Photo sharing opens on event day/);
   assert.match(photosApi, /Photo uploads are paused by the host/);
   assert.match(photosApi, /image\/jpeg/);
+  assert.match(photosApi, /guest_name/);
+  assert.doesNotMatch(photosApi, /SELECT id, name/);
+  assert.match(dashboard, /event-upload-qr\.svg/);
+  assert.match(dashboard, /Guest photos,/);
+  assert.doesNotMatch(dashboard, /guestName|guest_name/);
   assert.match(eventApi, /photoUploadsEnabled/);
   assert.match(auth, /eventDayAccessToken/);
   assert.match(authApi, /httpOnly: true/);

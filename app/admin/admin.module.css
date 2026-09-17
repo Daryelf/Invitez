@@ -126,6 +126,23 @@
 .eventPlaceholder{display:grid;justify-items:center;align-content:center;min-height:540px;padding:60px 28px;border:1px solid #e2e1e8;border-radius:28px;background:radial-gradient(circle at 50% 18%,rgba(151,132,242,.18),transparent 34%),#fff;text-align:center;box-shadow:0 18px 48px rgba(29,28,42,.06)}
 .eventPlaceholderIcon{display:grid;place-items:center;width:72px;aspect-ratio:1;margin-bottom:24px;border-radius:24px;background:linear-gradient(145deg,#9f90f4,#6655d8);color:#fff;font-size:1.6rem;box-shadow:0 16px 35px rgba(101,84,209,.24)}
 .eventPlaceholder h2{margin:0;font-size:clamp(2.2rem,5vw,4rem);letter-spacing:-.055em}.eventPlaceholder>p:not(.eyebrow){max-width:560px;margin:16px 0 28px;color:#74717f;font-size:.84rem;line-height:1.7}
+.eventDayDashboard{display:grid;gap:18px}
+.eventDayHero{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:28px;min-height:250px;padding:36px;overflow:hidden;border-radius:27px;background:radial-gradient(circle at 84% 18%,rgba(145,126,242,.62),transparent 31%),linear-gradient(135deg,#171621,#2c2847);color:#fff;box-shadow:0 24px 60px rgba(34,31,59,.18)}
+.eventDayHero:after{content:"✦";position:absolute;right:40px;top:-48px;color:rgba(255,255,255,.07);font-size:14rem;line-height:1}
+.eventDayHero>div{position:relative;z-index:1}.eventDayHero .eyebrow{color:#c7c0ff}.eventDayHero h2{margin:0;font-size:clamp(2.3rem,4.5vw,4.3rem);line-height:.93;letter-spacing:-.065em}.eventDayHero p:not(.eyebrow){max-width:660px;margin:16px 0 0;color:#c4c0d5;font-size:.84rem;line-height:1.65}
+.eventDayActions{display:flex;flex:0 0 auto;gap:9px}.eventDayHero .secondaryButton{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff}.eventDayHero .primaryButton{background:#dfff61;color:#171721}
+.eventDayGrid{display:grid;grid-template-columns:minmax(300px,.72fr) minmax(0,1.28fr);gap:18px;align-items:stretch}
+.eventQrCard,.eventSummary,.eventPhotoPanel{border:1px solid #e2e1e8;border-radius:24px;background:#fff;box-shadow:0 12px 34px rgba(29,28,42,.045)}
+.eventQrCard{padding:20px;background:#dfff61;transform:rotate(-.5deg);box-shadow:14px 14px 0 rgba(113,94,222,.16)}
+.eventQrTopline{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 15px;color:#292634;font-size:.62rem;font-weight:820;letter-spacing:.12em;text-transform:uppercase}.eventQrTopline strong{font-weight:820}
+.eventQrFrame{padding:14px;border-radius:16px;background:#fff}.eventQrFrame img{display:block;width:100%;aspect-ratio:1}
+.eventQrCard h3{margin:18px 0 6px;font-size:1.3rem;letter-spacing:-.04em}.eventQrCard>p{margin:0;color:#504d3c;font-size:.69rem;line-height:1.5}
+.eventSummary{display:grid;align-content:start;padding:30px}.eventStatus{display:flex;align-items:center;gap:9px;color:#777481;font-size:.68rem;font-weight:780}.eventStatus i{width:9px;aspect-ratio:1;border-radius:50%;background:#b9b6c1}.eventStatus .eventStatusLive{background:#4fb276;box-shadow:0 0 0 5px rgba(79,178,118,.13)}
+.eventMemoryCount{display:grid;margin:32px 0 26px}.eventMemoryCount strong{font-size:clamp(4rem,8vw,7rem);line-height:.8;letter-spacing:-.08em}.eventMemoryCount span{margin-top:12px;color:#75717f;font-size:.74rem;font-weight:750}
+.eventSummary dl{display:grid;margin:0 0 24px;border-top:1px solid #e8e6ed}.eventSummary dl div{display:grid;grid-template-columns:90px minmax(0,1fr);gap:16px;padding:14px 0;border-bottom:1px solid #e8e6ed}.eventSummary dt{color:#85818e;font-size:.64rem}.eventSummary dd{margin:0;color:#2d2a38;font-size:.72rem;font-weight:720}.eventSummary button{justify-self:start}
+.eventPhotoPanel{overflow:hidden}.eventPhotoHeader{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:24px 26px;border-bottom:1px solid #e8e6ed}.eventPhotoHeader .eyebrow{margin-bottom:6px}.eventPhotoHeader h3{margin:0;font-size:1.45rem;letter-spacing:-.04em}.eventPhotoHeader>span{color:#7d7986;font-size:.67rem;font-weight:740}
+.eventPhotoGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:16px}.eventPhotoGrid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:#eceaf1}
+.eventPhotoEmpty{display:grid;justify-items:center;padding:70px 24px;color:#777481;text-align:center}.eventPhotoEmpty>span{display:grid;place-items:center;width:55px;aspect-ratio:1;margin-bottom:15px;border-radius:17px;background:#efedff;color:#6e5cdd;font-size:1.6rem}.eventPhotoEmpty strong{color:#24212f;font-size:1rem}.eventPhotoEmpty p{margin:7px 0 0;font-size:.72rem}
 .sectionLock{display:grid;justify-items:center;align-content:center;min-height:540px;padding:54px 28px;border:1px solid #e2e1e8;border-radius:28px;background:radial-gradient(circle at 50% 18%,rgba(151,132,242,.18),transparent 34%),#fff;text-align:center;box-shadow:0 18px 48px rgba(29,28,42,.06)}
 .sectionLockIcon{display:grid;place-items:center;width:72px;aspect-ratio:1;margin-bottom:22px;border-radius:24px;background:linear-gradient(145deg,#9f90f4,#6655d8);color:#fff;font-size:2rem;box-shadow:0 16px 35px rgba(101,84,209,.24)}
 .sectionLock h2{margin:0;font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.05em}.sectionLock>p:not(.eyebrow){margin:12px 0 24px;color:#74717f;font-size:.82rem}.sectionLock form{display:grid;width:min(100%,330px);gap:12px}.sectionLock input{padding:15px;border:1px solid #d9d7e4;border-radius:13px;outline:0;background:#faf9ff;color:#171522;font-size:1.25rem;font-weight:800;letter-spacing:.45em;text-align:center}.sectionLock input:focus{border-color:#8c7bea;box-shadow:0 0 0 4px rgba(140,123,234,.12)}.sectionLock form span{color:#b64052;font-size:.72rem}.sectionLock form button{width:100%}
@@ -203,6 +220,7 @@
   .overviewColumns{grid-template-columns:1fr}
   .overviewColumns .eventCard{grid-column:auto}
   .smsSetupBanner{grid-template-columns:1fr}
+  .eventDayHero{align-items:flex-start;flex-direction:column}.eventDayGrid{grid-template-columns:1fr}.eventQrCard{width:min(100%,380px)}
 }
 @media(max-width:760px){
   .adminApp{grid-template-columns:1fr;grid-template-rows:auto 1fr}
@@ -217,6 +235,7 @@
   .smsRecipient{grid-template-columns:1fr}
   .modalActions{flex-wrap:wrap}
   .modalActions>*{flex:1}
+  .eventDayHero{padding:26px}.eventDayActions{width:100%;flex-wrap:wrap}.eventDayActions>*{flex:1}.eventPhotoGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 /* Themed printable guest scroll */

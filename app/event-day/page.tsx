@@ -15,7 +15,6 @@ type EventInfo = {
 
 type Photo = {
   id: string;
-  name: string;
   caption: string | null;
   url: string;
   createdAt: string;
@@ -46,7 +45,7 @@ export default function EventDayPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [preview] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("preview") === "1");
-  const [guestName] = useState(() => typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("guest") || "").slice(0, 80) : "");
+  const [guestName, setGuestName] = useState(() => typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("guest") || "").slice(0, 80) : "");
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState("");
   const [caption, setCaption] = useState("");
@@ -103,6 +102,7 @@ export default function EventDayPage() {
     const body = new FormData();
     body.set("photo", file);
     body.set("caption", caption);
+    body.set("guestName", guestName);
 
     try {
       const response = await fetch("/api/photos", { method: "POST", body });
@@ -168,11 +168,14 @@ export default function EventDayPage() {
             {filePreview ? <img src={filePreview} alt="Selected upload preview" /> : <><span className={styles.cameraIcon}>＋</span><strong>Choose a photo</strong><small>Tap to open your camera or photo library</small></>}
             <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={selectPhoto} disabled={!uploadAllowed} />
           </label>
-          <label className={styles.captionField}><span>Say something about this moment</span><input value={caption} onChange={(captionEvent) => setCaption(captionEvent.target.value)} maxLength={140} placeholder="A memory, a wish, or who is in the photo…" disabled={!uploadAllowed} /></label>
-          {!uploadAllowed ? <p className={styles.previewNotice}>{preview && !data.active ? "Uploads are disabled in preview. Turn on event-day mode to test a real upload." : "Photo uploads are paused by the host."}</p> : null}
-          {error ? <p className={styles.error}>{error}</p> : null}
-          {notice ? <p className={styles.success}>{notice}</p> : null}
-          <button disabled={!file || !uploadAllowed || uploading}>{uploading ? "Adding your memory…" : "Add to the party wall"}</button>
+          <div className={styles.uploadDetails}>
+            <label className={styles.captionField}><span>Your name <em>optional</em></span><input value={guestName} onChange={(nameEvent) => setGuestName(nameEvent.target.value.slice(0, 80))} maxLength={80} placeholder="Add your name if you want" autoComplete="name" disabled={!uploadAllowed} /><small>Saved privately for the host. Your name will not appear in the gallery.</small></label>
+            <label className={styles.captionField}><span>Say something about this moment</span><input value={caption} onChange={(captionEvent) => setCaption(captionEvent.target.value)} maxLength={140} placeholder="A memory, a wish, or who is in the photo…" disabled={!uploadAllowed} /></label>
+            {!uploadAllowed ? <p className={styles.previewNotice}>{preview && !data.active ? "Uploads are disabled in preview. Turn on event-day mode to test a real upload." : "Photo uploads are paused by the host."}</p> : null}
+            {error ? <p className={styles.error}>{error}</p> : null}
+            {notice ? <p className={styles.success}>{notice}</p> : null}
+            <button disabled={!file || !uploadAllowed || uploading}>{uploading ? "Adding your memory…" : "Add to the party wall"}</button>
+          </div>
         </form>
       </section>
 
@@ -180,7 +183,7 @@ export default function EventDayPage() {
         <div className={styles.sectionHeading}><span>02</span><div><p className={styles.kicker}>Made by everyone</p><h2>Party wall</h2></div><small>{photos.length} {photos.length === 1 ? "memory" : "memories"}</small></div>
         {photos.length ? (
           <div className={styles.gallery}>
-            {photos.map((photo, index) => <figure key={photo.id} className={styles[`tile${index % 3}`]}><img src={photo.url} alt={photo.caption || photo.name} loading="lazy" /><figcaption><span>{photo.caption || "A moment from the party"}</span><time>{photoTime(photo.createdAt)}</time></figcaption></figure>)}
+            {photos.map((photo, index) => <figure key={photo.id} className={styles[`tile${index % 3}`]}><img src={photo.url} alt={photo.caption || `Event photo ${index + 1}`} loading="lazy" /><figcaption><span>{photo.caption || "A moment from the party"}</span><time>{photoTime(photo.createdAt)}</time></figcaption></figure>)}
           </div>
         ) : (
           <div className={styles.emptyGallery}><span>♡</span><strong>The first memory starts here</strong><p>Photos shared by guests will fill this party wall.</p></div>

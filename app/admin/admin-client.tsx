@@ -2,6 +2,7 @@
 
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./admin.module.css";
+import EventDayDashboard from "./event-day-dashboard";
 
 type GuestStatus = "pending" | "attending" | "declined";
 type Guest = {
@@ -301,13 +302,7 @@ export default function AdminClient() {
 
         {tab === "event" && !unlockedSections.has("event") ? <SectionLock section="event" title="Event Day" onUnlock={() => unlockSection("event")} /> : null}
         {tab === "event" && unlockedSections.has("event") ? (
-          <section className={styles.eventPlaceholder}>
-            <div className={styles.eventPlaceholderIcon} aria-hidden="true">✦</div>
-            <p className={styles.eyebrow}>Coming later</p>
-            <h2>Event Day</h2>
-            <p>This space is reserved for the experience guests will use during the event. We’ll design and build it when you’re ready.</p>
-            <button className={styles.secondaryButton} onClick={() => setTab("overview")}>Back to studio</button>
-          </section>
+          <EventDayDashboard />
         ) : null}
       </section>
 

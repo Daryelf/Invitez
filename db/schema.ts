@@ -15,6 +15,7 @@ export const photos = sqliteTable("photos", {
   name: text("name").notNull(),
   contentType: text("content_type").notNull(),
   caption: text("caption"),
+  guestName: text("guest_name"),
   createdAt: text("created_at").notNull(),
 });
 

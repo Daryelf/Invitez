@@ -139,10 +139,13 @@
 .dropZone img { width: 100%; height: 100%; object-fit: cover; }
 .dropZoneSelected { border-style: solid; }
 .cameraIcon { display: grid; width: 54px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: white; background: #879678; font-size: 28px; font-weight: 200; }
+.uploadDetails { display: grid; align-content: start; gap: 18px; }
 .captionField { display: grid; align-content: start; gap: 10px; }
-.captionField span { color: #66765f; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.captionField span { display: flex; justify-content: space-between; gap: 14px; color: #66765f; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.captionField span em { color: #a18486; font-size: 9px; font-style: normal; }
 .captionField input { width: 100%; min-height: 58px; padding: 0 16px; border: 1px solid rgba(23,60,50,.18); border-radius: 13px; outline: 0; color: var(--ink); background: rgba(255,255,255,.62); font: inherit; }
 .captionField input:focus { border-color: #d48b98; box-shadow: 0 0 0 3px rgba(212,139,152,.15); }
+.captionField small { margin-top: -2px; color: #798371; font-size: 10px; line-height: 1.5; }
 .uploadCard button { align-self: end; min-height: 56px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
 .uploadCard button:disabled { opacity: .38; cursor: not-allowed; }
 .previewNotice,
