@@ -182,6 +182,14 @@ createServer(async (request, response) => {
       response.end();
       return;
     }
+    if (pathname === "/share-photos" || pathname === "/share-photos/") {
+      response.writeHead(302, {
+        "Cache-Control": "no-store",
+        Location: `https://after-hours-party.adventraa.chatgpt.site/share-photos${requestUrl.search}`,
+      });
+      response.end();
+      return;
+    }
     if (pathname === "/og-rsvp.jpg") {
       await sendSocialPreview(request, response);
       return;
