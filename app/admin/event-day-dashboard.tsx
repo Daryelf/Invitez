@@ -11,7 +11,7 @@ type EventDayData = {
 
 type GalleryPhoto = { id: string; url: string; createdAt: string };
 
-const EVENT_DAY_URL = "https://www.invitez.xyz/event-day";
+const EVENT_DAY_URL = "https://www.invitez.xyz/share-photos";
 
 export default function EventDayDashboard() {
   const [eventDay, setEventDay] = useState<EventDayData | null>(null);
@@ -47,7 +47,7 @@ export default function EventDayDashboard() {
       setCopyLabel("Guest link copied");
       window.setTimeout(() => setCopyLabel("Copy guest link"), 2200);
     } catch {
-      window.prompt("Copy the Event Day guest link", EVENT_DAY_URL);
+      window.prompt("Copy the guest photo link", EVENT_DAY_URL);
     }
   }
 
@@ -57,11 +57,11 @@ export default function EventDayDashboard() {
         <div>
           <p className={styles.eyebrow}>Event Day live gallery</p>
           <h2>Guest photos,<br />all in one place.</h2>
-          <p>Share the QR code at the event. Guests can add photos from their phones, and every upload appears in the gallery here.</p>
+          <p>Share the QR code at the event. Guests land directly on the uploader—no PIN—and every photo appears in the gallery here.</p>
         </div>
         <div className={styles.eventDayActions}>
           <button className={styles.secondaryButton} type="button" onClick={copyGuestLink}>{copyLabel}</button>
-          <a className={styles.primaryButton} href={EVENT_DAY_URL} target="_blank" rel="noreferrer">Open Event Day</a>
+          <a className={styles.primaryButton} href={EVENT_DAY_URL} target="_blank" rel="noreferrer">Open guest upload</a>
         </div>
       </div>
 
@@ -70,7 +70,7 @@ export default function EventDayDashboard() {
           <div className={styles.eventQrTopline}><span>Guest upload</span><strong>Scan me</strong></div>
           <div className={styles.eventQrFrame}><img src="/event-upload-qr.svg" alt="QR code for the Event Day guest photo page" /></div>
           <h3>Scan to share photos</h3>
-          <p>The Event Day PIN still protects the page. Put the PIN next to this code when you print or display it.</p>
+          <p>This guest upload link opens without a PIN. Names are optional and stay private.</p>
         </article>
 
         <article className={styles.eventSummary}>

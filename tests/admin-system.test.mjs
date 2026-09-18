@@ -176,8 +176,8 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.doesNotMatch(styles, /\.confirmation-screen/);
 });
 
-test("event-day photo wall uses a PIN gate and supports controlled private guest uploads", async () => {
-  const [page, styles, photosApi, eventApi, gate, layout, authApi, auth, dashboard] = await Promise.all([
+test("event-day wall stays protected while the QR guest upload is public and keeps names private", async () => {
+  const [page, styles, photosApi, eventApi, gate, layout, authApi, auth, dashboard, sharePage, shareStyles] = await Promise.all([
     source("../app/event-day/page.tsx"),
     source("../app/event-day/event-day.module.css"),
     source("../app/api/photos/route.ts"),
@@ -187,8 +187,10 @@ test("event-day photo wall uses a PIN gate and supports controlled private guest
     source("../app/api/event-day/auth/route.ts"),
     source("../app/event-day/event-day-auth.ts"),
     source("../app/admin/event-day-dashboard.tsx"),
+    source("../app/share-photos/page.tsx"),
+    source("../app/share-photos/share-photos.module.css"),
   ]);
-  const eventSource = `${page}\n${styles}\n${photosApi}\n${eventApi}\n${gate}\n${layout}\n${authApi}\n${auth}\n${dashboard}`;
+  const eventSource = `${page}\n${styles}\n${photosApi}\n${eventApi}\n${gate}\n${layout}\n${authApi}\n${auth}\n${dashboard}\n${sharePage}\n${shareStyles}`;
 
   assert.match(page, /capture="environment"/);
   assert.match(page, /Party wall/);
@@ -204,7 +206,15 @@ test("event-day photo wall uses a PIN gate and supports controlled private guest
   assert.doesNotMatch(photosApi, /SELECT id, name/);
   assert.match(dashboard, /event-upload-qr\.svg/);
   assert.match(dashboard, /Guest photos,/);
+  assert.match(dashboard, /https:\/\/www\.invitez\.xyz\/share-photos/);
+  assert.match(dashboard, /without a PIN/);
   assert.doesNotMatch(dashboard, /guestName|guest_name/);
+  assert.match(sharePage, /capture="environment"/);
+  assert.match(sharePage, /no PIN needed/);
+  assert.match(sharePage, /optional · private/);
+  assert.match(sharePage, /never shown publicly/);
+  assert.match(sharePage, /body\.set\("guestName", guestName\)/);
+  assert.doesNotMatch(sharePage, /EventDayPinGate|hasEventDayAccess|EVENT_DAY_COOKIE/);
   assert.match(eventApi, /photoUploadsEnabled/);
   assert.match(auth, /eventDayAccessToken/);
   assert.match(authApi, /httpOnly: true/);

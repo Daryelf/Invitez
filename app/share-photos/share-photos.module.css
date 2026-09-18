@@ -1,0 +1,141 @@
+.page {
+  --ink: #173c32;
+  --sage: #829475;
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: max(18px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 8% 8%, rgba(237, 171, 184, .52), transparent 25%),
+    radial-gradient(circle at 92% 82%, rgba(139, 157, 120, .46), transparent 28%),
+    #e8eddc;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.glow {
+  position: fixed;
+  width: 280px;
+  height: 280px;
+  top: 18%;
+  right: -170px;
+  border: 62px solid rgba(255, 249, 237, .34);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(100%, 680px);
+  align-items: center;
+  gap: 11px;
+  margin: 0 auto 16px;
+  padding: 2px 3px;
+}
+
+.monogram {
+  display: grid;
+  width: 40px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff8ec;
+  background: var(--ink);
+  font: 22px Georgia, serif;
+}
+
+.header div { display: grid; }
+.header strong { font: 500 16px Georgia, serif; }
+.header small { color: #6d7c64; font-size: 9px; letter-spacing: .16em; text-transform: uppercase; }
+
+.card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 680px);
+  gap: 28px;
+  margin: 0 auto;
+  padding: clamp(24px, 6vw, 44px);
+  overflow: hidden;
+  border: 1px solid rgba(23, 60, 50, .14);
+  border-radius: 30px;
+  background: rgba(255, 249, 237, .94);
+  box-shadow: 0 26px 70px rgba(45, 66, 45, .18);
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  width: 160px;
+  aspect-ratio: 1;
+  top: -96px;
+  right: -76px;
+  border: 42px solid rgba(226, 145, 161, .12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.intro { position: relative; z-index: 1; }
+.kicker { margin: 0 0 12px; color: #bf7281; font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+.intro h1 { margin: 0; font: 400 clamp(3.35rem, 17vw, 5.8rem)/.8 Georgia, "Times New Roman", serif; letter-spacing: -.055em; }
+.intro h1 em { color: #c98591; font-weight: 400; }
+.intro > p:last-child { max-width: 520px; margin: 24px 0 0; color: #65745d; font: 1rem/1.65 Georgia, serif; }
+
+.form { position: relative; z-index: 1; display: grid; gap: 16px; }
+.photoPicker {
+  position: relative;
+  display: grid;
+  min-height: 265px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px dashed rgba(23, 60, 50, .34);
+  border-radius: 22px;
+  color: #61705a;
+  background: linear-gradient(145deg, rgba(222, 233, 207, .62), rgba(249, 223, 228, .55));
+  cursor: pointer;
+  text-align: center;
+}
+
+.photoPicker input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photoPicker input:disabled { cursor: not-allowed; }
+.photoPicker img { width: 100%; height: 100%; max-height: 440px; object-fit: cover; }
+.photoSelected { border-style: solid; background: #e8ecdf; }
+.photoPrompt { display: grid; place-items: center; gap: 8px; padding: 24px; }
+.photoPrompt i { display: grid; width: 56px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: white; background: var(--sage); font-size: 28px; font-style: normal; font-weight: 200; }
+.photoPrompt strong { margin-top: 5px; font: 500 24px Georgia, serif; }
+.photoPrompt small { font-size: 11px; line-height: 1.45; }
+.changePhoto { justify-self: center; margin-top: -7px; border: 0; color: #7d6a68; background: transparent; cursor: pointer; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+
+.field { display: grid; gap: 8px; }
+.field > span { display: flex; justify-content: space-between; gap: 12px; color: #63705d; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.field > span em { color: #a17d80; font-style: normal; }
+.field input { width: 100%; min-height: 56px; padding: 0 15px; border: 1px solid rgba(23, 60, 50, .18); border-radius: 13px; outline: 0; color: var(--ink); background: #fffdf8; font: inherit; }
+.field input:focus { border-color: #d48b98; box-shadow: 0 0 0 3px rgba(212, 139, 152, .15); }
+.field small { color: #788371; font-size: 10px; line-height: 1.45; }
+
+.status,
+.error,
+.success { margin: 0; padding: 12px 14px; border-radius: 11px; font-size: 12px; line-height: 1.45; }
+.status { color: #75684f; background: #f1e5c9; }
+.error { color: #8d3947; background: #f7dde1; }
+.success { color: #325c49; background: #dcebdc; }
+.submit { min-height: 58px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.submit:disabled { cursor: not-allowed; opacity: .38; }
+
+.page footer { position: relative; z-index: 1; margin: 20px auto 0; color: #61705a; font-size: 9px; font-weight: 700; letter-spacing: .15em; text-align: center; text-transform: uppercase; }
+
+@media (min-width: 720px) {
+  .page { padding-top: 34px; padding-bottom: 40px; }
+  .card { grid-template-columns: .8fr 1.2fr; align-items: start; }
+  .intro { position: sticky; top: 30px; }
+  .photoPicker { min-height: 330px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page * { scroll-behavior: auto !important; }
+}
