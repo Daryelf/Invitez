@@ -50,8 +50,13 @@ function canonicalInvitationPath(pathname) {
 function shouldProxyDashboard(pathname) {
   return pathname === "/admin"
     || pathname.startsWith("/admin/")
+    || pathname === "/share-photos"
+    || pathname === "/share-photos/"
     || pathname === "/api/admin"
     || pathname.startsWith("/api/admin/")
+    || pathname === "/api/event-day"
+    || pathname === "/api/photos"
+    || pathname.startsWith("/api/photos/")
     || pathname.startsWith("/assets/");
 }
 
@@ -65,12 +70,12 @@ function publicRequestOrigin(request) {
   return `${isLocal ? "http" : "https"}://${allowedHost}`;
 }
 
-async function readRequestBody(request) {
+async function readRequestBody(request, maxSize = 2 * 1024 * 1024) {
   const chunks = [];
   let size = 0;
   for await (const chunk of request) {
     size += chunk.length;
-    if (size > 2 * 1024 * 1024) throw new Error("Request is too large");
+    if (size > maxSize) throw new Error("Request is too large");
     chunks.push(chunk);
   }
   return Buffer.concat(chunks);
@@ -91,7 +96,8 @@ async function proxyDashboardRequest(request, response, requestUrl) {
   if (upstreamHeaders.has("origin")) upstreamHeaders.set("origin", dashboardOrigin);
 
   const method = request.method || "GET";
-  const body = method === "GET" || method === "HEAD" ? undefined : await readRequestBody(request);
+  const maxBodySize = requestUrl.pathname === "/api/photos" ? 12 * 1024 * 1024 : 2 * 1024 * 1024;
+  const body = method === "GET" || method === "HEAD" ? undefined : await readRequestBody(request, maxBodySize);
   const upstream = await fetch(target, {
     method,
     headers: upstreamHeaders,
@@ -179,14 +185,6 @@ createServer(async (request, response) => {
     }
     if (pathname === "/event-day" || pathname === "/event-day/") {
       response.writeHead(302, { Location: `https://after-hours-party.adventraa.chatgpt.site/event-day${requestUrl.search}` });
-      response.end();
-      return;
-    }
-    if (pathname === "/share-photos" || pathname === "/share-photos/") {
-      response.writeHead(302, {
-        "Cache-Control": "no-store",
-        Location: `https://after-hours-party.adventraa.chatgpt.site/share-photos${requestUrl.search}`,
-      });
       response.end();
       return;
     }

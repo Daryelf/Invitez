@@ -155,7 +155,9 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
 
   assert.ok(server.includes('if (/^\\/i\\/[^/]+\\/?$/.test(pathname))'));
   assert.match(server, /pathname === "\/share-photos"/);
-  assert.match(server, /adventraa\.chatgpt\.site\/share-photos/);
+  assert.match(server, /pathname\.startsWith\("\/api\/photos\/"\)/);
+  assert.match(server, /12 \* 1024 \* 1024/);
+  assert.doesNotMatch(server, /Location: `https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/share-photos/);
   assert.match(server, /canonicalInvitationPath/);
   assert.match(server, /\[a-f0-9\]\{32\}/);
   assert.match(server, /canonicalInvitePath/);
