@@ -14,9 +14,10 @@ export default function SharePhotosPage() {
   const [eventDay, setEventDay] = useState<EventDayData | null>(null);
   const [guestName, setGuestName] = useState("");
   const [caption, setCaption] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadedCount, setUploadedCount] = useState(0);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -30,50 +31,63 @@ export default function SharePhotosPage() {
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Photo sharing is temporarily unavailable"));
   }, []);
 
-  useEffect(() => () => {
-    if (filePreview) URL.revokeObjectURL(filePreview);
-  }, [filePreview]);
+  useEffect(() => {
+    const previews = files.map((selectedFile) => URL.createObjectURL(selectedFile));
+    setFilePreviews(previews);
+    return () => previews.forEach((preview) => URL.revokeObjectURL(preview));
+  }, [files]);
 
   const uploadAllowed = Boolean(eventDay?.photoUploadsEnabled);
   const eventName = eventDay?.event?.eventName || "the celebration";
 
-  function selectPhoto(changeEvent: ChangeEvent<HTMLInputElement>) {
-    const nextFile = changeEvent.target.files?.[0] || null;
-    if (filePreview) URL.revokeObjectURL(filePreview);
-    setFile(nextFile);
-    setFilePreview(nextFile ? URL.createObjectURL(nextFile) : "");
+  function selectPhotos(changeEvent: ChangeEvent<HTMLInputElement>) {
+    const nextFiles = Array.from(changeEvent.target.files || []);
+    setFiles((currentFiles) => [...currentFiles, ...nextFiles]);
     setNotice("");
     setError("");
+    changeEvent.target.value = "";
   }
 
-  function clearPhoto() {
-    if (filePreview) URL.revokeObjectURL(filePreview);
-    setFile(null);
-    setFilePreview("");
+  function clearPhotos() {
+    setFiles([]);
     if (fileInput.current) fileInput.current.value = "";
   }
 
-  async function uploadPhoto(formEvent: FormEvent<HTMLFormElement>) {
+  async function uploadPhotos(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
-    if (!file || !uploadAllowed) return;
+    if (!files.length || !uploadAllowed) return;
 
     setUploading(true);
+    setUploadedCount(0);
     setNotice("");
     setError("");
-    const body = new FormData();
-    body.set("photo", file);
-    body.set("guestName", guestName);
-    body.set("caption", caption);
+    let completed = 0;
 
     try {
-      const response = await fetch("/api/photos", { method: "POST", body });
-      const result = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(result.error || "Could not upload that photo");
-      clearPhoto();
+      for (const selectedFile of files) {
+        const body = new FormData();
+        body.set("photo", selectedFile);
+        body.set("guestName", guestName);
+        body.set("caption", caption);
+
+        const response = await fetch("/api/photos", { method: "POST", body });
+        const result = await response.json() as { error?: string };
+        if (!response.ok) throw new Error(result.error || "Could not upload that photo");
+        completed += 1;
+        setUploadedCount(completed);
+      }
+
+      clearPhotos();
       setCaption("");
-      setNotice("Your photo was added. Thank you for sharing it!");
+      setNotice(files.length === 1
+        ? "Your photo was added. Thank you for sharing it!"
+        : `All ${files.length} photos were added. Thank you for sharing them!`);
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Could not upload that photo");
+      if (completed > 0) setFiles((currentFiles) => currentFiles.slice(completed));
+      const message = uploadError instanceof Error ? uploadError.message : "Could not upload that photo";
+      setError(completed > 0
+        ? `${completed} of ${files.length} photos uploaded. ${message} Please try the remaining photos again.`
+        : message);
     } finally {
       setUploading(false);
     }
@@ -93,21 +107,26 @@ export default function SharePhotosPage() {
           <p>Share your experience for Erika.</p>
         </div>
 
-        <form className={styles.form} onSubmit={uploadPhoto}>
-          <label className={`${styles.photoPicker} ${filePreview ? styles.photoSelected : ""}`}>
-            {filePreview ? (
-              <img src={filePreview} alt="Your selected photo" />
+        <form className={styles.form} onSubmit={uploadPhotos}>
+          <label className={`${styles.photoPicker} ${filePreviews.length ? styles.photoSelected : ""}`}>
+            {filePreviews.length ? (
+              <span className={`${styles.previewGrid} ${filePreviews.length === 1 ? styles.singlePreview : ""}`}>
+                {filePreviews.map((preview, index) => (
+                  <img key={preview} src={preview} alt={`Selected photo ${index + 1} of ${filePreviews.length}`} />
+                ))}
+                <strong className={styles.selectionCount}>{files.length} {files.length === 1 ? "photo" : "photos"} selected</strong>
+              </span>
             ) : (
               <span className={styles.photoPrompt}>
                 <i>＋</i>
-                <strong>Choose a photo</strong>
-                <small>Open your camera or photo library</small>
+                <strong>Choose photos</strong>
+                <small>Select one or more from your photo library</small>
               </span>
             )}
-            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={selectPhoto} disabled={!uploadAllowed} />
+            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={selectPhotos} disabled={!uploadAllowed || uploading} />
           </label>
 
-          {file ? <button className={styles.changePhoto} type="button" onClick={clearPhoto}>Choose a different photo</button> : null}
+          {files.length ? <button className={styles.changePhoto} type="button" onClick={() => fileInput.current?.click()} disabled={uploading}>Add more photos</button> : null}
 
           <label className={styles.field}>
             <span>Your name <em>optional · private</em></span>
@@ -124,8 +143,12 @@ export default function SharePhotosPage() {
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
           {notice ? <p className={styles.success} role="status">{notice}</p> : null}
 
-          <button className={styles.submit} type="submit" disabled={!file || !uploadAllowed || uploading}>
-            {uploading ? "Uploading…" : notice ? "Add another photo" : "Share this photo"}
+          <button className={styles.submit} type="submit" disabled={!files.length || !uploadAllowed || uploading}>
+            {uploading
+              ? `Uploading ${Math.min(uploadedCount + 1, files.length)} of ${files.length}…`
+              : files.length > 1
+                ? `Share ${files.length} photos`
+                : "Share this photo"}
           </button>
         </form>
       </section>

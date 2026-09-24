@@ -222,6 +222,13 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(sharePage, /optional · private/);
   assert.match(sharePage, /will not appear with the photo/);
   assert.match(sharePage, /body\.set\("guestName", guestName\)/);
+  assert.match(sharePage, /multiple onChange=\{selectPhotos\}/);
+  assert.match(sharePage, /Array\.from\(changeEvent\.target\.files/);
+  assert.match(sharePage, /\[\.\.\.currentFiles, \.\.\.nextFiles\]/);
+  assert.match(sharePage, /for \(const selectedFile of files\)/);
+  assert.match(sharePage, /Share \$\{files\.length\} photos/);
+  assert.match(shareStyles, /\.previewGrid/);
+  assert.match(shareStyles, /\.selectionCount/);
   assert.doesNotMatch(sharePage, /EventDayPinGate|hasEventDayAccess|EVENT_DAY_COOKIE/);
   assert.match(eventApi, /photoUploadsEnabled/);
   assert.match(auth, /eventDayAccessToken/);

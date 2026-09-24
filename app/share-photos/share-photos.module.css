@@ -102,13 +102,38 @@
 
 .photoPicker input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .photoPicker input:disabled { cursor: not-allowed; }
-.photoPicker img { width: 100%; height: 100%; max-height: 440px; object-fit: cover; }
+.previewGrid {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 265px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+}
+.previewGrid img { width: 100%; height: 100%; min-height: 130px; max-height: 218px; object-fit: cover; }
+.singlePreview { grid-template-columns: 1fr; }
+.singlePreview img { min-height: 265px; max-height: 440px; }
+.selectionCount {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: #fffaf0;
+  background: rgba(23, 60, 50, .88);
+  box-shadow: 0 4px 14px rgba(23, 60, 50, .22);
+  font-size: 12px;
+  line-height: 1;
+}
 .photoSelected { border-style: solid; background: #e8ecdf; }
 .photoPrompt { display: grid; place-items: center; gap: 8px; padding: 24px; }
 .photoPrompt i { display: grid; width: 56px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: white; background: var(--sage); font-size: 28px; font-style: normal; font-weight: 200; }
 .photoPrompt strong { margin-top: 5px; font: 500 24px Georgia, serif; }
 .photoPrompt small { font-size: 11px; line-height: 1.45; }
 .changePhoto { justify-self: center; margin-top: -7px; border: 0; color: #7d6a68; background: transparent; cursor: pointer; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.changePhoto:disabled { cursor: not-allowed; opacity: .45; }
 
 .field { display: grid; gap: 8px; }
 .field > span { display: flex; justify-content: space-between; gap: 12px; color: #63705d; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
