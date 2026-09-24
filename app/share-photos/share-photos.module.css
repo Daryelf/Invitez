@@ -81,7 +81,6 @@
 }
 
 .intro { position: relative; z-index: 1; }
-.kicker { margin: 0 0 12px; color: #bf7281; font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
 .intro h1 { margin: 0; font: 400 clamp(3.35rem, 17vw, 5.8rem)/.8 Georgia, "Times New Roman", serif; letter-spacing: -.055em; }
 .intro h1 em { color: #c98591; font-weight: 400; }
 .intro > p:last-child { max-width: 520px; margin: 24px 0 0; color: #65745d; font: 1rem/1.65 Georgia, serif; }
@@ -126,8 +125,6 @@
 .success { color: #325c49; background: #dcebdc; }
 .submit { min-height: 58px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .submit:disabled { cursor: not-allowed; opacity: .38; }
-
-.page footer { position: relative; z-index: 1; margin: 20px auto 0; color: #61705a; font-size: 9px; font-weight: 700; letter-spacing: .15em; text-align: center; text-transform: uppercase; }
 
 @media (min-width: 720px) {
   .page { padding-top: 34px; padding-bottom: 40px; }

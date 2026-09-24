@@ -203,7 +203,7 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(page, /Your name <em>optional/);
   assert.match(page, /will not appear in the gallery/);
   assert.match(page, /body\.set\("guestName", guestName\)/);
-  assert.match(photosApi, /Photo sharing opens on event day/);
+  assert.doesNotMatch(photosApi, /Photo sharing opens on event day/);
   assert.match(photosApi, /Photo uploads are paused by the host/);
   assert.match(photosApi, /image\/jpeg/);
   assert.match(photosApi, /guest_name/);
@@ -213,10 +213,14 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(dashboard, /https:\/\/www\.invitez\.xyz\/share-photos/);
   assert.match(dashboard, /without a PIN/);
   assert.doesNotMatch(dashboard, /guestName|guest_name/);
-  assert.match(sharePage, /capture="environment"/);
-  assert.match(sharePage, /no PIN needed/);
+  assert.doesNotMatch(sharePage, /capture="environment"/);
+  assert.doesNotMatch(sharePage, /no PIN needed/);
+  assert.match(sharePage, /Share your experience for Erika\./);
+  assert.doesNotMatch(sharePage, /Photo sharing will open/);
+  assert.doesNotMatch(sharePage, /Private guest upload/);
+  assert.match(sharePage, /Boolean\(eventDay\?\.photoUploadsEnabled\)/);
   assert.match(sharePage, /optional · private/);
-  assert.match(sharePage, /never shown publicly/);
+  assert.match(sharePage, /will not appear with the photo/);
   assert.match(sharePage, /body\.set\("guestName", guestName\)/);
   assert.doesNotMatch(sharePage, /EventDayPinGate|hasEventDayAccess|EVENT_DAY_COOKIE/);
   assert.match(eventApi, /photoUploadsEnabled/);

@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { getEventSettings, isEventDayActive } from "@/db/invitations";
+import { getEventSettings } from "@/db/invitations";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -21,7 +21,6 @@ export async function GET() {
 export async function POST(request: Request) {
   if (!env.DB || !env.MEDIA) return json({ error: "Photo storage is not configured yet" }, { status: 503 });
   const event = await getEventSettings();
-  if (!isEventDayActive(event)) return json({ error: "Photo sharing opens on event day" }, { status: 403 });
   if (!event.photoUploadsEnabled) return json({ error: "Photo uploads are paused by the host" }, { status: 403 });
   const formData = await request.formData();
   const file = formData.get("photo");

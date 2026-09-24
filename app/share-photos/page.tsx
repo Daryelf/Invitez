@@ -34,7 +34,7 @@ export default function SharePhotosPage() {
     if (filePreview) URL.revokeObjectURL(filePreview);
   }, [filePreview]);
 
-  const uploadAllowed = Boolean(eventDay?.active && eventDay.photoUploadsEnabled);
+  const uploadAllowed = Boolean(eventDay?.photoUploadsEnabled);
   const eventName = eventDay?.event?.eventName || "the celebration";
 
   function selectPhoto(changeEvent: ChangeEvent<HTMLInputElement>) {
@@ -89,9 +89,8 @@ export default function SharePhotosPage() {
 
       <section className={styles.card}>
         <div className={styles.intro}>
-          <p className={styles.kicker}>You&apos;re in — no PIN needed</p>
           <h1>Share a<br /><em>memory.</em></h1>
-          <p>Choose a photo from your phone. Add your name if you want—it is saved privately for the host and never shown publicly.</p>
+          <p>Share your experience for Erika.</p>
         </div>
 
         <form className={styles.form} onSubmit={uploadPhoto}>
@@ -105,7 +104,7 @@ export default function SharePhotosPage() {
                 <small>Open your camera or photo library</small>
               </span>
             )}
-            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={selectPhoto} disabled={!uploadAllowed} />
+            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={selectPhoto} disabled={!uploadAllowed} />
           </label>
 
           {file ? <button className={styles.changePhoto} type="button" onClick={clearPhoto}>Choose a different photo</button> : null}
@@ -121,8 +120,7 @@ export default function SharePhotosPage() {
             <input value={caption} onChange={(event) => setCaption(event.target.value.slice(0, 140))} maxLength={140} placeholder="Add a short note about this moment" disabled={!uploadAllowed} />
           </label>
 
-          {eventDay && !eventDay.active ? <p className={styles.status}>Photo sharing will open when the host starts Event Day.</p> : null}
-          {eventDay?.active && !eventDay.photoUploadsEnabled ? <p className={styles.status}>Photo uploads are paused by the host.</p> : null}
+          {eventDay && !eventDay.photoUploadsEnabled ? <p className={styles.status}>Photo uploads are paused by the host.</p> : null}
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
           {notice ? <p className={styles.success} role="status">{notice}</p> : null}
 
@@ -132,7 +130,6 @@ export default function SharePhotosPage() {
         </form>
       </section>
 
-      <footer>Invitez · Private guest upload</footer>
     </main>
   );
 }
