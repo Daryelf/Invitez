@@ -51,6 +51,7 @@
     }
     .card::after { content: ""; position: absolute; width: 160px; aspect-ratio: 1; top: -96px; right: -76px; border: 42px solid rgba(226, 145, 161, .12); border-radius: 50%; pointer-events: none; }
     .intro { position: relative; z-index: 1; }
+    .intro[hidden], form[hidden] { display: none; }
     h1 { margin: 0; font: 400 clamp(3.35rem, 17vw, 5.8rem)/.8 Georgia, "Times New Roman", serif; letter-spacing: -.055em; }
     h1 em { color: #c98591; font-weight: 400; }
     .intro p { max-width: 520px; margin: 24px 0 0; color: #65745d; font: 1rem/1.65 Georgia, serif; }
@@ -98,6 +99,14 @@
     .message.success { color: #325c49; background: #dcebdc; }
     .submit { min-height: 58px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
     .submit:disabled { cursor: not-allowed; opacity: .38; }
+    .confirmation { position: relative; z-index: 1; display: grid; grid-column: 1 / -1; min-height: min(520px, 68dvh); place-items: center; align-content: center; gap: 16px; padding: 20px 0; text-align: center; }
+    .confirmation[hidden] { display: none; }
+    .confirmation-icon { display: grid; width: 76px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #fffaf0; background: var(--ink); box-shadow: 0 14px 28px rgba(23, 60, 50, .2); font-size: 34px; }
+    .confirmation > small { color: #a17d80; font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .confirmation h2 { max-width: 520px; margin: 0; font: 400 clamp(2.8rem, 13vw, 5rem)/.92 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+    .confirmation p { max-width: 470px; margin: 0; color: #65745d; font: 1rem/1.6 Georgia, serif; }
+    .confirmation button { min-height: 56px; margin-top: 8px; padding: 0 24px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .confirmation button:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }
     @media (min-width: 720px) {
       .page { padding-top: 34px; padding-bottom: 48px; }
       .card { grid-template-columns: .8fr 1.2fr; align-items: start; }
@@ -113,13 +122,13 @@
       <div><strong id="event-name">Erika's Sweet 16</strong><small>Guest memory drop</small></div>
     </header>
     <section class="card">
-      <div class="intro">
+      <div class="intro" id="intro">
         <h1>Share a<br><em>memory.</em></h1>
         <p>Share your experience for Erika.</p>
       </div>
       <form id="photo-form">
         <label class="picker" id="picker">
-          <span class="prompt" id="prompt"><i>＋</i><strong>Choose photos or videos</strong><small>Select one or more from your library</small></span>
+          <span class="prompt" id="prompt"><i>＋</i><strong>Choose photos or videos</strong><small>Upload up to 10 photos or videos at a time</small></span>
           <span class="previews" id="previews"><strong class="count" id="count"></strong></span>
           <input id="photos" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple disabled>
         </label>
@@ -134,14 +143,22 @@
           <input id="caption" maxlength="140" placeholder="Add a short note about this moment" disabled>
         </label>
         <p class="message error" id="error" role="alert"></p>
-        <p class="message success" id="success" role="status"></p>
         <button class="submit" id="submit" type="submit" disabled>Share this photo</button>
       </form>
+      <section class="confirmation" id="confirmation" role="status" aria-live="polite" hidden>
+        <span class="confirmation-icon" aria-hidden="true">✓</span>
+        <small>Submitted</small>
+        <h2 id="confirmation-title">Your memories are in.</h2>
+        <p id="confirmation-copy"></p>
+        <button id="submit-another" type="button">Submit new photos or videos</button>
+      </section>
     </section>
   </main>
   <script>
+    const MAX_BATCH_FILES = 10;
     const input = document.querySelector("#photos");
     const form = document.querySelector("#photo-form");
+    const intro = document.querySelector("#intro");
     const picker = document.querySelector("#picker");
     const prompt = document.querySelector("#prompt");
     const previews = document.querySelector("#previews");
@@ -151,7 +168,10 @@
     const caption = document.querySelector("#caption");
     const submit = document.querySelector("#submit");
     const errorMessage = document.querySelector("#error");
-    const successMessage = document.querySelector("#success");
+    const confirmation = document.querySelector("#confirmation");
+    const confirmationTitle = document.querySelector("#confirmation-title");
+    const confirmationCopy = document.querySelector("#confirmation-copy");
+    const submitAnother = document.querySelector("#submit-another");
     let selectedFiles = [];
     let previewUrls = [];
     let uploadAllowed = false;
@@ -209,10 +229,13 @@
     }
 
     input.addEventListener("change", () => {
-      selectedFiles = selectedFiles.concat(Array.from(input.files || []));
+      const nextFiles = Array.from(input.files || []);
+      const availableSlots = Math.max(0, MAX_BATCH_FILES - selectedFiles.length);
+      selectedFiles = selectedFiles.concat(nextFiles.slice(0, availableSlots));
       input.value = "";
-      showMessage(errorMessage, "");
-      showMessage(successMessage, "");
+      showMessage(errorMessage, nextFiles.length > availableSlots
+        ? `You can upload up to ${MAX_BATCH_FILES} photos or videos at a time.`
+        : "");
       renderSelection();
     });
 
@@ -228,7 +251,6 @@
       input.disabled = true;
       addMore.disabled = true;
       showMessage(errorMessage, "");
-      showMessage(successMessage, "");
       renderSelection();
 
       try {
@@ -245,9 +267,15 @@
         }
         selectedFiles = [];
         caption.value = "";
-        showMessage(successMessage, batchSize === 1
-          ? `Your ${singleFileWasVideo ? "video" : "photo"} was added. Thank you for sharing it!`
-          : `All ${batchSize} memories were added. Thank you for sharing them!`);
+        confirmationTitle.textContent = batchSize === 1
+          ? `Your ${singleFileWasVideo ? "video is" : "photo is"} in.`
+          : "Your memories are in.";
+        confirmationCopy.textContent = batchSize === 1
+          ? `Your ${singleFileWasVideo ? "video" : "photo"} was shared successfully. Thank you for celebrating Erika!`
+          : `All ${batchSize} photos and videos were shared successfully. Thank you for celebrating Erika!`;
+        intro.hidden = true;
+        form.hidden = true;
+        confirmation.hidden = false;
       } catch (error) {
         if (completed) selectedFiles = selectedFiles.slice(completed);
         const reason = error instanceof Error ? error.message : "Could not upload that photo or video";
@@ -260,6 +288,16 @@
         addMore.disabled = false;
         renderSelection();
       }
+    });
+
+    submitAnother.addEventListener("click", () => {
+      selectedFiles = [];
+      caption.value = "";
+      showMessage(errorMessage, "");
+      confirmation.hidden = true;
+      intro.hidden = false;
+      form.hidden = false;
+      renderSelection();
     });
 
     fetch("/api/event-day", { cache: "no-store" })

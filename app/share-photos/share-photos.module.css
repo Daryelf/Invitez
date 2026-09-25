@@ -138,13 +138,30 @@
 .field small { color: #788371; font-size: 10px; line-height: 1.45; }
 
 .status,
-.error,
-.success { margin: 0; padding: 12px 14px; border-radius: 11px; font-size: 12px; line-height: 1.45; }
+.error { margin: 0; padding: 12px 14px; border-radius: 11px; font-size: 12px; line-height: 1.45; }
 .status { color: #75684f; background: #f1e5c9; }
 .error { color: #8d3947; background: #f7dde1; }
-.success { color: #325c49; background: #dcebdc; }
 .submit { min-height: 58px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .submit:disabled { cursor: not-allowed; opacity: .38; }
+
+.confirmation {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-column: 1 / -1;
+  min-height: min(520px, 68dvh);
+  place-items: center;
+  align-content: center;
+  gap: 16px;
+  padding: 20px 0;
+  text-align: center;
+}
+.confirmationIcon { display: grid; width: 76px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #fffaf0; background: var(--ink); box-shadow: 0 14px 28px rgba(23, 60, 50, .2); font-size: 34px; }
+.confirmation small { color: #a17d80; font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+.confirmation h1 { max-width: 520px; margin: 0; font: 400 clamp(2.8rem, 13vw, 5rem)/.92 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+.confirmation p { max-width: 470px; margin: 0; color: #65745d; font: 1rem/1.6 Georgia, serif; }
+.confirmation button { min-height: 56px; margin-top: 8px; padding: 0 24px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.confirmation button:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }
 
 @media (min-width: 720px) {
   .page { padding-top: 34px; padding-bottom: 48px; }

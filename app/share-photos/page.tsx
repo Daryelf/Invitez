@@ -9,6 +9,8 @@ type EventDayData = {
   event: { eventName: string } | null;
 };
 
+const MAX_BATCH_FILES = 10;
+
 function isVideo(file: File | undefined) {
   return Boolean(file?.type.startsWith("video/"));
 }
@@ -27,7 +29,7 @@ export default function SharePhotosPage() {
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
-  const [notice, setNotice] = useState("");
+  const [submitted, setSubmitted] = useState<{ count: number; singleWasVideo: boolean } | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -51,9 +53,16 @@ export default function SharePhotosPage() {
 
   function selectMedia(changeEvent: ChangeEvent<HTMLInputElement>) {
     const nextFiles = Array.from(changeEvent.target.files || []);
-    setFiles((currentFiles) => [...currentFiles, ...nextFiles]);
-    setNotice("");
-    setError("");
+    setFiles((currentFiles) => {
+      const availableSlots = Math.max(0, MAX_BATCH_FILES - currentFiles.length);
+      const acceptedFiles = nextFiles.slice(0, availableSlots);
+      if (nextFiles.length > availableSlots) {
+        setError(`You can upload up to ${MAX_BATCH_FILES} photos or videos at a time.`);
+      } else {
+        setError("");
+      }
+      return [...currentFiles, ...acceptedFiles];
+    });
     changeEvent.target.value = "";
   }
 
@@ -68,9 +77,10 @@ export default function SharePhotosPage() {
 
     setUploading(true);
     setUploadedCount(0);
-    setNotice("");
     setError("");
     let completed = 0;
+    const batchSize = files.length;
+    const singleWasVideo = batchSize === 1 && isVideo(files[0]);
 
     try {
       for (const selectedFile of files) {
@@ -88,9 +98,7 @@ export default function SharePhotosPage() {
 
       clearPhotos();
       setCaption("");
-      setNotice(files.length === 1
-        ? `Your ${isVideo(files[0]) ? "video" : "photo"} was added. Thank you for sharing it!`
-        : `All ${files.length} memories were added. Thank you for sharing them!`);
+      setSubmitted({ count: batchSize, singleWasVideo });
     } catch (uploadError) {
       if (completed > 0) setFiles((currentFiles) => currentFiles.slice(completed));
       const message = uploadError instanceof Error ? uploadError.message : "Could not upload that photo or video";
@@ -111,12 +119,23 @@ export default function SharePhotosPage() {
       </header>
 
       <section className={styles.card}>
-        <div className={styles.intro}>
-          <h1>Share a<br /><em>memory.</em></h1>
-          <p>Share your experience for Erika.</p>
-        </div>
+        {submitted ? (
+          <div className={styles.confirmation} role="status" aria-live="polite">
+            <span className={styles.confirmationIcon} aria-hidden="true">✓</span>
+            <small>Submitted</small>
+            <h1>Your {submitted.count === 1 ? (submitted.singleWasVideo ? "video is" : "photo is") : "memories are"} in.</h1>
+            <p>{submitted.count === 1
+              ? `Your ${submitted.singleWasVideo ? "video" : "photo"} was shared successfully. Thank you for celebrating Erika!`
+              : `All ${submitted.count} photos and videos were shared successfully. Thank you for celebrating Erika!`}</p>
+            <button type="button" onClick={() => setSubmitted(null)}>Submit new photos or videos</button>
+          </div>
+        ) : <>
+          <div className={styles.intro}>
+            <h1>Share a<br /><em>memory.</em></h1>
+            <p>Share your experience for Erika.</p>
+          </div>
 
-        <form className={styles.form} onSubmit={uploadPhotos}>
+          <form className={styles.form} onSubmit={uploadPhotos}>
           <label className={`${styles.photoPicker} ${filePreviews.length ? styles.photoSelected : ""}`}>
             {filePreviews.length ? (
               <span className={`${styles.previewGrid} ${filePreviews.length === 1 ? styles.singlePreview : ""}`}>
@@ -134,7 +153,7 @@ export default function SharePhotosPage() {
               <span className={styles.photoPrompt}>
                 <i>＋</i>
                 <strong>Choose photos or videos</strong>
-                <small>Select one or more from your library</small>
+                <small>Upload up to {MAX_BATCH_FILES} photos or videos at a time</small>
               </span>
             )}
             <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple onChange={selectMedia} disabled={!uploadAllowed || uploading} />
@@ -155,7 +174,6 @@ export default function SharePhotosPage() {
 
           {eventDay && !eventDay.photoUploadsEnabled ? <p className={styles.status}>Uploads are paused by the host.</p> : null}
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
-          {notice ? <p className={styles.success} role="status">{notice}</p> : null}
 
           <button className={styles.submit} type="submit" disabled={!files.length || !uploadAllowed || uploading}>
             {uploading
@@ -164,7 +182,8 @@ export default function SharePhotosPage() {
                 ? `Share ${files.length} memories`
                 : `Share this ${isVideo(files[0]) ? "video" : "photo"}`}
           </button>
-        </form>
+          </form>
+        </>}
       </section>
 
     </main>
