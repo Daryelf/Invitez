@@ -159,6 +159,8 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(server, /railway", "share-photos\.html/);
   assert.match(server, /pathname\.startsWith\("\/api\/photos\/"\)/);
   assert.match(server, /96 \* 1024 \* 1024/);
+  assert.match(server, /Readable\.fromWeb\(upstream\.body\)\.pipe\(response\)/);
+  assert.doesNotMatch(server, /upstream\.arrayBuffer/);
   assert.doesNotMatch(server, /Location: `https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/share-photos/);
   assert.match(guestUpload, /type="file" accept="image\/jpeg,image\/png,image\/webp,video\/mp4,video\/quicktime,video\/webm,video\/x-m4v" multiple/);
   assert.match(guestUpload, /const MAX_BATCH_FILES = 10/);
@@ -196,7 +198,7 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
 });
 
 test("event-day wall stays protected while the QR guest upload is public and keeps names private", async () => {
-  const [page, styles, photosApi, mediaApi, eventApi, gate, layout, authApi, auth, dashboard, sharePage, shareStyles] = await Promise.all([
+  const [page, styles, photosApi, mediaApi, eventApi, gate, layout, authApi, auth, dashboard, sharePage, shareStyles, adminPhotosApi, adminPhotoApi, adminDownloadApi, zipStream] = await Promise.all([
     source("../app/event-day/page.tsx"),
     source("../app/event-day/event-day.module.css"),
     source("../app/api/photos/route.ts"),
@@ -209,6 +211,10 @@ test("event-day wall stays protected while the QR guest upload is public and kee
     source("../app/admin/event-day-dashboard.tsx"),
     source("../app/share-photos/page.tsx"),
     source("../app/share-photos/share-photos.module.css"),
+    source("../app/api/admin/photos/route.ts"),
+    source("../app/api/admin/photos/[id]/route.ts"),
+    source("../app/api/admin/photos/download/route.ts"),
+    source("../lib/zip-stream.ts"),
   ]);
   const eventSource = `${page}\n${styles}\n${photosApi}\n${mediaApi}\n${eventApi}\n${gate}\n${layout}\n${authApi}\n${auth}\n${dashboard}\n${sharePage}\n${shareStyles}`;
 
@@ -237,7 +243,22 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(dashboard, /Download QR/);
   assert.match(dashboard, /download="Erikas-Sweet-16-guest-upload-QR\.svg"/);
   assert.match(dashboard, /<video/);
-  assert.doesNotMatch(dashboard, /guestName|guest_name/);
+  assert.match(dashboard, /guestName/);
+  assert.match(dashboard, /Search guest names or messages/);
+  assert.match(dashboard, /Download all/);
+  assert.match(dashboard, /Collapse all/);
+  assert.match(dashboard, /Delete/);
+  assert.match(dashboard, /\/api\/admin\/photos/);
+  assert.match(adminPhotosApi, /requireAdminApi/);
+  assert.match(adminPhotosApi, /guest_name/);
+  assert.match(adminPhotosApi, /downloadUrl/);
+  assert.match(adminPhotoApi, /export async function DELETE/);
+  assert.match(adminPhotoApi, /env\.MEDIA\.delete/);
+  assert.match(adminPhotoApi, /DELETE FROM photos/);
+  assert.match(adminDownloadApi, /Erikas-Sweet-16-guest-memories\.zip/);
+  assert.match(adminDownloadApi, /Anonymous guest/);
+  assert.match(zipStream, /0x04034b50/);
+  assert.match(zipStream, /0x06064b50/);
   assert.doesNotMatch(sharePage, /capture="environment"/);
   assert.doesNotMatch(sharePage, /no PIN needed/);
   assert.match(sharePage, /Share your experience for Erika\./);

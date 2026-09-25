@@ -2,6 +2,7 @@ import { createReadStream } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
+import { Readable } from "node:stream";
 
 const port = Number(process.env.PORT || 8080);
 const root = process.cwd();
@@ -103,14 +104,12 @@ async function proxyDashboardRequest(request, response, requestUrl) {
     body,
     redirect: "manual",
   });
-  const responseBody = method === "HEAD" ? Buffer.alloc(0) : Buffer.from(await upstream.arrayBuffer());
   const responseHeaders = {};
 
   upstream.headers.forEach((value, name) => {
-    if (["connection", "content-length", "content-encoding", "set-cookie"].includes(name)) return;
+    if (["connection", "content-encoding", "set-cookie"].includes(name)) return;
     responseHeaders[name] = name === "location" ? value.replaceAll(dashboardOrigin, publicOrigin) : value;
   });
-  responseHeaders["Content-Length"] = responseBody.length;
 
   const setCookies = typeof upstream.headers.getSetCookie === "function"
     ? upstream.headers.getSetCookie()
@@ -119,7 +118,11 @@ async function proxyDashboardRequest(request, response, requestUrl) {
   if (dashboardCookies.length) responseHeaders["Set-Cookie"] = dashboardCookies;
 
   response.writeHead(upstream.status, responseHeaders);
-  response.end(responseBody);
+  if (method === "HEAD" || !upstream.body) {
+    response.end();
+    return;
+  }
+  Readable.fromWeb(upstream.body).pipe(response);
 }
 
 async function sendFile(request, response, filePath) {
