@@ -12,12 +12,14 @@ type EventDayData = {
 type GalleryPhoto = { id: string; url: string; createdAt: string };
 
 const EVENT_DAY_URL = "https://www.invitez.xyz/share-photos";
+const EVENT_QR_URL = "/event-upload-qr.svg";
 
 export default function EventDayDashboard() {
   const [eventDay, setEventDay] = useState<EventDayData | null>(null);
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [copyLabel, setCopyLabel] = useState("Copy guest link");
+  const [qrExpanded, setQrExpanded] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -41,6 +43,15 @@ export default function EventDayDashboard() {
     return () => window.clearInterval(refreshTimer);
   }, [load]);
 
+  useEffect(() => {
+    if (!qrExpanded) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setQrExpanded(false);
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [qrExpanded]);
+
   async function copyGuestLink() {
     try {
       await navigator.clipboard.writeText(EVENT_DAY_URL);
@@ -53,35 +64,33 @@ export default function EventDayDashboard() {
 
   return (
     <section className={styles.eventDayDashboard}>
-      <div className={styles.eventDayHero}>
-        <div>
-          <p className={styles.eyebrow}>Event Day live gallery</p>
-          <h2>Guest photos,<br />all in one place.</h2>
-          <p>Share the QR code at the event. Guests land directly on the uploader—no PIN—and every photo appears in the gallery here.</p>
-        </div>
-        <div className={styles.eventDayActions}>
-          <button className={styles.secondaryButton} type="button" onClick={copyGuestLink}>{copyLabel}</button>
-          <a className={styles.primaryButton} href={EVENT_DAY_URL} target="_blank" rel="noreferrer">Open guest upload</a>
-        </div>
-      </div>
-
       <div className={styles.eventDayGrid}>
         <article className={styles.eventQrCard}>
           <div className={styles.eventQrTopline}><span>Guest upload</span><strong>Scan me</strong></div>
-          <div className={styles.eventQrFrame}><img src="/event-upload-qr.svg" alt="QR code for the Event Day guest photo page" /></div>
-          <h3>Scan to share photos</h3>
-          <p>This guest upload link opens without a PIN. Names are optional and stay private.</p>
+          <button className={styles.eventQrFrame} type="button" onClick={() => setQrExpanded(true)} aria-label="Enlarge guest upload QR code">
+            <img src={EVENT_QR_URL} alt="QR code for the Event Day guest photo page" />
+          </button>
+          <div className={styles.eventQrActions}>
+            <button type="button" onClick={() => setQrExpanded(true)}>Enlarge</button>
+            <a href={EVENT_QR_URL} download="Erikas-Sweet-16-guest-upload-QR.svg">Download QR</a>
+          </div>
         </article>
 
         <article className={styles.eventSummary}>
-          <div className={styles.eventStatus}><i className={eventDay?.active ? styles.eventStatusLive : ""} /><span>{eventDay?.active ? "Event Day is live" : "Scheduled for event day"}</span></div>
-          <div className={styles.eventMemoryCount}><strong>{loading ? "—" : photos.length}</strong><span>{photos.length === 1 ? "photo shared" : "photos shared"}</span></div>
+          <div className={styles.eventSummaryTopline}>
+            <div className={styles.eventStatus}><i className={eventDay?.active ? styles.eventStatusLive : ""} /><span>{eventDay?.active ? "Event Day is live" : "Scheduled for event day"}</span></div>
+            <div className={styles.eventMemoryCount}><strong>{loading ? "—" : photos.length}</strong><span>{photos.length === 1 ? "photo shared" : "photos shared"}</span></div>
+          </div>
           <dl>
             <div><dt>Event</dt><dd>{eventDay?.event?.eventName ?? "Your event"}</dd></div>
             <div><dt>When</dt><dd>{eventDay?.event ? `${eventDay.event.eventDate} · ${eventDay.event.eventTime}` : "Loading…"}</dd></div>
             <div><dt>Uploads</dt><dd>{eventDay?.photoUploadsEnabled ? "Open when Event Day is live" : "Paused"}</dd></div>
           </dl>
-          <button className={styles.secondaryButton} type="button" onClick={() => void load()}>Refresh gallery</button>
+          <div className={styles.eventSummaryActions}>
+            <button className={styles.secondaryButton} type="button" onClick={() => void load()}>Refresh gallery</button>
+            <button className={styles.secondaryButton} type="button" onClick={copyGuestLink}>{copyLabel}</button>
+            <a className={styles.primaryButton} href={EVENT_DAY_URL} target="_blank" rel="noreferrer">Open guest upload</a>
+          </div>
         </article>
       </div>
 
@@ -98,6 +107,23 @@ export default function EventDayDashboard() {
           <div className={styles.eventPhotoEmpty}><span>＋</span><strong>The gallery is ready</strong><p>Guest photos will appear here as soon as they are uploaded.</p></div>
         )}
       </section>
+
+      {qrExpanded ? (
+        <div className={styles.eventQrModal} role="dialog" aria-modal="true" aria-label="Guest upload QR code" onMouseDown={(event) => {
+          if (event.currentTarget === event.target) setQrExpanded(false);
+        }}>
+          <div className={styles.eventQrModalCard}>
+            <button className={styles.eventQrClose} type="button" onClick={() => setQrExpanded(false)} aria-label="Close enlarged QR code">×</button>
+            <p className={styles.eyebrow}>Guest upload</p>
+            <h3>Scan to share photos</h3>
+            <img src={EVENT_QR_URL} alt="Enlarged QR code for the Event Day guest photo page" />
+            <div className={styles.eventQrModalActions}>
+              <a className={styles.primaryButton} href={EVENT_QR_URL} download="Erikas-Sweet-16-guest-upload-QR.svg">Download QR</a>
+              <button className={styles.secondaryButton} type="button" onClick={() => setQrExpanded(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

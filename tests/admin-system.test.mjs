@@ -218,9 +218,11 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(photosApi, /guest_name/);
   assert.doesNotMatch(photosApi, /SELECT id, name/);
   assert.match(dashboard, /event-upload-qr\.svg/);
-  assert.match(dashboard, /Guest photos,/);
+  assert.doesNotMatch(dashboard, /Guest photos,/);
   assert.match(dashboard, /https:\/\/www\.invitez\.xyz\/share-photos/);
-  assert.match(dashboard, /without a PIN/);
+  assert.match(dashboard, /Enlarge/);
+  assert.match(dashboard, /Download QR/);
+  assert.match(dashboard, /download="Erikas-Sweet-16-guest-upload-QR\.svg"/);
   assert.doesNotMatch(dashboard, /guestName|guest_name/);
   assert.doesNotMatch(sharePage, /capture="environment"/);
   assert.doesNotMatch(sharePage, /no PIN needed/);
