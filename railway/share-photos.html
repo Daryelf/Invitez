@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e8eddc">
+  <title>Share a Photo | Invitez</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #e8eddc; }
+    button, input { font: inherit; }
+    .page {
+      --ink: #173c32;
+      --sage: #829475;
+      position: relative;
+      min-height: 100dvh;
+      overflow: hidden;
+      padding: max(18px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(237, 171, 184, .52), transparent 25%),
+        radial-gradient(circle at 92% 82%, rgba(139, 157, 120, .46), transparent 28%),
+        #e8eddc;
+    }
+    .page::before {
+      content: "";
+      position: fixed;
+      width: 280px;
+      height: 280px;
+      top: 18%;
+      right: -170px;
+      border: 62px solid rgba(255, 249, 237, .34);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      width: min(100%, 680px);
+      align-items: center;
+      gap: 11px;
+      margin: 0 auto 16px;
+      padding: 2px 3px;
+    }
+    .monogram { display: grid; width: 40px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #fff8ec; background: var(--ink); font: 22px Georgia, serif; }
+    .header div { display: grid; }
+    .header strong { font: 500 16px Georgia, serif; }
+    .header small { color: #6d7c64; font-size: 9px; letter-spacing: .16em; text-transform: uppercase; }
+    .card {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: min(100%, 680px);
+      gap: 28px;
+      margin: 0 auto;
+      padding: clamp(24px, 6vw, 44px);
+      overflow: hidden;
+      border: 1px solid rgba(23, 60, 50, .14);
+      border-radius: 30px;
+      background: rgba(255, 249, 237, .94);
+      box-shadow: 0 26px 70px rgba(45, 66, 45, .18);
+    }
+    .card::after { content: ""; position: absolute; width: 160px; aspect-ratio: 1; top: -96px; right: -76px; border: 42px solid rgba(226, 145, 161, .12); border-radius: 50%; pointer-events: none; }
+    .intro { position: relative; z-index: 1; }
+    h1 { margin: 0; font: 400 clamp(3.35rem, 17vw, 5.8rem)/.8 Georgia, "Times New Roman", serif; letter-spacing: -.055em; }
+    h1 em { color: #c98591; font-weight: 400; }
+    .intro p { max-width: 520px; margin: 24px 0 0; color: #65745d; font: 1rem/1.65 Georgia, serif; }
+    form { position: relative; z-index: 1; display: grid; gap: 16px; }
+    .picker {
+      position: relative;
+      display: grid;
+      min-height: 265px;
+      place-items: center;
+      overflow: hidden;
+      border: 1px dashed rgba(23, 60, 50, .34);
+      border-radius: 22px;
+      color: #61705a;
+      background: linear-gradient(145deg, rgba(222, 233, 207, .62), rgba(249, 223, 228, .55));
+      cursor: pointer;
+      text-align: center;
+    }
+    .picker.selected { border-style: solid; background: #e8ecdf; }
+    .picker input { position: absolute; z-index: 3; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .picker input:disabled { cursor: not-allowed; }
+    .prompt { display: grid; place-items: center; gap: 8px; padding: 24px; }
+    .prompt i { display: grid; width: 56px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: white; background: var(--sage); font-size: 28px; font-style: normal; font-weight: 200; }
+    .prompt strong { margin-top: 5px; font: 500 24px Georgia, serif; }
+    .prompt small { font-size: 11px; line-height: 1.45; }
+    .previews { position: relative; display: none; width: 100%; height: 100%; min-height: 265px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 3px; }
+    .previews.visible { display: grid; }
+    .previews.single { grid-template-columns: 1fr; }
+    .previews img { width: 100%; height: 100%; min-height: 130px; max-height: 218px; object-fit: cover; }
+    .previews.single img { min-height: 265px; max-height: 440px; }
+    .count { position: absolute; right: 12px; bottom: 12px; padding: 8px 11px; border-radius: 999px; color: #fffaf0; background: rgba(23, 60, 50, .88); box-shadow: 0 4px 14px rgba(23, 60, 50, .22); font-size: 12px; line-height: 1; }
+    .add-more { justify-self: center; margin-top: -7px; border: 0; color: #7d6a68; background: transparent; cursor: pointer; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+    .add-more[hidden] { display: none; }
+    .add-more:disabled { cursor: not-allowed; opacity: .45; }
+    .field { display: grid; gap: 8px; }
+    .field > span { display: flex; justify-content: space-between; gap: 12px; color: #63705d; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .field em { color: #a17d80; font-style: normal; }
+    .field input { width: 100%; min-height: 56px; padding: 0 15px; border: 1px solid rgba(23, 60, 50, .18); border-radius: 13px; outline: 0; color: var(--ink); background: #fffdf8; font-size: 16px; }
+    .field input:focus { border-color: #d48b98; box-shadow: 0 0 0 3px rgba(212, 139, 152, .15); }
+    .field small { color: #788371; font-size: 10px; line-height: 1.45; }
+    .message { display: none; margin: 0; padding: 12px 14px; border-radius: 11px; font-size: 12px; line-height: 1.45; }
+    .message.visible { display: block; }
+    .message.error { color: #8d3947; background: #f7dde1; }
+    .message.success { color: #325c49; background: #dcebdc; }
+    .submit { min-height: 58px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .submit:disabled { cursor: not-allowed; opacity: .38; }
+    @media (min-width: 720px) {
+      .page { padding-top: 34px; padding-bottom: 40px; }
+      .card { grid-template-columns: .8fr 1.2fr; align-items: start; }
+      .intro { position: sticky; top: 30px; }
+      .picker, .previews { min-height: 330px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <span class="monogram">E</span>
+      <div><strong id="event-name">Erika's Sweet 16</strong><small>Guest photo drop</small></div>
+    </header>
+    <section class="card">
+      <div class="intro">
+        <h1>Share a<br><em>memory.</em></h1>
+        <p>Share your experience for Erika.</p>
+      </div>
+      <form id="photo-form">
+        <label class="picker" id="picker">
+          <span class="prompt" id="prompt"><i>＋</i><strong>Choose photos</strong><small>Select one or more from your photo library</small></span>
+          <span class="previews" id="previews"><strong class="count" id="count"></strong></span>
+          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple disabled>
+        </label>
+        <button class="add-more" id="add-more" type="button" hidden>Add more photos</button>
+        <label class="field">
+          <span>Your name <em>optional · private</em></span>
+          <input id="guest-name" maxlength="80" placeholder="Add your name if you want" autocomplete="name" disabled>
+          <small>Your name will not appear with the photo.</small>
+        </label>
+        <label class="field">
+          <span>Message <em>optional</em></span>
+          <input id="caption" maxlength="140" placeholder="Add a short note about this moment" disabled>
+        </label>
+        <p class="message error" id="error" role="alert"></p>
+        <p class="message success" id="success" role="status"></p>
+        <button class="submit" id="submit" type="submit" disabled>Share this photo</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    const input = document.querySelector("#photos");
+    const form = document.querySelector("#photo-form");
+    const picker = document.querySelector("#picker");
+    const prompt = document.querySelector("#prompt");
+    const previews = document.querySelector("#previews");
+    const count = document.querySelector("#count");
+    const addMore = document.querySelector("#add-more");
+    const guestName = document.querySelector("#guest-name");
+    const caption = document.querySelector("#caption");
+    const submit = document.querySelector("#submit");
+    const errorMessage = document.querySelector("#error");
+    const successMessage = document.querySelector("#success");
+    let selectedFiles = [];
+    let previewUrls = [];
+    let uploadAllowed = false;
+    let uploading = false;
+
+    function showMessage(element, message) {
+      element.textContent = message;
+      element.classList.toggle("visible", Boolean(message));
+    }
+
+    function clearPreviewUrls() {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls = [];
+    }
+
+    function renderSelection() {
+      clearPreviewUrls();
+      previews.querySelectorAll("img").forEach((image) => image.remove());
+      selectedFiles.forEach((file, index) => {
+        const url = URL.createObjectURL(file);
+        previewUrls.push(url);
+        const image = document.createElement("img");
+        image.src = url;
+        image.alt = `Selected photo ${index + 1} of ${selectedFiles.length}`;
+        previews.insertBefore(image, count);
+      });
+      const hasFiles = selectedFiles.length > 0;
+      picker.classList.toggle("selected", hasFiles);
+      prompt.hidden = hasFiles;
+      previews.classList.toggle("visible", hasFiles);
+      previews.classList.toggle("single", selectedFiles.length === 1);
+      count.textContent = `${selectedFiles.length} ${selectedFiles.length === 1 ? "photo" : "photos"} selected`;
+      addMore.hidden = !hasFiles;
+      submit.disabled = !hasFiles || !uploadAllowed || uploading;
+      if (!uploading) submit.textContent = selectedFiles.length > 1 ? `Share ${selectedFiles.length} photos` : "Share this photo";
+    }
+
+    input.addEventListener("change", () => {
+      selectedFiles = selectedFiles.concat(Array.from(input.files || []));
+      input.value = "";
+      showMessage(errorMessage, "");
+      showMessage(successMessage, "");
+      renderSelection();
+    });
+
+    addMore.addEventListener("click", () => input.click());
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!selectedFiles.length || !uploadAllowed || uploading) return;
+      const batchSize = selectedFiles.length;
+      let completed = 0;
+      uploading = true;
+      input.disabled = true;
+      addMore.disabled = true;
+      showMessage(errorMessage, "");
+      showMessage(successMessage, "");
+      renderSelection();
+
+      try {
+        for (const file of selectedFiles) {
+          submit.textContent = `Uploading ${completed + 1} of ${batchSize}…`;
+          const body = new FormData();
+          body.set("photo", file);
+          body.set("guestName", guestName.value);
+          body.set("caption", caption.value);
+          const response = await fetch("/api/photos", { method: "POST", body });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Could not upload that photo");
+          completed += 1;
+        }
+        selectedFiles = [];
+        caption.value = "";
+        showMessage(successMessage, batchSize === 1
+          ? "Your photo was added. Thank you for sharing it!"
+          : `All ${batchSize} photos were added. Thank you for sharing them!`);
+      } catch (error) {
+        if (completed) selectedFiles = selectedFiles.slice(completed);
+        const reason = error instanceof Error ? error.message : "Could not upload that photo";
+        showMessage(errorMessage, completed
+          ? `${completed} of ${batchSize} photos uploaded. ${reason} Please try the remaining photos again.`
+          : reason);
+      } finally {
+        uploading = false;
+        input.disabled = !uploadAllowed;
+        addMore.disabled = false;
+        renderSelection();
+      }
+    });
+
+    fetch("/api/event-day", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("Photo sharing is temporarily unavailable");
+        return response.json();
+      })
+      .then((eventDay) => {
+        if (eventDay.event?.eventName) document.querySelector("#event-name").textContent = eventDay.event.eventName;
+        uploadAllowed = Boolean(eventDay.photoUploadsEnabled);
+        input.disabled = !uploadAllowed;
+        guestName.disabled = !uploadAllowed;
+        caption.disabled = !uploadAllowed;
+        renderSelection();
+        if (!uploadAllowed) showMessage(errorMessage, "Photo uploads are paused by the host.");
+      })
+      .catch((error) => showMessage(errorMessage, error.message || "Photo sharing is temporarily unavailable"));
+
+    window.addEventListener("pagehide", clearPreviewUrls);
+  </script>
+</body>
+</html>

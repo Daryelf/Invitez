@@ -144,9 +144,10 @@ test("Argentum Studio uses PIN-only login, clean invite links, and protected own
 });
 
 test("individual invite links skip the opening on return, confirm RSVP, and switch on event day", async () => {
-  const [html, server, inviteApi, rsvpApi, eventApi, styles] = await Promise.all([
+  const [html, server, guestUpload, inviteApi, rsvpApi, eventApi, styles] = await Promise.all([
     source("../railway/index.html"),
     source("../railway-server.mjs"),
+    source("../railway/share-photos.html"),
     source("../app/api/invite/[token]/route.ts"),
     source("../app/api/invite/[token]/rsvp/route.ts"),
     source("../app/api/event-day/route.ts"),
@@ -155,9 +156,14 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
 
   assert.ok(server.includes('if (/^\\/i\\/[^/]+\\/?$/.test(pathname))'));
   assert.match(server, /pathname === "\/share-photos"/);
+  assert.match(server, /railway", "share-photos\.html/);
   assert.match(server, /pathname\.startsWith\("\/api\/photos\/"\)/);
   assert.match(server, /12 \* 1024 \* 1024/);
   assert.doesNotMatch(server, /Location: `https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/share-photos/);
+  assert.match(guestUpload, /type="file" accept="image\/jpeg,image\/png,image\/webp" multiple/);
+  assert.match(guestUpload, /selectedFiles = selectedFiles\.concat\(Array\.from/);
+  assert.match(guestUpload, /for \(const file of selectedFiles\)/);
+  assert.match(guestUpload, /Add more photos/);
   assert.match(server, /canonicalInvitationPath/);
   assert.match(server, /\[a-f0-9\]\{32\}/);
   assert.match(server, /canonicalInvitePath/);

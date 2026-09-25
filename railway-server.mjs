@@ -22,6 +22,7 @@ const contentTypes = {
 function resolveRequestPath(pathname) {
   if (pathname === "/" || pathname === "/index.html") return join(root, "railway", "index.html");
   if (pathname === "/rsvp" || pathname === "/rsvp/") return join(root, "railway", "index.html");
+  if (pathname === "/share-photos" || pathname === "/share-photos/") return join(root, "railway", "share-photos.html");
   if (/^\/i\/[^/]+\/?$/.test(pathname)) return join(root, "railway", "index.html");
   if (pathname === "/globals.css") return join(root, "app", "globals.css");
 
@@ -50,8 +51,6 @@ function canonicalInvitationPath(pathname) {
 function shouldProxyDashboard(pathname) {
   return pathname === "/admin"
     || pathname.startsWith("/admin/")
-    || pathname === "/share-photos"
-    || pathname === "/share-photos/"
     || pathname === "/api/admin"
     || pathname.startsWith("/api/admin/")
     || pathname === "/api/event-day"
