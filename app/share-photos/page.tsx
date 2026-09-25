@@ -9,6 +9,15 @@ type EventDayData = {
   event: { eventName: string } | null;
 };
 
+function isVideo(file: File | undefined) {
+  return Boolean(file?.type.startsWith("video/"));
+}
+
+function mediaLabel(files: File[]) {
+  if (files.length !== 1) return `${files.length} memories`;
+  return isVideo(files[0]) ? "1 video" : "1 photo";
+}
+
 export default function SharePhotosPage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [eventDay, setEventDay] = useState<EventDayData | null>(null);
@@ -24,11 +33,11 @@ export default function SharePhotosPage() {
   useEffect(() => {
     fetch("/api/event-day", { cache: "no-store" })
       .then((response) => {
-        if (!response.ok) throw new Error("Photo sharing is temporarily unavailable");
+        if (!response.ok) throw new Error("Sharing is temporarily unavailable");
         return response.json() as Promise<EventDayData>;
       })
       .then(setEventDay)
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Photo sharing is temporarily unavailable"));
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Sharing is temporarily unavailable"));
   }, []);
 
   useEffect(() => {
@@ -40,7 +49,7 @@ export default function SharePhotosPage() {
   const uploadAllowed = Boolean(eventDay?.photoUploadsEnabled);
   const eventName = eventDay?.event?.eventName || "the celebration";
 
-  function selectPhotos(changeEvent: ChangeEvent<HTMLInputElement>) {
+  function selectMedia(changeEvent: ChangeEvent<HTMLInputElement>) {
     const nextFiles = Array.from(changeEvent.target.files || []);
     setFiles((currentFiles) => [...currentFiles, ...nextFiles]);
     setNotice("");
@@ -72,7 +81,7 @@ export default function SharePhotosPage() {
 
         const response = await fetch("/api/photos", { method: "POST", body });
         const result = await response.json() as { error?: string };
-        if (!response.ok) throw new Error(result.error || "Could not upload that photo");
+        if (!response.ok) throw new Error(result.error || "Could not upload that photo or video");
         completed += 1;
         setUploadedCount(completed);
       }
@@ -80,13 +89,13 @@ export default function SharePhotosPage() {
       clearPhotos();
       setCaption("");
       setNotice(files.length === 1
-        ? "Your photo was added. Thank you for sharing it!"
-        : `All ${files.length} photos were added. Thank you for sharing them!`);
+        ? `Your ${isVideo(files[0]) ? "video" : "photo"} was added. Thank you for sharing it!`
+        : `All ${files.length} memories were added. Thank you for sharing them!`);
     } catch (uploadError) {
       if (completed > 0) setFiles((currentFiles) => currentFiles.slice(completed));
-      const message = uploadError instanceof Error ? uploadError.message : "Could not upload that photo";
+      const message = uploadError instanceof Error ? uploadError.message : "Could not upload that photo or video";
       setError(completed > 0
-        ? `${completed} of ${files.length} photos uploaded. ${message} Please try the remaining photos again.`
+        ? `${completed} of ${files.length} memories uploaded. ${message} Please try the remaining files again.`
         : message);
     } finally {
       setUploading(false);
@@ -98,7 +107,7 @@ export default function SharePhotosPage() {
       <div className={styles.glow} aria-hidden="true" />
       <header className={styles.header}>
         <span className={styles.monogram}>E</span>
-        <div><strong>{eventName}</strong><small>Guest photo drop</small></div>
+        <div><strong>{eventName}</strong><small>Guest memory drop</small></div>
       </header>
 
       <section className={styles.card}>
@@ -111,27 +120,32 @@ export default function SharePhotosPage() {
           <label className={`${styles.photoPicker} ${filePreviews.length ? styles.photoSelected : ""}`}>
             {filePreviews.length ? (
               <span className={`${styles.previewGrid} ${filePreviews.length === 1 ? styles.singlePreview : ""}`}>
-                {filePreviews.map((preview, index) => (
+                {filePreviews.map((preview, index) => isVideo(files[index]) ? (
+                  <span className={styles.videoPreview} key={preview}>
+                    <video src={preview} muted playsInline preload="metadata" aria-label={`Selected video ${index + 1} of ${filePreviews.length}`} />
+                    <i>Video</i>
+                  </span>
+                ) : (
                   <img key={preview} src={preview} alt={`Selected photo ${index + 1} of ${filePreviews.length}`} />
                 ))}
-                <strong className={styles.selectionCount}>{files.length} {files.length === 1 ? "photo" : "photos"} selected</strong>
+                <strong className={styles.selectionCount}>{mediaLabel(files)} selected</strong>
               </span>
             ) : (
               <span className={styles.photoPrompt}>
                 <i>＋</i>
-                <strong>Choose photos</strong>
-                <small>Select one or more from your photo library</small>
+                <strong>Choose photos or videos</strong>
+                <small>Select one or more from your library</small>
               </span>
             )}
-            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={selectPhotos} disabled={!uploadAllowed || uploading} />
+            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple onChange={selectMedia} disabled={!uploadAllowed || uploading} />
           </label>
 
-          {files.length ? <button className={styles.changePhoto} type="button" onClick={() => fileInput.current?.click()} disabled={uploading}>Add more photos</button> : null}
+          {files.length ? <button className={styles.changePhoto} type="button" onClick={() => fileInput.current?.click()} disabled={uploading}>Add more photos or videos</button> : null}
 
           <label className={styles.field}>
             <span>Your name <em>optional · private</em></span>
             <input value={guestName} onChange={(event) => setGuestName(event.target.value.slice(0, 80))} maxLength={80} placeholder="Add your name if you want" autoComplete="name" disabled={!uploadAllowed} />
-            <small>Your name will not appear with the photo.</small>
+            <small>Your name will not appear with the photo or video.</small>
           </label>
 
           <label className={styles.field}>
@@ -139,7 +153,7 @@ export default function SharePhotosPage() {
             <input value={caption} onChange={(event) => setCaption(event.target.value.slice(0, 140))} maxLength={140} placeholder="Add a short note about this moment" disabled={!uploadAllowed} />
           </label>
 
-          {eventDay && !eventDay.photoUploadsEnabled ? <p className={styles.status}>Photo uploads are paused by the host.</p> : null}
+          {eventDay && !eventDay.photoUploadsEnabled ? <p className={styles.status}>Uploads are paused by the host.</p> : null}
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
           {notice ? <p className={styles.success} role="status">{notice}</p> : null}
 
@@ -147,8 +161,8 @@ export default function SharePhotosPage() {
             {uploading
               ? `Uploading ${Math.min(uploadedCount + 1, files.length)} of ${files.length}…`
               : files.length > 1
-                ? `Share ${files.length} photos`
-                : "Share this photo"}
+                ? `Share ${files.length} memories`
+                : `Share this ${isVideo(files[0]) ? "video" : "photo"}`}
           </button>
         </form>
       </section>

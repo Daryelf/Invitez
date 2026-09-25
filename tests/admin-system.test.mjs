@@ -158,12 +158,13 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(server, /pathname === "\/share-photos"/);
   assert.match(server, /railway", "share-photos\.html/);
   assert.match(server, /pathname\.startsWith\("\/api\/photos\/"\)/);
-  assert.match(server, /12 \* 1024 \* 1024/);
+  assert.match(server, /96 \* 1024 \* 1024/);
   assert.doesNotMatch(server, /Location: `https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/share-photos/);
-  assert.match(guestUpload, /type="file" accept="image\/jpeg,image\/png,image\/webp" multiple/);
+  assert.match(guestUpload, /type="file" accept="image\/jpeg,image\/png,image\/webp,video\/mp4,video\/quicktime,video\/webm,video\/x-m4v" multiple/);
   assert.match(guestUpload, /selectedFiles = selectedFiles\.concat\(Array\.from/);
   assert.match(guestUpload, /for \(const file of selectedFiles\)/);
-  assert.match(guestUpload, /Add more photos/);
+  assert.match(guestUpload, /Add more photos or videos/);
+  assert.match(guestUpload, /document\.createElement\("video"\)/);
   assert.match(guestUpload, /html, body \{ min-height: 100%; background: #e8eddc; \}/);
   assert.match(guestUpload, /calc\(64px \+ env\(safe-area-inset-bottom\)\)/);
   assert.doesNotMatch(guestUpload, /\.page::before/);
@@ -190,10 +191,11 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
 });
 
 test("event-day wall stays protected while the QR guest upload is public and keeps names private", async () => {
-  const [page, styles, photosApi, eventApi, gate, layout, authApi, auth, dashboard, sharePage, shareStyles] = await Promise.all([
+  const [page, styles, photosApi, mediaApi, eventApi, gate, layout, authApi, auth, dashboard, sharePage, shareStyles] = await Promise.all([
     source("../app/event-day/page.tsx"),
     source("../app/event-day/event-day.module.css"),
     source("../app/api/photos/route.ts"),
+    source("../app/api/photos/[id]/route.ts"),
     source("../app/api/event-day/route.ts"),
     source("../app/event-day/event-day-pin-gate.tsx"),
     source("../app/event-day/layout.tsx"),
@@ -203,7 +205,7 @@ test("event-day wall stays protected while the QR guest upload is public and kee
     source("../app/share-photos/page.tsx"),
     source("../app/share-photos/share-photos.module.css"),
   ]);
-  const eventSource = `${page}\n${styles}\n${photosApi}\n${eventApi}\n${gate}\n${layout}\n${authApi}\n${auth}\n${dashboard}\n${sharePage}\n${shareStyles}`;
+  const eventSource = `${page}\n${styles}\n${photosApi}\n${mediaApi}\n${eventApi}\n${gate}\n${layout}\n${authApi}\n${auth}\n${dashboard}\n${sharePage}\n${shareStyles}`;
 
   assert.match(page, /capture="environment"/);
   assert.match(page, /Party wall/);
@@ -213,8 +215,14 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(page, /will not appear in the gallery/);
   assert.match(page, /body\.set\("guestName", guestName\)/);
   assert.doesNotMatch(photosApi, /Photo sharing opens on event day/);
-  assert.match(photosApi, /Photo uploads are paused by the host/);
+  assert.match(photosApi, /Uploads are paused by the host/);
   assert.match(photosApi, /image\/jpeg/);
+  assert.match(photosApi, /video\/quicktime/);
+  assert.match(photosApi, /MAX_VIDEO_SIZE = 90 \* 1024 \* 1024/);
+  assert.match(photosApi, /content_type, created_at/);
+  assert.match(mediaApi, /range: request\.headers/);
+  assert.match(mediaApi, /status: 206/);
+  assert.match(mediaApi, /content-range/);
   assert.match(photosApi, /guest_name/);
   assert.doesNotMatch(photosApi, /SELECT id, name/);
   assert.match(dashboard, /event-upload-qr\.svg/);
@@ -223,6 +231,7 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(dashboard, /Enlarge/);
   assert.match(dashboard, /Download QR/);
   assert.match(dashboard, /download="Erikas-Sweet-16-guest-upload-QR\.svg"/);
+  assert.match(dashboard, /<video/);
   assert.doesNotMatch(dashboard, /guestName|guest_name/);
   assert.doesNotMatch(sharePage, /capture="environment"/);
   assert.doesNotMatch(sharePage, /no PIN needed/);
@@ -233,11 +242,13 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(sharePage, /optional · private/);
   assert.match(sharePage, /will not appear with the photo/);
   assert.match(sharePage, /body\.set\("guestName", guestName\)/);
-  assert.match(sharePage, /multiple onChange=\{selectPhotos\}/);
+  assert.match(sharePage, /multiple onChange=\{selectMedia\}/);
   assert.match(sharePage, /Array\.from\(changeEvent\.target\.files/);
   assert.match(sharePage, /\[\.\.\.currentFiles, \.\.\.nextFiles\]/);
   assert.match(sharePage, /for \(const selectedFile of files\)/);
-  assert.match(sharePage, /Share \$\{files\.length\} photos/);
+  assert.match(sharePage, /Share \$\{files\.length\} memories/);
+  assert.match(sharePage, /video\/quicktime/);
+  assert.match(sharePage, /<video/);
   assert.match(shareStyles, /\.previewGrid/);
   assert.match(shareStyles, /\.selectionCount/);
   assert.doesNotMatch(sharePage, /EventDayPinGate|hasEventDayAccess|EVENT_DAY_COOKIE/);

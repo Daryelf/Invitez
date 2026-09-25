@@ -95,7 +95,7 @@ async function proxyDashboardRequest(request, response, requestUrl) {
   if (upstreamHeaders.has("origin")) upstreamHeaders.set("origin", dashboardOrigin);
 
   const method = request.method || "GET";
-  const maxBodySize = requestUrl.pathname === "/api/photos" ? 12 * 1024 * 1024 : 2 * 1024 * 1024;
+  const maxBodySize = requestUrl.pathname === "/api/photos" ? 96 * 1024 * 1024 : 2 * 1024 * 1024;
   const body = method === "GET" || method === "HEAD" ? undefined : await readRequestBody(request, maxBodySize);
   const upstream = await fetch(target, {
     method,

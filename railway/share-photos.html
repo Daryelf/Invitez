@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#e8eddc">
-  <title>Share a Photo | Invitez</title>
+  <title>Share a Memory | Invitez</title>
   <style>
     :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     * { box-sizing: border-box; }
@@ -78,8 +78,10 @@
     .previews { position: relative; display: none; width: 100%; height: 100%; min-height: 265px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 3px; }
     .previews.visible { display: grid; }
     .previews.single { grid-template-columns: 1fr; }
-    .previews img { width: 100%; height: 100%; min-height: 130px; max-height: 218px; object-fit: cover; }
-    .previews.single img { min-height: 265px; max-height: 440px; }
+    .previews img, .previews video { width: 100%; height: 100%; min-height: 130px; max-height: 218px; object-fit: cover; }
+    .video-preview { position: relative; display: block; min-height: 130px; overflow: hidden; background: #17211d; }
+    .video-preview i { position: absolute; left: 9px; top: 9px; padding: 5px 7px; border-radius: 999px; color: #fff; background: rgba(23,60,50,.82); font-size: 9px; font-style: normal; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .previews.single img, .previews.single video, .previews.single .video-preview { min-height: 265px; max-height: 440px; }
     .count { position: absolute; right: 12px; bottom: 12px; padding: 8px 11px; border-radius: 999px; color: #fffaf0; background: rgba(23, 60, 50, .88); box-shadow: 0 4px 14px rgba(23, 60, 50, .22); font-size: 12px; line-height: 1; }
     .add-more { justify-self: center; margin-top: -7px; border: 0; color: #7d6a68; background: transparent; cursor: pointer; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
     .add-more[hidden] { display: none; }
@@ -108,7 +110,7 @@
   <main class="page">
     <header class="header">
       <span class="monogram">E</span>
-      <div><strong id="event-name">Erika's Sweet 16</strong><small>Guest photo drop</small></div>
+      <div><strong id="event-name">Erika's Sweet 16</strong><small>Guest memory drop</small></div>
     </header>
     <section class="card">
       <div class="intro">
@@ -117,15 +119,15 @@
       </div>
       <form id="photo-form">
         <label class="picker" id="picker">
-          <span class="prompt" id="prompt"><i>＋</i><strong>Choose photos</strong><small>Select one or more from your photo library</small></span>
+          <span class="prompt" id="prompt"><i>＋</i><strong>Choose photos or videos</strong><small>Select one or more from your library</small></span>
           <span class="previews" id="previews"><strong class="count" id="count"></strong></span>
-          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple disabled>
+          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple disabled>
         </label>
-        <button class="add-more" id="add-more" type="button" hidden>Add more photos</button>
+        <button class="add-more" id="add-more" type="button" hidden>Add more photos or videos</button>
         <label class="field">
           <span>Your name <em>optional · private</em></span>
           <input id="guest-name" maxlength="80" placeholder="Add your name if you want" autocomplete="name" disabled>
-          <small>Your name will not appear with the photo.</small>
+          <small>Your name will not appear with the photo or video.</small>
         </label>
         <label class="field">
           <span>Message <em>optional</em></span>
@@ -167,24 +169,43 @@
 
     function renderSelection() {
       clearPreviewUrls();
-      previews.querySelectorAll("img").forEach((image) => image.remove());
+      previews.querySelectorAll("img, .video-preview").forEach((preview) => preview.remove());
       selectedFiles.forEach((file, index) => {
         const url = URL.createObjectURL(file);
         previewUrls.push(url);
-        const image = document.createElement("img");
-        image.src = url;
-        image.alt = `Selected photo ${index + 1} of ${selectedFiles.length}`;
-        previews.insertBefore(image, count);
+        if (file.type.startsWith("video/")) {
+          const wrapper = document.createElement("span");
+          wrapper.className = "video-preview";
+          const video = document.createElement("video");
+          video.src = url;
+          video.muted = true;
+          video.playsInline = true;
+          video.preload = "metadata";
+          video.setAttribute("aria-label", `Selected video ${index + 1} of ${selectedFiles.length}`);
+          const badge = document.createElement("i");
+          badge.textContent = "Video";
+          wrapper.append(video, badge);
+          previews.insertBefore(wrapper, count);
+        } else {
+          const image = document.createElement("img");
+          image.src = url;
+          image.alt = `Selected photo ${index + 1} of ${selectedFiles.length}`;
+          previews.insertBefore(image, count);
+        }
       });
       const hasFiles = selectedFiles.length > 0;
       picker.classList.toggle("selected", hasFiles);
       prompt.hidden = hasFiles;
       previews.classList.toggle("visible", hasFiles);
       previews.classList.toggle("single", selectedFiles.length === 1);
-      count.textContent = `${selectedFiles.length} ${selectedFiles.length === 1 ? "photo" : "photos"} selected`;
+      count.textContent = selectedFiles.length === 1
+        ? `1 ${selectedFiles[0].type.startsWith("video/") ? "video" : "photo"} selected`
+        : `${selectedFiles.length} memories selected`;
       addMore.hidden = !hasFiles;
       submit.disabled = !hasFiles || !uploadAllowed || uploading;
-      if (!uploading) submit.textContent = selectedFiles.length > 1 ? `Share ${selectedFiles.length} photos` : "Share this photo";
+      if (!uploading) submit.textContent = selectedFiles.length > 1
+        ? `Share ${selectedFiles.length} memories`
+        : `Share this ${selectedFiles[0]?.type.startsWith("video/") ? "video" : "photo"}`;
     }
 
     input.addEventListener("change", () => {
@@ -201,6 +222,7 @@
       event.preventDefault();
       if (!selectedFiles.length || !uploadAllowed || uploading) return;
       const batchSize = selectedFiles.length;
+      const singleFileWasVideo = batchSize === 1 && selectedFiles[0].type.startsWith("video/");
       let completed = 0;
       uploading = true;
       input.disabled = true;
@@ -218,19 +240,19 @@
           body.set("caption", caption.value);
           const response = await fetch("/api/photos", { method: "POST", body });
           const result = await response.json();
-          if (!response.ok) throw new Error(result.error || "Could not upload that photo");
+          if (!response.ok) throw new Error(result.error || "Could not upload that photo or video");
           completed += 1;
         }
         selectedFiles = [];
         caption.value = "";
         showMessage(successMessage, batchSize === 1
-          ? "Your photo was added. Thank you for sharing it!"
-          : `All ${batchSize} photos were added. Thank you for sharing them!`);
+          ? `Your ${singleFileWasVideo ? "video" : "photo"} was added. Thank you for sharing it!`
+          : `All ${batchSize} memories were added. Thank you for sharing them!`);
       } catch (error) {
         if (completed) selectedFiles = selectedFiles.slice(completed);
-        const reason = error instanceof Error ? error.message : "Could not upload that photo";
+        const reason = error instanceof Error ? error.message : "Could not upload that photo or video";
         showMessage(errorMessage, completed
-          ? `${completed} of ${batchSize} photos uploaded. ${reason} Please try the remaining photos again.`
+          ? `${completed} of ${batchSize} memories uploaded. ${reason} Please try the remaining files again.`
           : reason);
       } finally {
         uploading = false;
@@ -242,7 +264,7 @@
 
     fetch("/api/event-day", { cache: "no-store" })
       .then((response) => {
-        if (!response.ok) throw new Error("Photo sharing is temporarily unavailable");
+        if (!response.ok) throw new Error("Sharing is temporarily unavailable");
         return response.json();
       })
       .then((eventDay) => {
@@ -252,9 +274,9 @@
         guestName.disabled = !uploadAllowed;
         caption.disabled = !uploadAllowed;
         renderSelection();
-        if (!uploadAllowed) showMessage(errorMessage, "Photo uploads are paused by the host.");
+        if (!uploadAllowed) showMessage(errorMessage, "Uploads are paused by the host.");
       })
-      .catch((error) => showMessage(errorMessage, error.message || "Photo sharing is temporarily unavailable"));
+      .catch((error) => showMessage(errorMessage, error.message || "Sharing is temporarily unavailable"));
 
     window.addEventListener("pagehide", clearPreviewUrls);
   </script>

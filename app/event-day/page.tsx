@@ -16,6 +16,7 @@ type EventInfo = {
 type Photo = {
   id: string;
   caption: string | null;
+  contentType: string;
   url: string;
   createdAt: string;
 };
@@ -83,6 +84,7 @@ export default function EventDayPage() {
   const event = data.event || fallbackEvent;
   const experienceVisible = data.active || preview;
   const uploadAllowed = data.active && data.photoUploadsEnabled;
+  const fileIsVideo = Boolean(file?.type.startsWith("video/"));
   const mapLink = useMemo(() => event.mapUrl || (event.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}` : ""), [event]);
 
   function selectPhoto(changeEvent: ChangeEvent<HTMLInputElement>) {
@@ -107,7 +109,7 @@ export default function EventDayPage() {
     try {
       const response = await fetch("/api/photos", { method: "POST", body });
       const result = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(result.error || "Could not upload that photo");
+      if (!response.ok) throw new Error(result.error || "Could not upload that photo or video");
       if (filePreview) URL.revokeObjectURL(filePreview);
       setFile(null);
       setFilePreview("");
@@ -115,7 +117,7 @@ export default function EventDayPage() {
       setNotice("Your memory is on the party wall!");
       await loadPhotos();
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Could not upload that photo");
+      setError(uploadError instanceof Error ? uploadError.message : "Could not upload that photo or video");
     } finally {
       setUploading(false);
     }
@@ -162,16 +164,19 @@ export default function EventDayPage() {
       </section>
 
       <section className={styles.uploadSection}>
-        <div className={styles.sectionHeading}><span>01</span><div><p className={styles.kicker}>Add to the story</p><h2>Share a photo</h2></div></div>
+        <div className={styles.sectionHeading}><span>01</span><div><p className={styles.kicker}>Add to the story</p><h2>Share a memory</h2></div></div>
         <form className={styles.uploadCard} onSubmit={uploadPhoto}>
           <label className={`${styles.dropZone} ${filePreview ? styles.dropZoneSelected : ""}`}>
-            {filePreview ? <img src={filePreview} alt="Selected upload preview" /> : <><span className={styles.cameraIcon}>＋</span><strong>Choose a photo</strong><small>Tap to open your camera or photo library</small></>}
-            <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={selectPhoto} disabled={!uploadAllowed} />
+            {filePreview ? (fileIsVideo
+              ? <video src={filePreview} muted playsInline preload="metadata" aria-label="Selected video preview" />
+              : <img src={filePreview} alt="Selected photo preview" />)
+              : <><span className={styles.cameraIcon}>＋</span><strong>Choose a photo or video</strong><small>Tap to open your camera or library</small></>}
+            <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" capture="environment" onChange={selectPhoto} disabled={!uploadAllowed} />
           </label>
           <div className={styles.uploadDetails}>
             <label className={styles.captionField}><span>Your name <em>optional</em></span><input value={guestName} onChange={(nameEvent) => setGuestName(nameEvent.target.value.slice(0, 80))} maxLength={80} placeholder="Add your name if you want" autoComplete="name" disabled={!uploadAllowed} /><small>Saved privately for the host. Your name will not appear in the gallery.</small></label>
             <label className={styles.captionField}><span>Say something about this moment</span><input value={caption} onChange={(captionEvent) => setCaption(captionEvent.target.value)} maxLength={140} placeholder="A memory, a wish, or who is in the photo…" disabled={!uploadAllowed} /></label>
-            {!uploadAllowed ? <p className={styles.previewNotice}>{preview && !data.active ? "Uploads are disabled in preview. Turn on event-day mode to test a real upload." : "Photo uploads are paused by the host."}</p> : null}
+            {!uploadAllowed ? <p className={styles.previewNotice}>{preview && !data.active ? "Uploads are disabled in preview. Turn on event-day mode to test a real upload." : "Uploads are paused by the host."}</p> : null}
             {error ? <p className={styles.error}>{error}</p> : null}
             {notice ? <p className={styles.success}>{notice}</p> : null}
             <button disabled={!file || !uploadAllowed || uploading}>{uploading ? "Adding your memory…" : "Add to the party wall"}</button>
@@ -183,7 +188,7 @@ export default function EventDayPage() {
         <div className={styles.sectionHeading}><span>02</span><div><p className={styles.kicker}>Made by everyone</p><h2>Party wall</h2></div><small>{photos.length} {photos.length === 1 ? "memory" : "memories"}</small></div>
         {photos.length ? (
           <div className={styles.gallery}>
-            {photos.map((photo, index) => <figure key={photo.id} className={styles[`tile${index % 3}`]}><img src={photo.url} alt={photo.caption || `Event photo ${index + 1}`} loading="lazy" /><figcaption><span>{photo.caption || "A moment from the party"}</span><time>{photoTime(photo.createdAt)}</time></figcaption></figure>)}
+            {photos.map((photo, index) => <figure key={photo.id} className={styles[`tile${index % 3}`]}>{photo.contentType?.startsWith("video/") ? <video src={photo.url} controls playsInline preload="metadata" aria-label={photo.caption || `Event video ${index + 1}`} /> : <img src={photo.url} alt={photo.caption || `Event photo ${index + 1}`} loading="lazy" />}<figcaption><span>{photo.caption || "A moment from the party"}</span><time>{photoTime(photo.createdAt)}</time></figcaption></figure>)}
           </div>
         ) : (
           <div className={styles.emptyGallery}><span>♡</span><strong>The first memory starts here</strong><p>Photos shared by guests will fill this party wall.</p></div>

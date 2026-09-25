@@ -48,6 +48,7 @@ export async function ensureInvitationSchema() {
       name TEXT NOT NULL,
       content_type TEXT NOT NULL,
       caption TEXT,
+      guest_name TEXT,
       created_at TEXT NOT NULL
     )`),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS photos_object_key_unique ON photos (object_key)"),

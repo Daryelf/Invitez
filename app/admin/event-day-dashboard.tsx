@@ -9,7 +9,7 @@ type EventDayData = {
   event: { eventName: string; eventDate: string; eventTime: string; venue: string } | null;
 };
 
-type GalleryPhoto = { id: string; url: string; createdAt: string };
+type GalleryPhoto = { id: string; url: string; contentType: string; createdAt: string };
 
 const EVENT_DAY_URL = "https://www.invitez.xyz/share-photos";
 const EVENT_QR_URL = "/event-upload-qr.svg";
@@ -79,7 +79,7 @@ export default function EventDayDashboard() {
         <article className={styles.eventSummary}>
           <div className={styles.eventSummaryTopline}>
             <div className={styles.eventStatus}><i className={eventDay?.active ? styles.eventStatusLive : ""} /><span>{eventDay?.active ? "Event Day is live" : "Scheduled for event day"}</span></div>
-            <div className={styles.eventMemoryCount}><strong>{loading ? "—" : photos.length}</strong><span>{photos.length === 1 ? "photo shared" : "photos shared"}</span></div>
+            <div className={styles.eventMemoryCount}><strong>{loading ? "—" : photos.length}</strong><span>{photos.length === 1 ? "memory shared" : "memories shared"}</span></div>
           </div>
           <dl>
             <div><dt>Event</dt><dd>{eventDay?.event?.eventName ?? "Your event"}</dd></div>
@@ -96,15 +96,19 @@ export default function EventDayDashboard() {
 
       <section className={styles.eventPhotoPanel}>
         <div className={styles.eventPhotoHeader}>
-          <div><p className={styles.eyebrow}>Live from the guests</p><h3>Shared photos</h3></div>
+          <div><p className={styles.eyebrow}>Live from the guests</p><h3>Shared memories</h3></div>
           <span>{photos.length} {photos.length === 1 ? "memory" : "memories"}</span>
         </div>
         {photos.length > 0 ? (
           <div className={styles.eventPhotoGrid}>
-            {photos.map((photo, index) => <img key={photo.id} src={photo.url} alt={`Event photo ${index + 1}`} loading="lazy" />)}
+            {photos.map((photo, index) => photo.contentType?.startsWith("video/") ? (
+              <video key={photo.id} src={photo.url} controls playsInline preload="metadata" aria-label={`Event video ${index + 1}`} />
+            ) : (
+              <img key={photo.id} src={photo.url} alt={`Event photo ${index + 1}`} loading="lazy" />
+            ))}
           </div>
         ) : (
-          <div className={styles.eventPhotoEmpty}><span>＋</span><strong>The gallery is ready</strong><p>Guest photos will appear here as soon as they are uploaded.</p></div>
+          <div className={styles.eventPhotoEmpty}><span>＋</span><strong>The gallery is ready</strong><p>Guest photos and videos will appear here as soon as they are uploaded.</p></div>
         )}
       </section>
 

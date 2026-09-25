@@ -136,7 +136,8 @@
 .dropZone input:disabled { cursor: not-allowed; }
 .dropZone strong { font-family: Georgia, serif; font-size: 24px; font-weight: 500; }
 .dropZone small { max-width: 220px; font-size: 11px; line-height: 1.5; }
-.dropZone img { width: 100%; height: 100%; object-fit: cover; }
+.dropZone img,
+.dropZone video { width: 100%; height: 100%; object-fit: cover; }
 .dropZoneSelected { border-style: solid; }
 .cameraIcon { display: grid; width: 54px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: white; background: #879678; font-size: 28px; font-weight: 200; }
 .uploadDetails { display: grid; align-content: start; gap: 18px; }
@@ -160,7 +161,8 @@
 .gallery figure { display: inline-block; width: 100%; margin: 0 0 18px; padding: 10px; break-inside: avoid; border-radius: 18px; background: #fffaf0; box-shadow: 0 12px 30px rgba(51,66,49,.11); transform: rotate(-.7deg); }
 .gallery .tile1 { transform: rotate(.9deg); }
 .gallery .tile2 { transform: rotate(-.2deg); }
-.gallery img { display: block; width: 100%; max-height: 540px; border-radius: 11px; object-fit: cover; }
+.gallery img,
+.gallery video { display: block; width: 100%; max-height: 540px; border-radius: 11px; object-fit: cover; background: #173c32; }
 .gallery figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 12px 5px 4px; color: #56694f; font-family: Georgia, serif; font-size: 13px; }
 .gallery time { flex: 0 0 auto; color: #ab8b88; font: 9px Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .emptyGallery { display: grid; place-items: center; padding: 80px 24px; border: 1px dashed rgba(23,60,50,.22); border-radius: 28px; color: #718068; text-align: center; }
