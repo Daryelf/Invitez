@@ -164,6 +164,9 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(guestUpload, /selectedFiles = selectedFiles\.concat\(Array\.from/);
   assert.match(guestUpload, /for \(const file of selectedFiles\)/);
   assert.match(guestUpload, /Add more photos/);
+  assert.match(guestUpload, /html, body \{ min-height: 100%; background: #e8eddc; \}/);
+  assert.match(guestUpload, /calc\(64px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.doesNotMatch(guestUpload, /\.page::before/);
   assert.match(server, /canonicalInvitationPath/);
   assert.match(server, /\[a-f0-9\]\{32\}/);
   assert.match(server, /canonicalInvitePath/);
