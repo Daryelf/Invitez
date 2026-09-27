@@ -101,13 +101,15 @@ export default function EventDayPage() {
     setUploading(true);
     setError("");
     setNotice("");
-    const body = new FormData();
-    body.set("photo", file);
-    body.set("caption", caption);
-    body.set("guestName", guestName);
+    const headers = {
+      "Content-Type": file.type,
+      "X-File-Name": encodeURIComponent(file.name),
+      "X-Caption": encodeURIComponent(caption),
+      "X-Guest-Name": encodeURIComponent(guestName),
+    };
 
     try {
-      const response = await fetch("/api/photos", { method: "POST", body });
+      const response = await fetch("/api/photos", { method: "POST", headers, body: file });
       const result = await response.json() as { error?: string };
       if (!response.ok) throw new Error(result.error || "Could not upload that photo or video");
       if (filePreview) URL.revokeObjectURL(filePreview);

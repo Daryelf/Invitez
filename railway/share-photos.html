@@ -361,11 +361,16 @@
       try {
         for (const file of selectedFiles) {
           submit.textContent = `${copy[language].uploading} ${completed + 1} / ${batchSize}…`;
-          const body = new FormData();
-          body.set("photo", file);
-          body.set("guestName", guestName.value);
-          body.set("caption", caption.value);
-          const response = await fetch("/api/photos", { method: "POST", body });
+          const response = await fetch("/api/photos", {
+            method: "POST",
+            headers: {
+              "Content-Type": file.type,
+              "X-File-Name": encodeURIComponent(file.name),
+              "X-Guest-Name": encodeURIComponent(guestName.value),
+              "X-Caption": encodeURIComponent(caption.value),
+            },
+            body: file,
+          });
           const result = await response.json();
           if (!response.ok) throw new Error(language === "es" ? copy.es.uploadError : (result.error || copy.en.uploadError));
           completed += 1;

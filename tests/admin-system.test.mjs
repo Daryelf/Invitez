@@ -229,7 +229,7 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(page, /preview/);
   assert.match(page, /Your name <em>optional/);
   assert.match(page, /will not appear in the gallery/);
-  assert.match(page, /body\.set\("guestName", guestName\)/);
+  assert.match(page, /"X-Guest-Name": encodeURIComponent\(guestName\)/);
   assert.doesNotMatch(photosApi, /Photo sharing opens on event day/);
   assert.match(photosApi, /Uploads are paused by the host/);
   assert.match(photosApi, /image\/jpeg/);
@@ -277,10 +277,10 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(sharePage, /Boolean\(eventDay\?\.photoUploadsEnabled\)/);
   assert.match(sharePage, /optional · private/);
   assert.match(sharePage, /will not appear with the photo/);
-  assert.match(sharePage, /body\.set\("guestName", guestName\)/);
+  assert.match(sharePage, /"X-Guest-Name": encodeURIComponent\(guestName\)/);
   assert.match(sharePage, /multiple onChange=\{selectMedia\}/);
   assert.match(sharePage, /Array\.from\(changeEvent\.target\.files/);
-  assert.match(sharePage, /\[\.\.\.currentFiles, \.\.\.acceptedFiles\]/);
+  assert.match(sharePage, /\[\.\.\.files, \.\.\.acceptedFiles\]/);
   assert.match(sharePage, /const MAX_BATCH_FILES = 10/);
   assert.match(sharePage, /Upload up to \$\{MAX_BATCH_FILES\} photos or videos at a time/);
   assert.match(sharePage, /Submit new photos or videos/);

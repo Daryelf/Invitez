@@ -30,7 +30,17 @@ export function getD1() {
   return env.DB;
 }
 
-export async function ensureInvitationSchema() {
+let schemaReady: Promise<void> | undefined;
+
+export function ensureInvitationSchema() {
+  schemaReady ??= initializeInvitationSchema().catch((error: unknown) => {
+    schemaReady = undefined;
+    throw error;
+  });
+  return schemaReady;
+}
+
+async function initializeInvitationSchema() {
   const db = getD1();
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS rsvps (

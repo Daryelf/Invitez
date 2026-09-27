@@ -5,7 +5,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const { id } = await context.params;
   const photo = await env.DB.prepare("SELECT object_key, content_type FROM photos WHERE id = ?").bind(id).first<{ object_key: string; content_type: string }>();
   if (!photo) return new Response("Not found", { status: 404 });
-  const object = await env.MEDIA.get(photo.object_key, { range: request.headers });
+  const requestedRange = request.headers.has("range");
+  const object = await env.MEDIA.get(photo.object_key, requestedRange ? { range: request.headers } : undefined);
   if (!object) return new Response("Not found", { status: 404 });
   const headers = new Headers();
   object.writeHttpMetadata(headers);
@@ -13,7 +14,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   headers.set("cache-control", "public, max-age=31536000, immutable");
   headers.set("content-type", photo.content_type);
   headers.set("accept-ranges", "bytes");
-  if (object.range) {
+  if (requestedRange && object.range) {
     const offset = object.range.offset || 0;
     const length = object.range.length || object.size;
     headers.set("content-length", String(length));

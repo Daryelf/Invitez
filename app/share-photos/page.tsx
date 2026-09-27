@@ -111,6 +111,7 @@ export default function SharePhotosPage() {
   const [caption, setCaption] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
+  const previewUrls = useRef<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
   const [submitted, setSubmitted] = useState<{ count: number; singleWasVideo: boolean } | null>(null);
@@ -128,10 +129,8 @@ export default function SharePhotosPage() {
   }, [language]);
 
   useEffect(() => {
-    const previews = files.map((selectedFile) => URL.createObjectURL(selectedFile));
-    setFilePreviews(previews);
-    return () => previews.forEach((preview) => URL.revokeObjectURL(preview));
-  }, [files]);
+    return () => previewUrls.current.forEach((preview) => URL.revokeObjectURL(preview));
+  }, []);
 
   const uploadAllowed = Boolean(eventDay?.photoUploadsEnabled);
   const eventName = eventDay?.event?.eventName || (language === "es" ? "la celebración" : "the celebration");
@@ -143,21 +142,20 @@ export default function SharePhotosPage() {
 
   function selectMedia(changeEvent: ChangeEvent<HTMLInputElement>) {
     const nextFiles = Array.from(changeEvent.target.files || []);
-    setFiles((currentFiles) => {
-      const availableSlots = Math.max(0, MAX_BATCH_FILES - currentFiles.length);
-      const acceptedFiles = nextFiles.slice(0, availableSlots);
-      if (nextFiles.length > availableSlots) {
-        setError(text.batchLimit);
-      } else {
-        setError("");
-      }
-      return [...currentFiles, ...acceptedFiles];
-    });
+    const availableSlots = Math.max(0, MAX_BATCH_FILES - files.length);
+    const acceptedFiles = nextFiles.slice(0, availableSlots);
+    previewUrls.current.push(...acceptedFiles.map((file) => URL.createObjectURL(file)));
+    setFiles([...files, ...acceptedFiles]);
+    setFilePreviews([...previewUrls.current]);
+    setError(nextFiles.length > availableSlots ? text.batchLimit : "");
     changeEvent.target.value = "";
   }
 
   function clearPhotos() {
+    previewUrls.current.forEach((preview) => URL.revokeObjectURL(preview));
+    previewUrls.current = [];
     setFiles([]);
+    setFilePreviews([]);
     if (fileInput.current) fileInput.current.value = "";
   }
 
@@ -174,12 +172,16 @@ export default function SharePhotosPage() {
 
     try {
       for (const selectedFile of files) {
-        const body = new FormData();
-        body.set("photo", selectedFile);
-        body.set("guestName", guestName);
-        body.set("caption", caption);
-
-        const response = await fetch("/api/photos", { method: "POST", body });
+        const response = await fetch("/api/photos", {
+          method: "POST",
+          headers: {
+            "Content-Type": selectedFile.type,
+            "X-File-Name": encodeURIComponent(selectedFile.name),
+            "X-Guest-Name": encodeURIComponent(guestName),
+            "X-Caption": encodeURIComponent(caption),
+          },
+          body: selectedFile,
+        });
         const result = await response.json() as { error?: string };
         if (!response.ok) throw new Error(language === "es" ? text.uploadError : (result.error || text.uploadError));
         completed += 1;
@@ -190,7 +192,11 @@ export default function SharePhotosPage() {
       setCaption("");
       setSubmitted({ count: batchSize, singleWasVideo });
     } catch (uploadError) {
-      if (completed > 0) setFiles((currentFiles) => currentFiles.slice(completed));
+      if (completed > 0) {
+        previewUrls.current.splice(0, completed).forEach((preview) => URL.revokeObjectURL(preview));
+        setFiles(files.slice(completed));
+        setFilePreviews([...previewUrls.current]);
+      }
       const message = uploadError instanceof Error ? uploadError.message : text.uploadError;
       setError(completed > 0
         ? language === "es"

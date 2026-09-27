@@ -70,15 +70,17 @@ function publicRequestOrigin(request) {
   return `${isLocal ? "http" : "https"}://${allowedHost}`;
 }
 
-async function readRequestBody(request, maxSize = 2 * 1024 * 1024) {
-  const chunks = [];
-  let size = 0;
-  for await (const chunk of request) {
-    size += chunk.length;
-    if (size > maxSize) throw new Error("Request is too large");
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks);
+class RequestTooLargeError extends Error {}
+
+function limitedRequestBody(request, maxSize) {
+  return Readable.toWeb(Readable.from((async function* () {
+    let size = 0;
+    for await (const chunk of request) {
+      size += chunk.length;
+      if (size > maxSize) throw new RequestTooLargeError("Request is too large");
+      yield chunk;
+    }
+  })()));
 }
 
 async function proxyDashboardRequest(request, response, requestUrl) {
@@ -97,11 +99,19 @@ async function proxyDashboardRequest(request, response, requestUrl) {
 
   const method = request.method || "GET";
   const maxBodySize = requestUrl.pathname === "/api/photos" ? 96 * 1024 * 1024 : 2 * 1024 * 1024;
-  const body = method === "GET" || method === "HEAD" ? undefined : await readRequestBody(request, maxBodySize);
+  const declaredSize = Number(request.headers["content-length"] || 0);
+  if (declaredSize > maxBodySize) {
+    response.writeHead(413, { "Content-Type": "application/json; charset=utf-8", Connection: "close" });
+    response.end(JSON.stringify({ error: "File is too large" }));
+    return;
+  }
+  const body = method === "GET" || method === "HEAD" ? undefined : limitedRequestBody(request, maxBodySize);
+  if (body && declaredSize > 0) upstreamHeaders.set("content-length", String(declaredSize));
   const upstream = await fetch(target, {
     method,
     headers: upstreamHeaders,
     body,
+    ...(body ? { duplex: "half" } : {}),
     redirect: "manual",
   });
   const responseHeaders = {};
@@ -197,9 +207,18 @@ createServer(async (request, response) => {
     const filePath = resolveRequestPath(pathname);
     if (!filePath) throw new Error("Invalid path");
     await sendFile(request, response, filePath);
-  } catch {
-    response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-    response.end("Not found");
+  } catch (error) {
+    if (response.headersSent) return response.destroy(error);
+    const tooLarge = error instanceof RequestTooLargeError || error?.cause instanceof RequestTooLargeError;
+    const proxyRequest = shouldProxyDashboard(new URL(request.url || "/", "http://localhost").pathname);
+    const status = tooLarge ? 413 : proxyRequest ? 502 : 404;
+    if (proxyRequest) {
+      response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
+      response.end(JSON.stringify({ error: tooLarge ? "File is too large" : "Upload service is temporarily unavailable" }));
+    } else {
+      response.writeHead(status, { "Content-Type": "text/plain; charset=utf-8" });
+      response.end("Not found");
+    }
   }
 }).listen(port, "0.0.0.0", () => {
   console.log(`Invitez is listening on port ${port}`);
