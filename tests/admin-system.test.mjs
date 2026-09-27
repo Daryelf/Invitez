@@ -170,6 +170,11 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(guestUpload, /document\.createElement\("video"\)/);
   assert.match(guestUpload, /Upload up to 10 photos or videos at a time/);
   assert.match(guestUpload, /Submit new photos or videos/);
+  assert.match(guestUpload, /Choose your language/);
+  assert.match(guestUpload, /Elige tu idioma/);
+  assert.match(guestUpload, /chooseLanguage\("es"\)/);
+  assert.match(guestUpload, /Comparte tu experiencia para Erika\./);
+  assert.match(guestUpload, /Sube hasta 10 fotos o videos a la vez/);
   assert.match(guestUpload, /confirmation\.hidden = false/);
   assert.match(guestUpload, /\.intro\[hidden\], form\[hidden\] \{ display: none; \}/);
   assert.match(guestUpload, /html, body \{ min-height: 100%; background: #e8eddc; \}/);
@@ -262,6 +267,11 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.doesNotMatch(sharePage, /capture="environment"/);
   assert.doesNotMatch(sharePage, /no PIN needed/);
   assert.match(sharePage, /Share your experience for Erika\./);
+  assert.match(sharePage, /Choose your language/);
+  assert.match(sharePage, /Elige tu idioma/);
+  assert.match(sharePage, /setLanguage\("es"\)/);
+  assert.match(sharePage, /Comparte tu experiencia para Erika\./);
+  assert.match(sharePage, /Sube hasta \$\{MAX_BATCH_FILES\} fotos o videos a la vez/);
   assert.doesNotMatch(sharePage, /Photo sharing will open/);
   assert.doesNotMatch(sharePage, /Private guest upload/);
   assert.match(sharePage, /Boolean\(eventDay\?\.photoUploadsEnabled\)/);
@@ -272,11 +282,11 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(sharePage, /Array\.from\(changeEvent\.target\.files/);
   assert.match(sharePage, /\[\.\.\.currentFiles, \.\.\.acceptedFiles\]/);
   assert.match(sharePage, /const MAX_BATCH_FILES = 10/);
-  assert.match(sharePage, /Upload up to \{MAX_BATCH_FILES\} photos or videos at a time/);
+  assert.match(sharePage, /Upload up to \$\{MAX_BATCH_FILES\} photos or videos at a time/);
   assert.match(sharePage, /Submit new photos or videos/);
   assert.match(sharePage, /setSubmitted\(\{ count: batchSize, singleWasVideo \}\)/);
   assert.match(sharePage, /for \(const selectedFile of files\)/);
-  assert.match(sharePage, /Share \$\{files\.length\} memories/);
+  assert.match(sharePage, /\$\{text\.share\} \$\{files\.length\} \$\{text\.memories\}/);
   assert.match(sharePage, /video\/quicktime/);
   assert.match(sharePage, /<video/);
   assert.match(shareStyles, /\.previewGrid/);

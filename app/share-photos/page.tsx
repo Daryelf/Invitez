@@ -10,18 +10,102 @@ type EventDayData = {
 };
 
 const MAX_BATCH_FILES = 10;
+type Language = "en" | "es";
+
+const copy = {
+  en: {
+    guestDrop: "Guest memory drop",
+    shareTitle: "Share a",
+    memory: "memory.",
+    experience: "Share your experience for Erika.",
+    choose: "Choose photos or videos",
+    limit: `Upload up to ${MAX_BATCH_FILES} photos or videos at a time`,
+    addMore: "Add more photos or videos",
+    yourName: "Your name",
+    optionalPrivate: "optional · private",
+    namePlaceholder: "Add your name if you want",
+    namePrivacy: "Your name will not appear with the photo or video.",
+    message: "Message",
+    optional: "optional",
+    messagePlaceholder: "Add a short note about this moment",
+    paused: "Uploads are paused by the host.",
+    unavailable: "Sharing is temporarily unavailable",
+    uploadError: "Could not upload that photo or video",
+    submitted: "Submitted",
+    thanks: "Thank you for celebrating Erika!",
+    submitMore: "Submit new photos or videos",
+    photo: "photo",
+    photos: "photos",
+    video: "video",
+    videos: "videos",
+    memories: "memories",
+    selected: "selected",
+    share: "Share",
+    shareThis: "Share this",
+    uploading: "Uploading",
+    in: "in.",
+    wasShared: "was shared successfully.",
+    wereShared: "were shared successfully.",
+    remaining: "Please try the remaining files again.",
+    batchLimit: `You can upload up to ${MAX_BATCH_FILES} photos or videos at a time.`,
+    changeLanguage: "Language",
+  },
+  es: {
+    guestDrop: "Recuerdos de los invitados",
+    shareTitle: "Comparte un",
+    memory: "recuerdo.",
+    experience: "Comparte tu experiencia para Erika.",
+    choose: "Elige fotos o videos",
+    limit: `Sube hasta ${MAX_BATCH_FILES} fotos o videos a la vez`,
+    addMore: "Agregar más fotos o videos",
+    yourName: "Tu nombre",
+    optionalPrivate: "opcional · privado",
+    namePlaceholder: "Agrega tu nombre si quieres",
+    namePrivacy: "Tu nombre no aparecerá con la foto o el video.",
+    message: "Mensaje",
+    optional: "opcional",
+    messagePlaceholder: "Agrega una nota corta sobre este momento",
+    paused: "El anfitrión ha pausado las cargas.",
+    unavailable: "La página para compartir no está disponible por el momento",
+    uploadError: "No se pudo subir esa foto o video",
+    submitted: "Enviado",
+    thanks: "¡Gracias por celebrar con Erika!",
+    submitMore: "Subir más fotos o videos",
+    photo: "foto",
+    photos: "fotos",
+    video: "video",
+    videos: "videos",
+    memories: "recuerdos",
+    selected: "seleccionado",
+    share: "Compartir",
+    shareThis: "Compartir este",
+    uploading: "Subiendo",
+    in: "enviado.",
+    wasShared: "se compartió correctamente.",
+    wereShared: "se compartieron correctamente.",
+    remaining: "Intenta subir los archivos restantes de nuevo.",
+    batchLimit: `Puedes subir hasta ${MAX_BATCH_FILES} fotos o videos a la vez.`,
+    changeLanguage: "Idioma",
+  },
+} as const;
 
 function isVideo(file: File | undefined) {
   return Boolean(file?.type.startsWith("video/"));
 }
 
-function mediaLabel(files: File[]) {
-  if (files.length !== 1) return `${files.length} memories`;
-  return isVideo(files[0]) ? "1 video" : "1 photo";
+function mediaLabel(files: File[], language: Language) {
+  const text = copy[language];
+  if (language === "es") {
+    if (files.length !== 1) return `${files.length} archivos seleccionados`;
+    return isVideo(files[0]) ? "1 video seleccionado" : "1 foto seleccionada";
+  }
+  if (files.length !== 1) return `${files.length} ${text.memories} selected`;
+  return isVideo(files[0]) ? "1 video selected" : "1 photo selected";
 }
 
 export default function SharePhotosPage() {
   const fileInput = useRef<HTMLInputElement>(null);
+  const [language, setLanguage] = useState<Language | null>(null);
   const [eventDay, setEventDay] = useState<EventDayData | null>(null);
   const [guestName, setGuestName] = useState("");
   const [caption, setCaption] = useState("");
@@ -33,14 +117,15 @@ export default function SharePhotosPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!language) return;
     fetch("/api/event-day", { cache: "no-store" })
       .then((response) => {
-        if (!response.ok) throw new Error("Sharing is temporarily unavailable");
+        if (!response.ok) throw new Error(copy[language].unavailable);
         return response.json() as Promise<EventDayData>;
       })
       .then(setEventDay)
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Sharing is temporarily unavailable"));
-  }, []);
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : copy[language].unavailable));
+  }, [language]);
 
   useEffect(() => {
     const previews = files.map((selectedFile) => URL.createObjectURL(selectedFile));
@@ -49,7 +134,12 @@ export default function SharePhotosPage() {
   }, [files]);
 
   const uploadAllowed = Boolean(eventDay?.photoUploadsEnabled);
-  const eventName = eventDay?.event?.eventName || "the celebration";
+  const eventName = eventDay?.event?.eventName || (language === "es" ? "la celebración" : "the celebration");
+  const text = copy[language || "en"];
+
+  useEffect(() => {
+    document.documentElement.lang = language || "en";
+  }, [language]);
 
   function selectMedia(changeEvent: ChangeEvent<HTMLInputElement>) {
     const nextFiles = Array.from(changeEvent.target.files || []);
@@ -57,7 +147,7 @@ export default function SharePhotosPage() {
       const availableSlots = Math.max(0, MAX_BATCH_FILES - currentFiles.length);
       const acceptedFiles = nextFiles.slice(0, availableSlots);
       if (nextFiles.length > availableSlots) {
-        setError(`You can upload up to ${MAX_BATCH_FILES} photos or videos at a time.`);
+        setError(text.batchLimit);
       } else {
         setError("");
       }
@@ -91,7 +181,7 @@ export default function SharePhotosPage() {
 
         const response = await fetch("/api/photos", { method: "POST", body });
         const result = await response.json() as { error?: string };
-        if (!response.ok) throw new Error(result.error || "Could not upload that photo or video");
+        if (!response.ok) throw new Error(language === "es" ? text.uploadError : (result.error || text.uploadError));
         completed += 1;
         setUploadedCount(completed);
       }
@@ -101,9 +191,11 @@ export default function SharePhotosPage() {
       setSubmitted({ count: batchSize, singleWasVideo });
     } catch (uploadError) {
       if (completed > 0) setFiles((currentFiles) => currentFiles.slice(completed));
-      const message = uploadError instanceof Error ? uploadError.message : "Could not upload that photo or video";
+      const message = uploadError instanceof Error ? uploadError.message : text.uploadError;
       setError(completed > 0
-        ? `${completed} of ${files.length} memories uploaded. ${message} Please try the remaining files again.`
+        ? language === "es"
+          ? `${completed} de ${files.length} recuerdos subidos. ${message} ${text.remaining}`
+          : `${completed} of ${files.length} memories uploaded. ${message} ${text.remaining}`
         : message);
     } finally {
       setUploading(false);
@@ -113,26 +205,44 @@ export default function SharePhotosPage() {
   return (
     <main className={styles.page}>
       <div className={styles.glow} aria-hidden="true" />
+      {!language ? (
+        <section className={styles.languageGate} aria-labelledby="language-title">
+          <span className={styles.languageMonogram}>E</span>
+          <p>Welcome · Bienvenidos</p>
+          <h1 id="language-title">Choose your language<br /><em>Elige tu idioma</em></h1>
+          <div className={styles.languageChoices}>
+            <button type="button" onClick={() => setLanguage("en")}><strong>English</strong><span>Continue in English</span></button>
+            <button type="button" lang="es" onClick={() => setLanguage("es")}><strong>Español</strong><span>Continuar en español</span></button>
+          </div>
+        </section>
+      ) : <>
       <header className={styles.header}>
         <span className={styles.monogram}>E</span>
-        <div><strong>{eventName}</strong><small>Guest memory drop</small></div>
+        <div><strong>{eventName}</strong><small>{text.guestDrop}</small></div>
+        <button className={styles.languageSwitch} type="button" onClick={() => setLanguage(null)} aria-label={text.changeLanguage}>{language === "en" ? "ES" : "EN"}</button>
       </header>
 
       <section className={styles.card}>
         {submitted ? (
           <div className={styles.confirmation} role="status" aria-live="polite">
             <span className={styles.confirmationIcon} aria-hidden="true">✓</span>
-            <small>Submitted</small>
-            <h1>Your {submitted.count === 1 ? (submitted.singleWasVideo ? "video is" : "photo is") : "memories are"} in.</h1>
-            <p>{submitted.count === 1
-              ? `Your ${submitted.singleWasVideo ? "video" : "photo"} was shared successfully. Thank you for celebrating Erika!`
-              : `All ${submitted.count} photos and videos were shared successfully. Thank you for celebrating Erika!`}</p>
-            <button type="button" onClick={() => setSubmitted(null)}>Submit new photos or videos</button>
+            <small>{text.submitted}</small>
+            <h1>{language === "es"
+              ? submitted.count === 1 ? (submitted.singleWasVideo ? "Tu video fue enviado." : "Tu foto fue enviada.") : `Tus ${text.memories} fueron enviados.`
+              : `Your ${submitted.count === 1 ? (submitted.singleWasVideo ? "video is" : "photo is") : "memories are"} in.`}</h1>
+            <p>{language === "es"
+              ? submitted.count === 1
+                ? `Tu ${submitted.singleWasVideo ? text.video : text.photo} ${text.wasShared} ${text.thanks}`
+                : `Las ${submitted.count} fotos y videos ${text.wereShared} ${text.thanks}`
+              : submitted.count === 1
+                ? `Your ${submitted.singleWasVideo ? text.video : text.photo} ${text.wasShared} ${text.thanks}`
+                : `All ${submitted.count} photos and videos ${text.wereShared} ${text.thanks}`}</p>
+            <button type="button" onClick={() => setSubmitted(null)}>{text.submitMore}</button>
           </div>
         ) : <>
           <div className={styles.intro}>
-            <h1>Share a<br /><em>memory.</em></h1>
-            <p>Share your experience for Erika.</p>
+            <h1>{text.shareTitle}<br /><em>{text.memory}</em></h1>
+            <p>{text.experience}</p>
           </div>
 
           <form className={styles.form} onSubmit={uploadPhotos}>
@@ -141,51 +251,53 @@ export default function SharePhotosPage() {
               <span className={`${styles.previewGrid} ${filePreviews.length === 1 ? styles.singlePreview : ""}`}>
                 {filePreviews.map((preview, index) => isVideo(files[index]) ? (
                   <span className={styles.videoPreview} key={preview}>
-                    <video src={preview} muted playsInline preload="metadata" aria-label={`Selected video ${index + 1} of ${filePreviews.length}`} />
-                    <i>Video</i>
+                    <video src={preview} muted playsInline preload="metadata" aria-label={`${text.video} ${index + 1} / ${filePreviews.length}`} />
+                    <i>{text.video}</i>
                   </span>
                 ) : (
-                  <img key={preview} src={preview} alt={`Selected photo ${index + 1} of ${filePreviews.length}`} />
+                  <img key={preview} src={preview} alt={`${text.photo} ${index + 1} / ${filePreviews.length}`} />
                 ))}
-                <strong className={styles.selectionCount}>{mediaLabel(files)} selected</strong>
+                <strong className={styles.selectionCount}>{mediaLabel(files, language)}</strong>
               </span>
             ) : (
               <span className={styles.photoPrompt}>
                 <i>＋</i>
-                <strong>Choose photos or videos</strong>
-                <small>Upload up to {MAX_BATCH_FILES} photos or videos at a time</small>
+                <strong>{text.choose}</strong>
+                <small>{text.limit}</small>
               </span>
             )}
             <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple onChange={selectMedia} disabled={!uploadAllowed || uploading} />
           </label>
 
-          {files.length ? <button className={styles.changePhoto} type="button" onClick={() => fileInput.current?.click()} disabled={uploading}>Add more photos or videos</button> : null}
+          {files.length ? <button className={styles.changePhoto} type="button" onClick={() => fileInput.current?.click()} disabled={uploading}>{text.addMore}</button> : null}
 
           <label className={styles.field}>
-            <span>Your name <em>optional · private</em></span>
-            <input value={guestName} onChange={(event) => setGuestName(event.target.value.slice(0, 80))} maxLength={80} placeholder="Add your name if you want" autoComplete="name" disabled={!uploadAllowed} />
-            <small>Your name will not appear with the photo or video.</small>
+            <span>{text.yourName} <em>{text.optionalPrivate}</em></span>
+            <input value={guestName} onChange={(event) => setGuestName(event.target.value.slice(0, 80))} maxLength={80} placeholder={text.namePlaceholder} autoComplete="name" disabled={!uploadAllowed} />
+            <small>{text.namePrivacy}</small>
           </label>
 
           <label className={styles.field}>
-            <span>Message <em>optional</em></span>
-            <input value={caption} onChange={(event) => setCaption(event.target.value.slice(0, 140))} maxLength={140} placeholder="Add a short note about this moment" disabled={!uploadAllowed} />
+            <span>{text.message} <em>{text.optional}</em></span>
+            <input value={caption} onChange={(event) => setCaption(event.target.value.slice(0, 140))} maxLength={140} placeholder={text.messagePlaceholder} disabled={!uploadAllowed} />
           </label>
 
-          {eventDay && !eventDay.photoUploadsEnabled ? <p className={styles.status}>Uploads are paused by the host.</p> : null}
+          {eventDay && !eventDay.photoUploadsEnabled ? <p className={styles.status}>{text.paused}</p> : null}
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
 
           <button className={styles.submit} type="submit" disabled={!files.length || !uploadAllowed || uploading}>
             {uploading
-              ? `Uploading ${Math.min(uploadedCount + 1, files.length)} of ${files.length}…`
+              ? `${text.uploading} ${Math.min(uploadedCount + 1, files.length)} / ${files.length}…`
               : files.length > 1
-                ? `Share ${files.length} memories`
-                : `Share this ${isVideo(files[0]) ? "video" : "photo"}`}
+                ? `${text.share} ${files.length} ${text.memories}`
+                : language === "es"
+                  ? `Compartir ${isVideo(files[0]) ? "este video" : "esta foto"}`
+                  : `${text.shareThis} ${isVideo(files[0]) ? text.video : text.photo}`}
           </button>
           </form>
         </>}
       </section>
-
+      </>}
     </main>
   );
 }

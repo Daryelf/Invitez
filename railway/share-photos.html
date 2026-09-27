@@ -11,6 +11,34 @@
     html, body { min-height: 100%; background: #e8eddc; }
     body { margin: 0; }
     button, input { font: inherit; }
+    .language-gate {
+      --ink: #173c32;
+      position: relative;
+      display: grid;
+      width: min(calc(100% - 32px), 540px);
+      min-height: calc(100dvh - max(36px, env(safe-area-inset-top)) - 64px - env(safe-area-inset-bottom));
+      place-items: center;
+      align-content: center;
+      gap: 18px;
+      margin: max(18px, env(safe-area-inset-top)) auto calc(64px + env(safe-area-inset-bottom));
+      padding: 38px 24px;
+      border: 1px solid rgba(23, 60, 50, .14);
+      border-radius: 30px;
+      color: var(--ink);
+      background: rgba(255, 249, 237, .96);
+      box-shadow: 0 26px 70px rgba(45, 66, 45, .18);
+      text-align: center;
+    }
+    .language-gate[hidden], .page[hidden] { display: none; }
+    .language-monogram { display: grid; width: 72px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #fff8ec; background: var(--ink); font: 38px Georgia, serif; }
+    .language-gate > p { margin: 0; color: #a17d80; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .language-gate h1 { margin: 0; font: 400 clamp(2.35rem, 10vw, 4.25rem)/1 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+    .language-gate h1 em { color: #c98591; font-weight: 400; }
+    .language-choices { display: grid; width: min(100%, 390px); gap: 12px; margin-top: 12px; }
+    .language-choices button { display: grid; gap: 4px; min-height: 78px; padding: 14px 20px; border: 1px solid rgba(23, 60, 50, .18); border-radius: 16px; color: var(--ink); background: #fffdf8; cursor: pointer; text-align: left; }
+    .language-choices button:focus-visible { outline: 3px solid rgba(212, 139, 152, .4); outline-offset: 3px; }
+    .language-choices strong { font: 500 24px Georgia, serif; }
+    .language-choices span { color: #6d7c64; font-size: 14px; }
     .page {
       --ink: #173c32;
       --sage: #829475;
@@ -31,6 +59,7 @@
       margin: 0 auto 16px;
       padding: 2px 3px;
     }
+    .language-switch { min-width: 42px; min-height: 36px; margin-left: auto; border: 1px solid rgba(23, 60, 50, .2); border-radius: 999px; color: var(--ink); background: rgba(255, 249, 237, .78); cursor: pointer; font-size: 12px; font-weight: 800; letter-spacing: .08em; }
     .monogram { display: grid; width: 40px; aspect-ratio: 1; place-items: center; border-radius: 50%; color: #fff8ec; background: var(--ink); font: 22px Georgia, serif; }
     .header div { display: grid; }
     .header strong { font: 500 16px Georgia, serif; }
@@ -89,6 +118,7 @@
     .add-more:disabled { cursor: not-allowed; opacity: .45; }
     .field { display: grid; gap: 8px; }
     .field > span { display: flex; justify-content: space-between; gap: 12px; color: #63705d; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .field b { font: inherit; }
     .field em { color: #a17d80; font-style: normal; }
     .field input { width: 100%; min-height: 56px; padding: 0 15px; border: 1px solid rgba(23, 60, 50, .18); border-radius: 13px; outline: 0; color: var(--ink); background: #fffdf8; font-size: 16px; }
     .field input:focus { border-color: #d48b98; box-shadow: 0 0 0 3px rgba(212, 139, 152, .15); }
@@ -116,30 +146,40 @@
   </style>
 </head>
 <body>
-  <main class="page">
+  <section class="language-gate" id="language-gate" aria-labelledby="language-title">
+    <span class="language-monogram">E</span>
+    <p>Welcome · Bienvenidos</p>
+    <h1 id="language-title">Choose your language<br><em>Elige tu idioma</em></h1>
+    <div class="language-choices">
+      <button id="choose-en" type="button"><strong>English</strong><span>Continue in English</span></button>
+      <button id="choose-es" type="button" lang="es"><strong>Español</strong><span>Continuar en español</span></button>
+    </div>
+  </section>
+  <main class="page" id="upload-page" hidden>
     <header class="header">
       <span class="monogram">E</span>
-      <div><strong id="event-name">Erika's Sweet 16</strong><small>Guest memory drop</small></div>
+      <div><strong id="event-name">Erika's Sweet 16</strong><small id="guest-drop">Guest memory drop</small></div>
+      <button class="language-switch" id="language-switch" type="button" aria-label="Language">ES</button>
     </header>
     <section class="card">
       <div class="intro" id="intro">
-        <h1>Share a<br><em>memory.</em></h1>
-        <p>Share your experience for Erika.</p>
+        <h1><span id="share-title">Share a</span><br><em id="memory-title">memory.</em></h1>
+        <p id="experience-copy">Share your experience for Erika.</p>
       </div>
       <form id="photo-form">
         <label class="picker" id="picker">
-          <span class="prompt" id="prompt"><i>＋</i><strong>Choose photos or videos</strong><small>Upload up to 10 photos or videos at a time</small></span>
+          <span class="prompt" id="prompt"><i>＋</i><strong id="choose-copy">Choose photos or videos</strong><small id="limit-copy">Upload up to 10 photos or videos at a time</small></span>
           <span class="previews" id="previews"><strong class="count" id="count"></strong></span>
           <input id="photos" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple disabled>
         </label>
         <button class="add-more" id="add-more" type="button" hidden>Add more photos or videos</button>
         <label class="field">
-          <span>Your name <em>optional · private</em></span>
+          <span><b id="name-label">Your name</b> <em id="name-optional">optional · private</em></span>
           <input id="guest-name" maxlength="80" placeholder="Add your name if you want" autocomplete="name" disabled>
-          <small>Your name will not appear with the photo or video.</small>
+          <small id="name-privacy">Your name will not appear with the photo or video.</small>
         </label>
         <label class="field">
-          <span>Message <em>optional</em></span>
+          <span><b id="message-label">Message</b> <em id="message-optional">optional</em></span>
           <input id="caption" maxlength="140" placeholder="Add a short note about this moment" disabled>
         </label>
         <p class="message error" id="error" role="alert"></p>
@@ -147,7 +187,7 @@
       </form>
       <section class="confirmation" id="confirmation" role="status" aria-live="polite" hidden>
         <span class="confirmation-icon" aria-hidden="true">✓</span>
-        <small>Submitted</small>
+        <small id="submitted-label">Submitted</small>
         <h2 id="confirmation-title">Your memories are in.</h2>
         <p id="confirmation-copy"></p>
         <button id="submit-another" type="button">Submit new photos or videos</button>
@@ -156,6 +196,29 @@
   </main>
   <script>
     const MAX_BATCH_FILES = 10;
+    const copy = {
+      en: {
+        guestDrop: "Guest memory drop", shareTitle: "Share a", memory: "memory.", experience: "Share your experience for Erika.",
+        choose: "Choose photos or videos", limit: "Upload up to 10 photos or videos at a time", addMore: "Add more photos or videos",
+        yourName: "Your name", optionalPrivate: "optional · private", namePlaceholder: "Add your name if you want", namePrivacy: "Your name will not appear with the photo or video.",
+        message: "Message", optional: "optional", messagePlaceholder: "Add a short note about this moment", paused: "Uploads are paused by the host.",
+        unavailable: "Sharing is temporarily unavailable", uploadError: "Could not upload that photo or video", submitted: "Submitted",
+        thanks: "Thank you for celebrating Erika!", submitMore: "Submit new photos or videos", memories: "memories", uploading: "Uploading",
+        batchLimit: "You can upload up to 10 photos or videos at a time.", remaining: "Please try the remaining files again.",
+      },
+      es: {
+        guestDrop: "Recuerdos de los invitados", shareTitle: "Comparte un", memory: "recuerdo.", experience: "Comparte tu experiencia para Erika.",
+        choose: "Elige fotos o videos", limit: "Sube hasta 10 fotos o videos a la vez", addMore: "Agregar más fotos o videos",
+        yourName: "Tu nombre", optionalPrivate: "opcional · privado", namePlaceholder: "Agrega tu nombre si quieres", namePrivacy: "Tu nombre no aparecerá con la foto o el video.",
+        message: "Mensaje", optional: "opcional", messagePlaceholder: "Agrega una nota corta sobre este momento", paused: "El anfitrión ha pausado las cargas.",
+        unavailable: "La página para compartir no está disponible por el momento", uploadError: "No se pudo subir esa foto o video", submitted: "Enviado",
+        thanks: "¡Gracias por celebrar con Erika!", submitMore: "Subir más fotos o videos", memories: "recuerdos", uploading: "Subiendo",
+        batchLimit: "Puedes subir hasta 10 fotos o videos a la vez.", remaining: "Intenta subir los archivos restantes de nuevo.",
+      },
+    };
+    const languageGate = document.querySelector("#language-gate");
+    const uploadPage = document.querySelector("#upload-page");
+    const languageSwitch = document.querySelector("#language-switch");
     const input = document.querySelector("#photos");
     const form = document.querySelector("#photo-form");
     const intro = document.querySelector("#intro");
@@ -176,6 +239,40 @@
     let previewUrls = [];
     let uploadAllowed = false;
     let uploading = false;
+    let language = null;
+
+    function applyLanguage() {
+      const text = copy[language];
+      document.documentElement.lang = language;
+      document.querySelector("#guest-drop").textContent = text.guestDrop;
+      document.querySelector("#share-title").textContent = text.shareTitle;
+      document.querySelector("#memory-title").textContent = text.memory;
+      document.querySelector("#experience-copy").textContent = text.experience;
+      document.querySelector("#choose-copy").textContent = text.choose;
+      document.querySelector("#limit-copy").textContent = text.limit;
+      addMore.textContent = text.addMore;
+      document.querySelector("#name-label").textContent = text.yourName;
+      document.querySelector("#name-optional").textContent = text.optionalPrivate;
+      guestName.placeholder = text.namePlaceholder;
+      document.querySelector("#name-privacy").textContent = text.namePrivacy;
+      document.querySelector("#message-label").textContent = text.message;
+      document.querySelector("#message-optional").textContent = text.optional;
+      caption.placeholder = text.messagePlaceholder;
+      document.querySelector("#submitted-label").textContent = text.submitted;
+      submitAnother.textContent = text.submitMore;
+      languageSwitch.textContent = language === "en" ? "ES" : "EN";
+      languageSwitch.setAttribute("aria-label", language === "en" ? "Cambiar a español" : "Switch to English");
+      renderSelection();
+    }
+
+    function chooseLanguage(nextLanguage) {
+      language = nextLanguage;
+      languageGate.hidden = true;
+      uploadPage.hidden = false;
+      showMessage(errorMessage, "");
+      applyLanguage();
+      loadEventDay();
+    }
 
     function showMessage(element, message) {
       element.textContent = message;
@@ -201,15 +298,15 @@
           video.muted = true;
           video.playsInline = true;
           video.preload = "metadata";
-          video.setAttribute("aria-label", `Selected video ${index + 1} of ${selectedFiles.length}`);
+          video.setAttribute("aria-label", `${language === "es" ? "Video" : "Selected video"} ${index + 1} / ${selectedFiles.length}`);
           const badge = document.createElement("i");
-          badge.textContent = "Video";
+          badge.textContent = language === "es" ? "Video" : "Video";
           wrapper.append(video, badge);
           previews.insertBefore(wrapper, count);
         } else {
           const image = document.createElement("img");
           image.src = url;
-          image.alt = `Selected photo ${index + 1} of ${selectedFiles.length}`;
+          image.alt = `${language === "es" ? "Foto" : "Selected photo"} ${index + 1} / ${selectedFiles.length}`;
           previews.insertBefore(image, count);
         }
       });
@@ -218,14 +315,22 @@
       prompt.hidden = hasFiles;
       previews.classList.toggle("visible", hasFiles);
       previews.classList.toggle("single", selectedFiles.length === 1);
-      count.textContent = selectedFiles.length === 1
-        ? `1 ${selectedFiles[0].type.startsWith("video/") ? "video" : "photo"} selected`
-        : `${selectedFiles.length} memories selected`;
+      count.textContent = language === "es"
+        ? selectedFiles.length === 1
+          ? (selectedFiles[0].type.startsWith("video/") ? "1 video seleccionado" : "1 foto seleccionada")
+          : `${selectedFiles.length} archivos seleccionados`
+        : selectedFiles.length === 1
+          ? `1 ${selectedFiles[0].type.startsWith("video/") ? "video" : "photo"} selected`
+          : `${selectedFiles.length} memories selected`;
       addMore.hidden = !hasFiles;
       submit.disabled = !hasFiles || !uploadAllowed || uploading;
-      if (!uploading) submit.textContent = selectedFiles.length > 1
-        ? `Share ${selectedFiles.length} memories`
-        : `Share this ${selectedFiles[0]?.type.startsWith("video/") ? "video" : "photo"}`;
+      if (!uploading && language) submit.textContent = language === "es"
+        ? selectedFiles.length > 1
+          ? `Compartir ${selectedFiles.length} recuerdos`
+          : `Compartir ${selectedFiles[0]?.type.startsWith("video/") ? "este video" : "esta foto"}`
+        : selectedFiles.length > 1
+          ? `Share ${selectedFiles.length} memories`
+          : `Share this ${selectedFiles[0]?.type.startsWith("video/") ? "video" : "photo"}`;
     }
 
     input.addEventListener("change", () => {
@@ -234,7 +339,7 @@
       selectedFiles = selectedFiles.concat(nextFiles.slice(0, availableSlots));
       input.value = "";
       showMessage(errorMessage, nextFiles.length > availableSlots
-        ? `You can upload up to ${MAX_BATCH_FILES} photos or videos at a time.`
+        ? copy[language].batchLimit
         : "");
       renderSelection();
     });
@@ -255,32 +360,38 @@
 
       try {
         for (const file of selectedFiles) {
-          submit.textContent = `Uploading ${completed + 1} of ${batchSize}…`;
+          submit.textContent = `${copy[language].uploading} ${completed + 1} / ${batchSize}…`;
           const body = new FormData();
           body.set("photo", file);
           body.set("guestName", guestName.value);
           body.set("caption", caption.value);
           const response = await fetch("/api/photos", { method: "POST", body });
           const result = await response.json();
-          if (!response.ok) throw new Error(result.error || "Could not upload that photo or video");
+          if (!response.ok) throw new Error(language === "es" ? copy.es.uploadError : (result.error || copy.en.uploadError));
           completed += 1;
         }
         selectedFiles = [];
         caption.value = "";
-        confirmationTitle.textContent = batchSize === 1
-          ? `Your ${singleFileWasVideo ? "video is" : "photo is"} in.`
-          : "Your memories are in.";
-        confirmationCopy.textContent = batchSize === 1
-          ? `Your ${singleFileWasVideo ? "video" : "photo"} was shared successfully. Thank you for celebrating Erika!`
-          : `All ${batchSize} photos and videos were shared successfully. Thank you for celebrating Erika!`;
+        confirmationTitle.textContent = language === "es"
+          ? batchSize === 1 ? (singleFileWasVideo ? "Tu video fue enviado." : "Tu foto fue enviada.") : "Tus recuerdos fueron enviados."
+          : batchSize === 1 ? `Your ${singleFileWasVideo ? "video is" : "photo is"} in.` : "Your memories are in.";
+        confirmationCopy.textContent = language === "es"
+          ? batchSize === 1
+            ? `Tu ${singleFileWasVideo ? "video" : "foto"} se compartió correctamente. ${copy.es.thanks}`
+            : `Las ${batchSize} fotos y videos se compartieron correctamente. ${copy.es.thanks}`
+          : batchSize === 1
+            ? `Your ${singleFileWasVideo ? "video" : "photo"} was shared successfully. ${copy.en.thanks}`
+            : `All ${batchSize} photos and videos were shared successfully. ${copy.en.thanks}`;
         intro.hidden = true;
         form.hidden = true;
         confirmation.hidden = false;
       } catch (error) {
         if (completed) selectedFiles = selectedFiles.slice(completed);
-        const reason = error instanceof Error ? error.message : "Could not upload that photo or video";
+        const reason = error instanceof Error ? error.message : copy[language].uploadError;
         showMessage(errorMessage, completed
-          ? `${completed} of ${batchSize} memories uploaded. ${reason} Please try the remaining files again.`
+          ? language === "es"
+            ? `${completed} de ${batchSize} recuerdos subidos. ${reason} ${copy.es.remaining}`
+            : `${completed} of ${batchSize} memories uploaded. ${reason} ${copy.en.remaining}`
           : reason);
       } finally {
         uploading = false;
@@ -300,21 +411,32 @@
       renderSelection();
     });
 
-    fetch("/api/event-day", { cache: "no-store" })
-      .then((response) => {
-        if (!response.ok) throw new Error("Sharing is temporarily unavailable");
-        return response.json();
-      })
-      .then((eventDay) => {
-        if (eventDay.event?.eventName) document.querySelector("#event-name").textContent = eventDay.event.eventName;
-        uploadAllowed = Boolean(eventDay.photoUploadsEnabled);
-        input.disabled = !uploadAllowed;
-        guestName.disabled = !uploadAllowed;
-        caption.disabled = !uploadAllowed;
-        renderSelection();
-        if (!uploadAllowed) showMessage(errorMessage, "Uploads are paused by the host.");
-      })
-      .catch((error) => showMessage(errorMessage, error.message || "Sharing is temporarily unavailable"));
+    function loadEventDay() {
+      fetch("/api/event-day", { cache: "no-store" })
+        .then((response) => {
+          if (!response.ok) throw new Error(copy[language].unavailable);
+          return response.json();
+        })
+        .then((eventDay) => {
+          if (eventDay.event?.eventName) document.querySelector("#event-name").textContent = eventDay.event.eventName;
+          uploadAllowed = Boolean(eventDay.photoUploadsEnabled);
+          input.disabled = !uploadAllowed;
+          guestName.disabled = !uploadAllowed;
+          caption.disabled = !uploadAllowed;
+          renderSelection();
+          if (!uploadAllowed) showMessage(errorMessage, copy[language].paused);
+        })
+        .catch((error) => showMessage(errorMessage, error.message || copy[language].unavailable));
+    }
+
+    document.querySelector("#choose-en").addEventListener("click", () => chooseLanguage("en"));
+    document.querySelector("#choose-es").addEventListener("click", () => chooseLanguage("es"));
+    languageSwitch.addEventListener("click", () => {
+      uploadPage.hidden = true;
+      languageGate.hidden = false;
+      language = null;
+      document.documentElement.lang = "en";
+    });
 
     window.addEventListener("pagehide", clearPreviewUrls);
   </script>

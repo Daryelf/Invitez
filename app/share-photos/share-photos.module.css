@@ -17,6 +17,57 @@
   display: none;
 }
 
+.languageGate {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: min(100%, 540px);
+  min-height: calc(100dvh - max(36px, env(safe-area-inset-top)) - 64px - env(safe-area-inset-bottom));
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+  margin: 0 auto;
+  padding: 38px 24px;
+  border: 1px solid rgba(23, 60, 50, .14);
+  border-radius: 30px;
+  background: rgba(255, 249, 237, .96);
+  box-shadow: 0 26px 70px rgba(45, 66, 45, .18);
+  text-align: center;
+}
+
+.languageMonogram {
+  display: grid;
+  width: 72px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff8ec;
+  background: var(--ink);
+  font: 38px Georgia, serif;
+}
+
+.languageGate > p { margin: 0; color: #a17d80; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.languageGate h1 { margin: 0; font: 400 clamp(2.35rem, 10vw, 4.25rem)/1 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+.languageGate h1 em { color: #c98591; font-weight: 400; }
+.languageChoices { display: grid; width: min(100%, 390px); gap: 12px; margin-top: 12px; }
+.languageChoices button {
+  display: grid;
+  gap: 4px;
+  min-height: 78px;
+  padding: 14px 20px;
+  border: 1px solid rgba(23, 60, 50, .18);
+  border-radius: 16px;
+  color: var(--ink);
+  background: #fffdf8;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.languageChoices button:hover { transform: translateY(-2px); border-color: #c98591; background: #fff7f2; }
+.languageChoices button:focus-visible { outline: 3px solid rgba(212, 139, 152, .4); outline-offset: 3px; }
+.languageChoices strong { font: 500 24px Georgia, serif; }
+.languageChoices span { color: #6d7c64; font-size: 14px; }
+
 .header {
   position: relative;
   z-index: 1;
@@ -26,6 +77,20 @@
   gap: 11px;
   margin: 0 auto 16px;
   padding: 2px 3px;
+}
+
+.languageSwitch {
+  min-width: 42px;
+  min-height: 36px;
+  margin-left: auto;
+  border: 1px solid rgba(23, 60, 50, .2);
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(255, 249, 237, .78);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
 }
 
 .monogram {
