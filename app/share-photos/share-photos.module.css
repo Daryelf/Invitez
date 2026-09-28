@@ -220,8 +220,10 @@
 .moreMemories strong { font: 500 18px Georgia, serif; }
 .moreMemories button { margin-top: 0; }
 .adventraCredit { display: grid; justify-items: center; gap: 10px; width: min(100%, 470px); margin-top: 10px; padding: 20px 18px 2px; border-top: 1px solid rgba(23, 60, 50, .16); }
-.adventraBrand { display: grid; place-items: center; max-width: 100%; padding: 7px; border: 1px solid rgba(23, 60, 50, .12); border-radius: 12px; background: #fff; }
-.adventraBrand img { display: block; max-width: 100%; height: auto; }
+.adventraBrand { display: grid; justify-items: center; gap: 3px; max-width: 100%; }
+.adventraLogoCrop { position: relative; width: 220px; max-width: 100%; height: 146px; overflow: hidden; }
+.adventraLogoCrop img { position: absolute; display: block; width: 330px; height: 330px; max-width: none; left: -57px; top: -89px; mix-blend-mode: multiply; }
+.adventraBrand strong { color: #10110f; font-size: 11px; font-weight: 600; letter-spacing: .21em; }
 .adventraCredit p { font: 14px/1.5 Georgia, serif; }
 .adventraCredit a { color: var(--ink); font-size: 13px; font-weight: 800; text-underline-offset: 3px; }
 .adventraCredit a:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }

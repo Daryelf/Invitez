@@ -254,7 +254,10 @@ export default function SharePhotosPage() {
             </div>
             <div className={styles.adventraCredit}>
               <div className={styles.adventraBrand}>
-                <img src="/adventra-logo.png" alt="Adventra Digital Growth Studio" width="205" height="85" />
+                <div className={styles.adventraLogoCrop}>
+                  <img src="/adventra-globe-logo.png" alt="Adventra" width="1254" height="1254" />
+                </div>
+                <strong>DIGITAL GROWTH STUDIO</strong>
               </div>
               <p>{text.adventraCredit}</p>
               <a href="https://adventra.us/" target="_blank" rel="noopener noreferrer">{text.adventraLink} <span aria-hidden="true">↗</span></a>
