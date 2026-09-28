@@ -169,7 +169,7 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(guestUpload, /Add more photos or videos/);
   assert.match(guestUpload, /document\.createElement\("video"\)/);
   assert.match(guestUpload, /Upload up to 25 photos or videos at a time/);
-  assert.match(guestUpload, /Submit new photos or videos/);
+  assert.match(guestUpload, /Upload more photos or videos/);
   assert.match(guestUpload, /Choose your language/);
   assert.match(guestUpload, /Elige tu idioma/);
   assert.match(guestUpload, /chooseLanguage\("es"\)/);
@@ -283,7 +283,7 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(sharePage, /\[\.\.\.files, \.\.\.acceptedFiles\]/);
   assert.match(sharePage, /const MAX_BATCH_FILES = 25/);
   assert.match(sharePage, /Upload up to \$\{MAX_BATCH_FILES\} photos or videos at a time/);
-  assert.match(sharePage, /Submit new photos or videos/);
+  assert.match(sharePage, /Upload more photos or videos/);
   assert.match(sharePage, /setSubmitted\(\{ count: batchSize, singleWasVideo \}\)/);
   assert.match(sharePage, /for \(const selectedFile of files\)/);
   assert.match(sharePage, /\$\{text\.share\} \$\{files\.length\} \$\{text\.memories\}/);

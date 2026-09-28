@@ -216,6 +216,17 @@
 .confirmation p { max-width: 470px; margin: 0; color: #65745d; font: 1rem/1.6 Georgia, serif; }
 .confirmation button { min-height: 56px; margin-top: 8px; padding: 0 24px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .confirmation button:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }
+.moreMemories { display: grid; justify-items: center; gap: 8px; margin-top: 4px; }
+.moreMemories strong { font: 500 18px Georgia, serif; }
+.moreMemories button { margin-top: 0; }
+.adventraCredit { display: grid; justify-items: center; gap: 10px; width: min(100%, 470px); margin-top: 10px; padding: 20px 18px 2px; border-top: 1px solid rgba(23, 60, 50, .16); }
+.adventraBrand { display: flex; align-items: center; gap: 9px; }
+.adventraBrand img { width: 40px; height: 40px; }
+.adventraBrand strong { color: var(--ink); font: 700 27px/1 Georgia, serif; letter-spacing: -.05em; }
+.adventraBrand strong span { color: #e75b32; }
+.adventraCredit p { font: 14px/1.5 Georgia, serif; }
+.adventraCredit a { color: var(--ink); font-size: 13px; font-weight: 800; text-underline-offset: 3px; }
+.adventraCredit a:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }
 
 @media (min-width: 720px) {
   .page { padding-top: 34px; padding-bottom: 48px; }

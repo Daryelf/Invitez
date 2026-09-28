@@ -33,7 +33,10 @@ const copy = {
     uploadError: "Could not upload that photo or video",
     submitted: "Submitted",
     thanks: "Thank you for celebrating Erika!",
-    submitMore: "Submit new photos or videos",
+    moreQuestion: "Have more memories to share?",
+    submitMore: "Upload more photos or videos",
+    adventraCredit: "Erika’s entire digital celebration—from invitations and RSVP to sharing photos and videos—was created by Adventra.",
+    adventraLink: "Explore Adventra services",
     photo: "photo",
     photos: "photos",
     video: "video",
@@ -70,7 +73,10 @@ const copy = {
     uploadError: "No se pudo subir esa foto o video",
     submitted: "Enviado",
     thanks: "¡Gracias por celebrar con Erika!",
+    moreQuestion: "¿Tienes más recuerdos para compartir?",
     submitMore: "Subir más fotos o videos",
+    adventraCredit: "Adventra creó toda la experiencia digital de la celebración de Erika: desde las invitaciones y las confirmaciones de asistencia hasta compartir fotos y videos.",
+    adventraLink: "Explora los servicios de Adventra",
     photo: "foto",
     photos: "fotos",
     video: "video",
@@ -242,7 +248,18 @@ export default function SharePhotosPage() {
               : submitted.count === 1
                 ? `Your ${submitted.singleWasVideo ? text.video : text.photo} ${text.wasShared} ${text.thanks}`
                 : `All ${submitted.count} photos and videos ${text.wereShared} ${text.thanks}`}</p>
-            <button type="button" onClick={() => setSubmitted(null)}>{text.submitMore}</button>
+            <div className={styles.moreMemories}>
+              <strong>{text.moreQuestion}</strong>
+              <button type="button" onClick={() => setSubmitted(null)}>{text.submitMore}</button>
+            </div>
+            <div className={styles.adventraCredit}>
+              <div className={styles.adventraBrand}>
+                <img src="/adventra-mark.svg" alt="" width="40" height="40" />
+                <strong>adventra<span>.</span></strong>
+              </div>
+              <p>{text.adventraCredit}</p>
+              <a href="https://adventra.us/" target="_blank" rel="noopener noreferrer">{text.adventraLink} <span aria-hidden="true">↗</span></a>
+            </div>
           </div>
         ) : <>
           <div className={styles.intro}>

@@ -136,6 +136,17 @@
     .confirmation p { max-width: 470px; margin: 0; color: #65745d; font: 1rem/1.6 Georgia, serif; }
     .confirmation button { min-height: 56px; margin-top: 8px; padding: 0 24px; border: 0; border-radius: 14px; color: #fffaf0; background: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
     .confirmation button:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }
+    .more-memories { display: grid; justify-items: center; gap: 8px; margin-top: 4px; }
+    .more-memories strong { font: 500 18px Georgia, serif; }
+    .more-memories button { margin-top: 0; }
+    .adventra-credit { display: grid; justify-items: center; gap: 10px; width: min(100%, 470px); margin-top: 10px; padding: 20px 18px 2px; border-top: 1px solid rgba(23, 60, 50, .16); }
+    .adventra-brand { display: flex; align-items: center; gap: 9px; }
+    .adventra-brand img { width: 40px; height: 40px; }
+    .adventra-brand strong { color: var(--ink); font: 700 27px/1 Georgia, serif; letter-spacing: -.05em; }
+    .adventra-brand strong span { color: #e75b32; }
+    .adventra-credit p { font: 14px/1.5 Georgia, serif; }
+    .adventra-credit a { color: var(--ink); font-size: 13px; font-weight: 800; text-underline-offset: 3px; }
+    .adventra-credit a:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }
     @media (min-width: 720px) {
       .page { padding-top: 34px; padding-bottom: 48px; }
       .card { grid-template-columns: .8fr 1.2fr; align-items: start; }
@@ -188,7 +199,15 @@
         <small id="submitted-label">Submitted</small>
         <h2 id="confirmation-title">Your memories are in.</h2>
         <p id="confirmation-copy"></p>
-        <button id="submit-another" type="button">Submit new photos or videos</button>
+        <div class="more-memories">
+          <strong id="more-question">Have more memories to share?</strong>
+          <button id="submit-another" type="button">Upload more photos or videos</button>
+        </div>
+        <div class="adventra-credit">
+          <div class="adventra-brand"><img src="/adventra-mark.svg" alt="" width="40" height="40"><strong>adventra<span>.</span></strong></div>
+          <p id="adventra-credit">Erika’s entire digital celebration—from invitations and RSVP to sharing photos and videos—was created by Adventra.</p>
+          <a id="adventra-link" href="https://adventra.us/" target="_blank" rel="noopener noreferrer">Explore Adventra services <span aria-hidden="true">↗</span></a>
+        </div>
       </section>
     </section>
   </main>
@@ -201,7 +220,7 @@
         yourName: "Your name", optionalPrivate: "optional · private", namePlaceholder: "Add your name if you want", namePrivacy: "Your name will not appear with the photo or video.",
         message: "Message", optional: "optional", messagePlaceholder: "Add a short note about this moment", paused: "Uploads are paused by the host.",
         unavailable: "Sharing is temporarily unavailable", uploadError: "Could not upload that photo or video", submitted: "Submitted",
-        thanks: "Thank you for celebrating Erika!", submitMore: "Submit new photos or videos", memories: "memories", uploading: "Uploading",
+        thanks: "Thank you for celebrating Erika!", moreQuestion: "Have more memories to share?", submitMore: "Upload more photos or videos", adventraCredit: "Erika’s entire digital celebration—from invitations and RSVP to sharing photos and videos—was created by Adventra.", adventraLink: "Explore Adventra services", memories: "memories", uploading: "Uploading",
         batchLimit: "You can upload up to 25 photos or videos at a time.", remaining: "Please try the remaining files again.",
       },
       es: {
@@ -210,7 +229,7 @@
         yourName: "Tu nombre", optionalPrivate: "opcional · privado", namePlaceholder: "Agrega tu nombre si quieres", namePrivacy: "Tu nombre no aparecerá con la foto o el video.",
         message: "Mensaje", optional: "opcional", messagePlaceholder: "Agrega una nota corta sobre este momento", paused: "El anfitrión ha pausado las cargas.",
         unavailable: "La página para compartir no está disponible por el momento", uploadError: "No se pudo subir esa foto o video", submitted: "Enviado",
-        thanks: "¡Gracias por celebrar con Erika!", submitMore: "Subir más fotos o videos", memories: "recuerdos", uploading: "Subiendo",
+        thanks: "¡Gracias por celebrar con Erika!", moreQuestion: "¿Tienes más recuerdos para compartir?", submitMore: "Subir más fotos o videos", adventraCredit: "Adventra creó toda la experiencia digital de la celebración de Erika: desde las invitaciones y las confirmaciones de asistencia hasta compartir fotos y videos.", adventraLink: "Explora los servicios de Adventra", memories: "recuerdos", uploading: "Subiendo",
         batchLimit: "Puedes subir hasta 25 fotos o videos a la vez.", remaining: "Intenta subir los archivos restantes de nuevo.",
       },
     };
@@ -257,7 +276,10 @@
       document.querySelector("#message-optional").textContent = text.optional;
       caption.placeholder = text.messagePlaceholder;
       document.querySelector("#submitted-label").textContent = text.submitted;
+      document.querySelector("#more-question").textContent = text.moreQuestion;
       submitAnother.textContent = text.submitMore;
+      document.querySelector("#adventra-credit").textContent = text.adventraCredit;
+      document.querySelector("#adventra-link").firstChild.textContent = `${text.adventraLink} `;
       languageSwitch.textContent = language === "en" ? "ES" : "EN";
       languageSwitch.setAttribute("aria-label", language === "en" ? "Cambiar a español" : "Switch to English");
       renderSelection();
