@@ -166,7 +166,7 @@
       </div>
       <form id="photo-form">
         <label class="picker" id="picker">
-          <span class="prompt" id="prompt"><i>＋</i><strong id="choose-copy">Choose photos or videos</strong><small id="limit-copy">Upload up to 10 photos or videos at a time</small></span>
+          <span class="prompt" id="prompt"><i>＋</i><strong id="choose-copy">Choose photos or videos</strong><small id="limit-copy">Upload up to 25 photos or videos at a time</small></span>
           <span class="previews" id="previews"><strong class="count" id="count"></strong></span>
           <input id="photos" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple disabled>
         </label>
@@ -193,25 +193,25 @@
     </section>
   </main>
   <script>
-    const MAX_BATCH_FILES = 10;
+    const MAX_BATCH_FILES = 25;
     const copy = {
       en: {
         guestDrop: "Guest memory drop", shareTitle: "Share a", memory: "memory.", experience: "Share your experience for Erika.",
-        choose: "Choose photos or videos", limit: "Upload up to 10 photos or videos at a time", addMore: "Add more photos or videos",
+        choose: "Choose photos or videos", limit: "Upload up to 25 photos or videos at a time", addMore: "Add more photos or videos",
         yourName: "Your name", optionalPrivate: "optional · private", namePlaceholder: "Add your name if you want", namePrivacy: "Your name will not appear with the photo or video.",
         message: "Message", optional: "optional", messagePlaceholder: "Add a short note about this moment", paused: "Uploads are paused by the host.",
         unavailable: "Sharing is temporarily unavailable", uploadError: "Could not upload that photo or video", submitted: "Submitted",
         thanks: "Thank you for celebrating Erika!", submitMore: "Submit new photos or videos", memories: "memories", uploading: "Uploading",
-        batchLimit: "You can upload up to 10 photos or videos at a time.", remaining: "Please try the remaining files again.",
+        batchLimit: "You can upload up to 25 photos or videos at a time.", remaining: "Please try the remaining files again.",
       },
       es: {
         guestDrop: "Recuerdos de los invitados", shareTitle: "Comparte un", memory: "recuerdo.", experience: "Comparte tu experiencia para Erika.",
-        choose: "Elige fotos o videos", limit: "Sube hasta 10 fotos o videos a la vez", addMore: "Agregar más fotos o videos",
+        choose: "Elige fotos o videos", limit: "Sube hasta 25 fotos o videos a la vez", addMore: "Agregar más fotos o videos",
         yourName: "Tu nombre", optionalPrivate: "opcional · privado", namePlaceholder: "Agrega tu nombre si quieres", namePrivacy: "Tu nombre no aparecerá con la foto o el video.",
         message: "Mensaje", optional: "opcional", messagePlaceholder: "Agrega una nota corta sobre este momento", paused: "El anfitrión ha pausado las cargas.",
         unavailable: "La página para compartir no está disponible por el momento", uploadError: "No se pudo subir esa foto o video", submitted: "Enviado",
         thanks: "¡Gracias por celebrar con Erika!", submitMore: "Subir más fotos o videos", memories: "recuerdos", uploading: "Subiendo",
-        batchLimit: "Puedes subir hasta 10 fotos o videos a la vez.", remaining: "Intenta subir los archivos restantes de nuevo.",
+        batchLimit: "Puedes subir hasta 25 fotos o videos a la vez.", remaining: "Intenta subir los archivos restantes de nuevo.",
       },
     };
     const languageGate = document.querySelector("#language-gate");

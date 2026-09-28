@@ -9,7 +9,7 @@ type EventDayData = {
   event: { eventName: string } | null;
 };
 
-const MAX_BATCH_FILES = 10;
+const MAX_BATCH_FILES = 25;
 type Language = "en" | "es";
 
 const copy = {
