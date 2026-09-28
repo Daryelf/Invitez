@@ -35,17 +35,6 @@
   text-align: center;
 }
 
-.languageMonogram {
-  display: grid;
-  width: 72px;
-  aspect-ratio: 1;
-  place-items: center;
-  border-radius: 50%;
-  color: #fff8ec;
-  background: var(--ink);
-  font: 38px Georgia, serif;
-}
-
 .languageGate > p { margin: 0; color: #a17d80; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .languageGate h1 { margin: 0; font: 400 clamp(2.35rem, 10vw, 4.25rem)/1 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
 .languageGate h1 em { color: #c98591; font-weight: 400; }

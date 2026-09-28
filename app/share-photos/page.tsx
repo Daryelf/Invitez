@@ -213,7 +213,6 @@ export default function SharePhotosPage() {
       <div className={styles.glow} aria-hidden="true" />
       {!language ? (
         <section className={styles.languageGate} aria-labelledby="language-title">
-          <span className={styles.languageMonogram}>E</span>
           <p>Welcome · Bienvenidos</p>
           <h1 id="language-title">Choose your language<br /><em>Elige tu idioma</em></h1>
           <div className={styles.languageChoices}>
