@@ -21,7 +21,7 @@ const contentTypes = {
 };
 
 function resolveRequestPath(pathname) {
-  if (pathname === "/" || pathname === "/index.html") return join(root, "railway", "index.html");
+  if (pathname === "/" || pathname === "/index.html") return join(root, "railway", "address.html");
   if (pathname === "/rsvp" || pathname === "/rsvp/") return join(root, "railway", "index.html");
   if (pathname === "/share-photos" || pathname === "/share-photos/") return join(root, "railway", "share-photos.html");
   if (/^\/i\/[^/]+\/?$/.test(pathname)) return join(root, "railway", "index.html");
