@@ -3,19 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#141414" />
-    <meta name="description" content="372 Middle Rd, Hazlet, NJ 07730" />
-    <title>Venue Address | Invitez</title>
+    <meta name="theme-color" content="#dce4cc" />
+    <meta name="description" content="Directions to Erika's Sweet 16 at 372 Middle Rd, Hazlet, NJ 07730." />
+    <title>Erika's Special Night | Directions</title>
     <style>
-      html, body { margin: 0; min-height: 100%; background: #141414; }
-      main { min-height: 100svh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; text-align: center; font-family: Arial, Helvetica, sans-serif; }
-      a { color: #fff; font-size: clamp(1.5rem, 6vw, 3rem); font-weight: 600; line-height: 1.25; text-decoration: none; }
-      a:focus-visible { outline: 2px solid #fff; outline-offset: 8px; }
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      html, body { min-height: 100%; margin: 0; }
+      body { background: #dce4cc; color: #36513d; font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif; }
+      .page { position: relative; isolation: isolate; display: grid; min-height: 100svh; place-items: center; overflow: hidden; padding: 28px 18px; }
+      .page::before { position: absolute; z-index: -2; inset: -20px; background: url("/first-poster.png") center / cover no-repeat; content: ""; filter: blur(6px) saturate(.85); }
+      .page::after { position: absolute; z-index: -1; inset: 0; background: rgba(225, 233, 211, .28); content: ""; }
+      .card { position: relative; width: min(100%, 650px); padding: clamp(30px, 6vw, 58px); border: 1px solid #aab89d; border-radius: 32px; background: rgba(255, 252, 246, .97); box-shadow: 0 24px 70px rgba(52, 72, 50, .20); text-align: center; }
+      .card::before { position: absolute; inset: 8px; border: 1px solid #dce3cf; border-radius: 25px; content: ""; pointer-events: none; }
+      .eyebrow { margin: 0 0 18px; color: #718266; font-size: .72rem; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; }
+      h1 { margin: 0; color: #445e45; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.45rem, 8vw, 4.5rem); font-weight: 400; line-height: 1.05; }
+      h1 em { color: #a66378; font-weight: 400; }
+      .date { margin: 20px 0 0; color: #7b8b70; font-size: .76rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+      .venue { margin: 30px 0 24px; padding: 20px 16px; border: 1px solid #dce5d4; border-radius: 16px; background: #f4f7ef; }
+      .venue-name { display: block; margin-bottom: 7px; font-size: .88rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+      address { color: #4a5e4d; font-size: clamp(1.1rem, 3.5vw, 1.35rem); font-style: normal; line-height: 1.45; }
+      .map-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .map-links a { display: flex; min-height: 58px; align-items: center; justify-content: center; padding: 11px 15px; border: 1px solid #65775b; border-radius: 12px; background: #718467; color: white; font-size: .97rem; font-weight: 700; line-height: 1.2; text-decoration: none; transition: transform .15s ease, background .15s ease; }
+      .map-links a:nth-child(2) { border-color: #dfb2bc; background: #f4d5d9; color: #6a4651; }
+      .map-links a:hover { transform: translateY(-2px); background: #5c7154; }
+      .map-links a:nth-child(2):hover { background: #ebc2c9; }
+      .map-links a:focus-visible { outline: 3px solid #344f3d; outline-offset: 3px; }
+      @media (max-width: 500px) { .page { padding: 22px 16px; } .card { padding: 32px 25px; border-radius: 26px; } .card::before { border-radius: 19px; } .map-links { grid-template-columns: 1fr; } }
+      @media (prefers-reduced-motion: reduce) { .map-links a { transition: none; } }
     </style>
   </head>
   <body>
-    <main>
-      <a href="https://www.google.com/maps/search/?api=1&amp;query=372%20Middle%20Rd%2C%20Hazlet%2C%20NJ%2007730" target="_blank" rel="noreferrer">372 Middle Rd<br />Hazlet, NJ 07730</a>
+    <main class="page">
+      <section class="card" aria-labelledby="page-title">
+        <p class="eyebrow">Erika's Sweet 16</p>
+        <h1 id="page-title">Erika's <em>special night</em> is here</h1>
+        <p class="date">October 3, 2026 · 7 PM</p>
+        <div class="venue">
+          <span class="venue-name">Centerville Banquet Hall</span>
+          <address>372 Middle Rd<br />Hazlet, NJ 07730</address>
+        </div>
+        <nav class="map-links" aria-label="Directions to the venue">
+          <a href="https://www.google.com/maps/dir/?api=1&amp;destination=372%20Middle%20Rd%2C%20Hazlet%2C%20NJ%2007730" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+          <a href="https://maps.apple.com/?daddr=372%20Middle%20Rd%2C%20Hazlet%2C%20NJ%2007730" target="_blank" rel="noopener noreferrer">Open in Apple Maps</a>
+        </nav>
+      </section>
     </main>
   </body>
 </html>
