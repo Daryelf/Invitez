@@ -10,6 +10,14 @@ type EventDayData = {
 };
 
 const MAX_BATCH_FILES = 25;
+const MAX_IMAGE_SIZE = 32 * 1024 * 1024;
+const MAX_VIDEO_SIZE = 90 * 1024 * 1024;
+const TYPES_BY_EXTENSION: Record<string, string> = {
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp",
+  heic: "image/heic", heif: "image/heif", avif: "image/avif",
+  mp4: "video/mp4", mov: "video/quicktime", webm: "video/webm", m4v: "video/x-m4v",
+};
+const SUPPORTED_TYPES = new Set(Object.values(TYPES_BY_EXTENSION));
 type Language = "en" | "es";
 
 const copy = {
@@ -52,6 +60,11 @@ const copy = {
     remaining: "Please try the remaining files again.",
     batchLimit: `You can upload up to ${MAX_BATCH_FILES} photos or videos at a time.`,
     changeLanguage: "Language",
+    retry: "Retry connection",
+    connection: "Could not check uploads. Tap Retry connection.",
+    unsupported: "Choose a JPG, PNG, WebP, HEIC, HEIF, AVIF, MP4, MOV, WebM, or M4V file.",
+    photoTooLarge: "Photos must be under 32 MB.",
+    videoTooLarge: "Videos must be under 90 MB.",
   },
   es: {
     guestDrop: "Recuerdos de los invitados",
@@ -92,11 +105,22 @@ const copy = {
     remaining: "Intenta subir los archivos restantes de nuevo.",
     batchLimit: `Puedes subir hasta ${MAX_BATCH_FILES} fotos o videos a la vez.`,
     changeLanguage: "Idioma",
+    retry: "Reintentar conexión",
+    connection: "No se pudo comprobar si se pueden subir archivos. Toca Reintentar conexión.",
+    unsupported: "Elige un archivo JPG, PNG, WebP, HEIC, HEIF, AVIF, MP4, MOV, WebM o M4V.",
+    photoTooLarge: "Las fotos deben pesar menos de 32 MB.",
+    videoTooLarge: "Los videos deben pesar menos de 90 MB.",
   },
 } as const;
 
+function mediaType(file: File) {
+  const type = (file.type || "").toLowerCase();
+  if (SUPPORTED_TYPES.has(type)) return type;
+  return TYPES_BY_EXTENSION[file.name.split(".").pop()?.toLowerCase() || ""] || type;
+}
+
 function isVideo(file: File | undefined) {
-  return Boolean(file?.type.startsWith("video/"));
+  return Boolean(file && mediaType(file).startsWith("video/"));
 }
 
 function mediaLabel(files: File[], language: Language) {
@@ -122,25 +146,42 @@ export default function SharePhotosPage() {
   const [uploadedCount, setUploadedCount] = useState(0);
   const [submitted, setSubmitted] = useState<{ count: number; singleWasVideo: boolean } | null>(null);
   const [error, setError] = useState("");
+  const [settingsError, setSettingsError] = useState(false);
+  const [settingsAttempt, setSettingsAttempt] = useState(0);
 
   useEffect(() => {
     if (!language) return;
+    let cancelled = false;
     fetch("/api/event-day", { cache: "no-store" })
       .then((response) => {
         if (!response.ok) throw new Error(copy[language].unavailable);
         return response.json() as Promise<EventDayData>;
       })
-      .then(setEventDay)
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : copy[language].unavailable));
-  }, [language]);
+      .then((data) => { if (!cancelled) setEventDay(data); })
+      .catch(() => { if (!cancelled) setSettingsError(true); });
+    return () => { cancelled = true; };
+  }, [language, settingsAttempt]);
 
   useEffect(() => {
     return () => previewUrls.current.forEach((preview) => URL.revokeObjectURL(preview));
   }, []);
 
   const uploadAllowed = Boolean(eventDay?.photoUploadsEnabled);
+  const pickerAllowed = eventDay?.photoUploadsEnabled !== false && !uploading;
   const eventName = eventDay?.event?.eventName || (language === "es" ? "la celebración" : "the celebration");
   const text = copy[language || "en"];
+
+  function chooseLanguage(nextLanguage: Language) {
+    setEventDay(null);
+    setSettingsError(false);
+    setLanguage(nextLanguage);
+  }
+
+  function retryConnection() {
+    setEventDay(null);
+    setSettingsError(false);
+    setSettingsAttempt((attempt) => attempt + 1);
+  }
 
   useEffect(() => {
     document.documentElement.lang = language || "en";
@@ -149,11 +190,24 @@ export default function SharePhotosPage() {
   function selectMedia(changeEvent: ChangeEvent<HTMLInputElement>) {
     const nextFiles = Array.from(changeEvent.target.files || []);
     const availableSlots = Math.max(0, MAX_BATCH_FILES - files.length);
-    const acceptedFiles = nextFiles.slice(0, availableSlots);
+    let invalidMessage = "";
+    const validFiles = nextFiles.filter((file) => {
+      const type = mediaType(file);
+      if (!SUPPORTED_TYPES.has(type)) {
+        invalidMessage = text.unsupported;
+        return false;
+      }
+      if (file.size > (isVideo(file) ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE)) {
+        invalidMessage = isVideo(file) ? text.videoTooLarge : text.photoTooLarge;
+        return false;
+      }
+      return true;
+    });
+    const acceptedFiles = validFiles.slice(0, availableSlots);
     previewUrls.current.push(...acceptedFiles.map((file) => URL.createObjectURL(file)));
     setFiles([...files, ...acceptedFiles]);
     setFilePreviews([...previewUrls.current]);
-    setError(nextFiles.length > availableSlots ? text.batchLimit : "");
+    setError(invalidMessage || (validFiles.length > availableSlots ? text.batchLimit : ""));
     changeEvent.target.value = "";
   }
 
@@ -181,14 +235,14 @@ export default function SharePhotosPage() {
         const response = await fetch("/api/photos", {
           method: "POST",
           headers: {
-            "Content-Type": selectedFile.type,
+            "Content-Type": mediaType(selectedFile),
             "X-File-Name": encodeURIComponent(selectedFile.name),
             "X-Guest-Name": encodeURIComponent(guestName),
             "X-Caption": encodeURIComponent(caption),
           },
           body: selectedFile,
         });
-        const result = await response.json() as { error?: string };
+        const result = await response.json().catch(() => ({})) as { error?: string };
         if (!response.ok) throw new Error(language === "es" ? text.uploadError : (result.error || text.uploadError));
         completed += 1;
         setUploadedCount(completed);
@@ -222,8 +276,8 @@ export default function SharePhotosPage() {
           <p>Welcome · Bienvenidos</p>
           <h1 id="language-title">Choose your language<br /><em>Elige tu idioma</em></h1>
           <div className={styles.languageChoices}>
-            <button type="button" onClick={() => setLanguage("en")}><strong>English</strong><span>Continue in English</span></button>
-            <button type="button" lang="es" onClick={() => setLanguage("es")}><strong>Español</strong><span>Continuar en español</span></button>
+            <button type="button" onClick={() => chooseLanguage("en")}><strong>English</strong><span>Continue in English</span></button>
+            <button type="button" lang="es" onClick={() => chooseLanguage("es")}><strong>Español</strong><span>Continuar en español</span></button>
           </div>
         </section>
       ) : <>
@@ -270,10 +324,13 @@ export default function SharePhotosPage() {
           </div>
 
           <form className={styles.form} onSubmit={uploadPhotos}>
+          {settingsError ? <div className={styles.retryPanel} role="alert"><span>{text.connection}</span><button type="button" onClick={retryConnection}>{text.retry}</button></div> : null}
           <label className={`${styles.photoPicker} ${filePreviews.length ? styles.photoSelected : ""}`}>
             {filePreviews.length ? (
               <span className={`${styles.previewGrid} ${filePreviews.length === 1 ? styles.singlePreview : ""}`}>
-                {filePreviews.map((preview, index) => isVideo(files[index]) ? (
+                {filePreviews.slice(0, 4).map((preview, index) => (mediaType(files[index]) === "image/heic" || mediaType(files[index]) === "image/heif") ? (
+                  <span className={styles.filePreviewFallback} key={preview}>{files[index].name}</span>
+                ) : isVideo(files[index]) ? (
                   <span className={styles.videoPreview} key={preview}>
                     <video src={preview} muted playsInline preload="metadata" aria-label={`${text.video} ${index + 1} / ${filePreviews.length}`} />
                     <i>{text.video}</i>
@@ -290,20 +347,22 @@ export default function SharePhotosPage() {
                 <small>{text.limit}</small>
               </span>
             )}
-            <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple onChange={selectMedia} disabled={!uploadAllowed || uploading} />
+            <input id="guest-media" ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v,.mov" multiple onChange={selectMedia} disabled={!pickerAllowed} />
           </label>
 
-          {files.length ? <button className={styles.changePhoto} type="button" onClick={() => fileInput.current?.click()} disabled={uploading}>{text.addMore}</button> : null}
+          {files.length ? <label className={styles.changePhoto} htmlFor="guest-media" role="button" tabIndex={uploading ? -1 : 0} aria-disabled={uploading} onKeyDown={(event) => {
+            if ((event.key === "Enter" || event.key === " ") && !uploading) { event.preventDefault(); fileInput.current?.click(); }
+          }}>{text.addMore}</label> : null}
 
           <label className={styles.field}>
             <span>{text.yourName} <em>{text.optionalPrivate}</em></span>
-            <input value={guestName} onChange={(event) => setGuestName(event.target.value.slice(0, 80))} maxLength={80} placeholder={text.namePlaceholder} autoComplete="name" disabled={!uploadAllowed} />
+            <input value={guestName} onChange={(event) => setGuestName(event.target.value.slice(0, 80))} maxLength={80} placeholder={text.namePlaceholder} autoComplete="name" disabled={eventDay?.photoUploadsEnabled === false || uploading} />
             <small>{text.namePrivacy}</small>
           </label>
 
           <label className={styles.field}>
             <span>{text.message} <em>{text.optional}</em></span>
-            <input value={caption} onChange={(event) => setCaption(event.target.value.slice(0, 140))} maxLength={140} placeholder={text.messagePlaceholder} disabled={!uploadAllowed} />
+            <input value={caption} onChange={(event) => setCaption(event.target.value.slice(0, 140))} maxLength={140} placeholder={text.messagePlaceholder} disabled={eventDay?.photoUploadsEnabled === false || uploading} />
           </label>
 
           {eventDay && !eventDay.photoUploadsEnabled ? <p className={styles.status}>{text.paused}</p> : null}

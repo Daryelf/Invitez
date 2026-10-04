@@ -162,9 +162,11 @@ test("individual invite links skip the opening on return, confirm RSVP, and swit
   assert.match(server, /Readable\.fromWeb\(upstream\.body\)\.pipe\(response\)/);
   assert.doesNotMatch(server, /upstream\.arrayBuffer/);
   assert.doesNotMatch(server, /Location: `https:\/\/after-hours-party\.adventraa\.chatgpt\.site\/share-photos/);
-  assert.match(guestUpload, /type="file" accept="image\/jpeg,image\/png,image\/webp,video\/mp4,video\/quicktime,video\/webm,video\/x-m4v" multiple/);
+  assert.match(guestUpload, /type="file" accept="image\/jpeg,image\/png,image\/webp,video\/mp4,video\/quicktime,video\/webm,video\/x-m4v,\.mov" multiple/);
   assert.match(guestUpload, /const MAX_BATCH_FILES = 25/);
-  assert.match(guestUpload, /selectedFiles = selectedFiles\.concat\(nextFiles\.slice/);
+  assert.match(guestUpload, /selectedFiles = selectedFiles\.concat\(validFiles\.slice/);
+  assert.match(guestUpload, /for="photos" role="button"/);
+  assert.match(guestUpload, /retrySettings\.addEventListener\("click", loadEventDay\)/);
   assert.match(guestUpload, /for \(const file of selectedFiles\)/);
   assert.match(guestUpload, /Add more photos or videos/);
   assert.match(guestUpload, /document\.createElement\("video"\)/);
@@ -269,7 +271,7 @@ test("event-day wall stays protected while the QR guest upload is public and kee
   assert.match(sharePage, /Share your experience for Erika\./);
   assert.match(sharePage, /Choose your language/);
   assert.match(sharePage, /Elige tu idioma/);
-  assert.match(sharePage, /setLanguage\("es"\)/);
+  assert.match(sharePage, /chooseLanguage\("es"\)/);
   assert.match(sharePage, /Comparte tu experiencia para Erika\./);
   assert.match(sharePage, /Sube hasta \$\{MAX_BATCH_FILES\} fotos o videos a la vez/);
   assert.doesNotMatch(sharePage, /Photo sharing will open/);

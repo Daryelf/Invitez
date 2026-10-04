@@ -34,12 +34,20 @@ function isVideo(photo: GalleryPhoto) {
   return photo.contentType?.startsWith("video/");
 }
 
-function mediaPreview(photo: GalleryPhoto, label: string, controls = false) {
-  return isVideo(photo) ? (
-    <video src={photo.url} controls={controls} muted={!controls} playsInline preload="metadata" aria-label={label} />
-  ) : (
-    <img src={photo.url} alt={label} loading="lazy" />
-  );
+function MediaPreview({ photo, label, controls = false }: { photo: GalleryPhoto; label: string; controls?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const needsDownload = failed || /^image\/hei[cf]$/i.test(photo.contentType);
+
+  if (needsDownload) {
+    return <span className={styles.mediaFallback} role="img" aria-label={label}>
+      <strong>{isVideo(photo) ? "Video" : "Photo"} preview unavailable</strong>
+      <small>Open this memory to download it</small>
+    </span>;
+  }
+
+  return isVideo(photo)
+    ? <video src={photo.url} controls={controls} muted={!controls} playsInline preload="metadata" aria-label={label} onError={() => setFailed(true)} />
+    : <img src={photo.url} alt={label} loading="lazy" onError={() => setFailed(true)} />;
 }
 
 function friendlyDate(value: string) {
@@ -229,7 +237,7 @@ export default function EventDayDashboard() {
               return (
                 <article className={styles.guestMediaCard} key={group.key}>
                   <button className={styles.guestMediaCover} type="button" onClick={() => toggleGroup(group.key)} aria-expanded={expanded}>
-                    {mediaPreview(cover, `First memory shared by ${group.guestName}`)}
+                    <MediaPreview photo={cover} label={`First memory shared by ${group.guestName}`} />
                     <span>{group.photos.length} {group.photos.length === 1 ? "memory" : "memories"}</span>
                   </button>
                   <div className={styles.guestMediaSummary}>
@@ -243,7 +251,7 @@ export default function EventDayDashboard() {
                     <div className={styles.guestMediaItems}>
                       {group.photos.map((photo, index) => (
                         <figure key={photo.id}>
-                          {mediaPreview(photo, `${isVideo(photo) ? "Video" : "Photo"} ${index + 1} shared by ${group.guestName}`, true)}
+                          <MediaPreview photo={photo} label={`${isVideo(photo) ? "Video" : "Photo"} ${index + 1} shared by ${group.guestName}`} controls />
                           <figcaption>
                             <p>{photo.caption || "No message added."}</p>
                             <time dateTime={photo.createdAt}>{friendlyDate(photo.createdAt)}</time>

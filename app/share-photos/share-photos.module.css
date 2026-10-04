@@ -144,7 +144,7 @@
   text-align: center;
 }
 
-.photoPicker input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photoPicker input { position: absolute; z-index: 3; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .photoPicker input:disabled { cursor: not-allowed; }
 .previewGrid {
   position: relative;
@@ -160,6 +160,7 @@
 .previewGrid video { width: 100%; height: 100%; min-height: 130px; max-height: 218px; object-fit: cover; }
 .videoPreview { position: relative; display: block; min-height: 130px; overflow: hidden; background: #17211d; }
 .videoPreview i { position: absolute; left: 9px; top: 9px; padding: 5px 7px; border-radius: 999px; color: #fff; background: rgba(23,60,50,.82); font-size: 9px; font-style: normal; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.filePreviewFallback { display: grid; min-height: 130px; place-items: center; overflow-wrap: anywhere; padding: 16px; color: #173c32; background: #dce6d3; font-size: 13px; }
 .singlePreview { grid-template-columns: 1fr; }
 .singlePreview img,
 .singlePreview video,
@@ -182,7 +183,11 @@
 .photoPrompt strong { margin-top: 5px; font: 500 24px Georgia, serif; }
 .photoPrompt small { font-size: 11px; line-height: 1.45; }
 .changePhoto { justify-self: center; margin-top: -7px; border: 0; color: #7d6a68; background: transparent; cursor: pointer; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
-.changePhoto:disabled { cursor: not-allowed; opacity: .45; }
+.changePhoto[aria-disabled="true"] { pointer-events: none; cursor: not-allowed; opacity: .45; }
+.changePhoto:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 3px; }
+
+.retryPanel { display: grid; gap: 10px; padding: 12px 14px; border-radius: 11px; color: #8d3947; background: #f7dde1; font-size: 12px; line-height: 1.45; }
+.retryPanel button { justify-self: start; min-height: 42px; padding: 0 14px; border: 0; border-radius: 9px; color: #fffaf0; background: var(--ink); cursor: pointer; font: inherit; font-weight: 800; }
 
 .field { display: grid; gap: 8px; }
 .field > span { display: flex; justify-content: space-between; gap: 12px; color: #63705d; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }

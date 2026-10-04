@@ -41,6 +41,23 @@ function photoTime(value: string) {
   return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(new Date(value));
 }
 
+function GalleryMedia({ photo, label }: { photo: Photo; label: string }) {
+  const [failed, setFailed] = useState(false);
+  const isVideo = photo.contentType?.startsWith("video/");
+  const needsDownload = failed || /^image\/hei[cf]$/i.test(photo.contentType);
+
+  if (needsDownload) {
+    return <div className={styles.mediaFallback}>
+      <strong>{isVideo ? "Video" : "Photo"} preview unavailable</strong>
+      <a href={photo.url} download={`event-memory-${photo.id}`}>Download {isVideo ? "video" : "photo"}</a>
+    </div>;
+  }
+
+  return isVideo
+    ? <video src={photo.url} controls playsInline preload="metadata" aria-label={label} onError={() => setFailed(true)} />
+    : <img src={photo.url} alt={label} loading="lazy" onError={() => setFailed(true)} />;
+}
+
 export default function EventDayPage() {
   const [data, setData] = useState<EventDayData>({ active: false, photoUploadsEnabled: false, event: fallbackEvent });
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -190,7 +207,7 @@ export default function EventDayPage() {
         <div className={styles.sectionHeading}><span>02</span><div><p className={styles.kicker}>Made by everyone</p><h2>Party wall</h2></div><small>{photos.length} {photos.length === 1 ? "memory" : "memories"}</small></div>
         {photos.length ? (
           <div className={styles.gallery}>
-            {photos.map((photo, index) => <figure key={photo.id} className={styles[`tile${index % 3}`]}>{photo.contentType?.startsWith("video/") ? <video src={photo.url} controls playsInline preload="metadata" aria-label={photo.caption || `Event video ${index + 1}`} /> : <img src={photo.url} alt={photo.caption || `Event photo ${index + 1}`} loading="lazy" />}<figcaption><span>{photo.caption || "A moment from the party"}</span><time>{photoTime(photo.createdAt)}</time></figcaption></figure>)}
+            {photos.map((photo, index) => <figure key={photo.id} className={styles[`tile${index % 3}`]}><GalleryMedia photo={photo} label={photo.caption || `Event ${photo.contentType?.startsWith("video/") ? "video" : "photo"} ${index + 1}`} /><figcaption><span>{photo.caption || "A moment from the party"}</span><time>{photoTime(photo.createdAt)}</time></figcaption></figure>)}
           </div>
         ) : (
           <div className={styles.emptyGallery}><span>♡</span><strong>The first memory starts here</strong><p>Photos shared by guests will fill this party wall.</p></div>

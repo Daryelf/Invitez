@@ -1,11 +1,24 @@
 import { env } from "cloudflare:workers";
 import { getEventSettings } from "@/db/invitations";
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 32 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 90 * 1024 * 1024;
 const MAX_REQUEST_SIZE = 96 * 1024 * 1024;
-const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/avif"]);
 const ALLOWED_VIDEO_TYPES = new Set(["video/mp4", "video/quicktime", "video/webm", "video/x-m4v"]);
+const TYPE_BY_EXTENSION: Record<string, string> = {
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp",
+  heic: "image/heic", heif: "image/heif", avif: "image/avif",
+  mp4: "video/mp4", mov: "video/quicktime", webm: "video/webm", m4v: "video/x-m4v",
+};
+
+function uploadContentType(rawType: string, name: string) {
+  const type = rawType.split(";")[0].trim().toLowerCase();
+  const extension = name.split(".").pop()?.toLowerCase() || "";
+  const extensionType = TYPE_BY_EXTENSION[extension];
+  if (ALLOWED_IMAGE_TYPES.has(type) || ALLOWED_VIDEO_TYPES.has(type)) return type;
+  return extensionType || type;
+}
 
 function decodeUploadHeader(value: string | null, limit: number) {
   try {
@@ -41,8 +54,8 @@ export async function POST(request: Request) {
   const formData = isMultipart ? await request.formData() : null;
   const file = formData?.get("photo");
   if (isMultipart && !(file instanceof File)) return json({ error: "Choose a photo or video first" }, { status: 400 });
-  const contentType = file instanceof File ? file.type : requestType;
   const name = file instanceof File ? file.name : decodeUploadHeader(request.headers.get("x-file-name"), 160) || "event-memory";
+  const contentType = uploadContentType(file instanceof File ? file.type : requestType, name);
   const caption = file instanceof File
     ? String(formData?.get("caption") ?? "").trim().slice(0, 140)
     : decodeUploadHeader(request.headers.get("x-caption"), 140);
@@ -51,10 +64,10 @@ export async function POST(request: Request) {
     : decodeUploadHeader(request.headers.get("x-guest-name"), 80);
   const isImage = ALLOWED_IMAGE_TYPES.has(contentType);
   const isVideo = ALLOWED_VIDEO_TYPES.has(contentType);
-  if (!isImage && !isVideo) return json({ error: "Choose a JPG, PNG, WebP, MP4, MOV, WebM, or M4V file" }, { status: 400 });
+  if (!isImage && !isVideo) return json({ error: "Choose a JPG, PNG, WebP, HEIC, HEIF, AVIF, MP4, MOV, WebM, or M4V file" }, { status: 400 });
   const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
   const declaredSize = file instanceof File ? file.size : Number(request.headers.get("content-length") || 0);
-  if (declaredSize > maxSize) return json({ error: isImage ? "That photo is larger than 10MB" : "That video is larger than 90MB" }, { status: 400 });
+  if (declaredSize > maxSize) return json({ error: isImage ? "That photo is larger than 32MB" : "That video is larger than 90MB" }, { status: 400 });
   if (file instanceof File && !file.size) return json({ error: "Choose a nonempty photo or video" }, { status: 400 });
   const source = file instanceof File ? file.stream() : request.body;
   if (!source) return json({ error: "Choose a photo or video first" }, { status: 400 });
@@ -66,7 +79,7 @@ export async function POST(request: Request) {
     const stored = await env.MEDIA.put(objectKey, source, { httpMetadata: { contentType, cacheControl: "public, max-age=31536000, immutable" } });
     if (!stored?.size || stored.size > maxSize) {
       await env.MEDIA.delete(objectKey);
-      return json({ error: stored?.size ? (isImage ? "That photo is larger than 10MB" : "That video is larger than 90MB") : "Choose a nonempty photo or video" }, { status: 400 });
+      return json({ error: stored?.size ? (isImage ? "That photo is larger than 32MB" : "That video is larger than 90MB") : "Choose a nonempty photo or video" }, { status: 400 });
     }
     await env.DB.prepare("INSERT INTO photos (id, object_key, name, content_type, caption, guest_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(id, objectKey, name, contentType, caption || null, guestName || null, createdAt).run();
     return json({ photo: { id, caption: caption || null, contentType, url: `/api/photos/${id}`, createdAt } });

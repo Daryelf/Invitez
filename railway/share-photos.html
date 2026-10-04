@@ -114,7 +114,11 @@
     .count { position: absolute; right: 12px; bottom: 12px; padding: 8px 11px; border-radius: 999px; color: #fffaf0; background: rgba(23, 60, 50, .88); box-shadow: 0 4px 14px rgba(23, 60, 50, .22); font-size: 12px; line-height: 1; }
     .add-more { justify-self: center; margin-top: -7px; border: 0; color: #7d6a68; background: transparent; cursor: pointer; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
     .add-more[hidden] { display: none; }
-    .add-more:disabled { cursor: not-allowed; opacity: .45; }
+    .add-more[aria-disabled="true"] { cursor: not-allowed; opacity: .45; pointer-events: none; }
+    .add-more:focus-visible { outline: 3px solid rgba(212, 139, 152, .45); outline-offset: 4px; }
+    .retry-settings { min-height: 44px; border: 1px solid rgba(23, 60, 50, .3); border-radius: 10px; color: var(--ink); background: #fffdf8; cursor: pointer; font-size: 13px; font-weight: 700; }
+    .retry-settings[hidden] { display: none; }
+    .file-preview-fallback { display: grid; min-height: 130px; place-items: center; padding: 16px; color: var(--ink); background: #e5ebdc; font: 600 14px/1.4 Georgia, serif; overflow-wrap: anywhere; }
     .field { display: grid; gap: 8px; }
     .field > span { display: flex; justify-content: space-between; gap: 12px; color: #63705d; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
     .field b { font: inherit; }
@@ -179,9 +183,9 @@
         <label class="picker" id="picker">
           <span class="prompt" id="prompt"><i>＋</i><strong id="choose-copy">Choose photos or videos</strong><small id="limit-copy">Upload up to 25 photos or videos at a time</small></span>
           <span class="previews" id="previews"><strong class="count" id="count"></strong></span>
-          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v" multiple disabled>
+          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm,video/x-m4v,.mov" multiple>
         </label>
-        <button class="add-more" id="add-more" type="button" hidden>Add more photos or videos</button>
+        <label class="add-more" id="add-more" for="photos" role="button" tabindex="0" hidden>Add more photos or videos</label>
         <label class="field">
           <span><b id="name-label">Your name</b> <em id="name-optional">optional · private</em></span>
           <input id="guest-name" maxlength="80" placeholder="Add your name if you want" autocomplete="name" disabled>
@@ -192,6 +196,7 @@
           <input id="caption" maxlength="140" placeholder="Add a short note about this moment" disabled>
         </label>
         <p class="message error" id="error" role="alert"></p>
+        <button class="retry-settings" id="retry-settings" type="button" hidden>Retry connection</button>
         <button class="submit" id="submit" type="submit" disabled>Share this photo</button>
       </form>
       <section class="confirmation" id="confirmation" role="status" aria-live="polite" hidden>
@@ -221,7 +226,7 @@
         message: "Message", optional: "optional", messagePlaceholder: "Add a short note about this moment", paused: "Uploads are paused by the host.",
         unavailable: "Sharing is temporarily unavailable", uploadError: "Could not upload that photo or video", submitted: "Submitted",
         thanks: "Thank you for celebrating Erika!", moreQuestion: "Have more memories to share?", submitMore: "Upload more photos or videos", adventraCredit: "Erika’s entire digital celebration—from invitations and RSVP to sharing photos and videos—was created by Adventra.", adventraLink: "Explore Adventra services", memories: "memories", uploading: "Uploading",
-        batchLimit: "You can upload up to 25 photos or videos at a time.", remaining: "Please try the remaining files again.",
+        batchLimit: "You can upload up to 25 photos or videos at a time.", remaining: "Please try the remaining files again.", retry: "Retry connection", connection: "Could not check uploads. Tap Retry connection.", unsupported: "Choose a JPG, PNG, WebP, HEIC, HEIF, AVIF, MP4, MOV, WebM, or M4V file.", photoTooLarge: "Photos must be under 32 MB.", videoTooLarge: "Videos must be under 90 MB.",
       },
       es: {
         guestDrop: "Recuerdos de los invitados", shareTitle: "Comparte un", memory: "recuerdo.", experience: "Comparte tu experiencia para Erika.",
@@ -230,7 +235,7 @@
         message: "Mensaje", optional: "opcional", messagePlaceholder: "Agrega una nota corta sobre este momento", paused: "El anfitrión ha pausado las cargas.",
         unavailable: "La página para compartir no está disponible por el momento", uploadError: "No se pudo subir esa foto o video", submitted: "Enviado",
         thanks: "¡Gracias por celebrar con Erika!", moreQuestion: "¿Tienes más recuerdos para compartir?", submitMore: "Subir más fotos o videos", adventraCredit: "Adventra creó toda la experiencia digital de la celebración de Erika: desde las invitaciones y las confirmaciones de asistencia hasta compartir fotos y videos.", adventraLink: "Explora los servicios de Adventra", memories: "recuerdos", uploading: "Subiendo",
-        batchLimit: "Puedes subir hasta 25 fotos o videos a la vez.", remaining: "Intenta subir los archivos restantes de nuevo.",
+        batchLimit: "Puedes subir hasta 25 fotos o videos a la vez.", remaining: "Intenta subir los archivos restantes de nuevo.", retry: "Reintentar conexión", connection: "No se pudo comprobar si se pueden subir archivos. Toca Reintentar conexión.", unsupported: "Elige un archivo JPG, PNG, WebP, HEIC, HEIF, AVIF, MP4, MOV, WebM o M4V.", photoTooLarge: "Las fotos deben pesar menos de 32 MB.", videoTooLarge: "Los videos deben pesar menos de 90 MB.",
       },
     };
     const languageGate = document.querySelector("#language-gate");
@@ -248,6 +253,7 @@
     const caption = document.querySelector("#caption");
     const submit = document.querySelector("#submit");
     const errorMessage = document.querySelector("#error");
+    const retrySettings = document.querySelector("#retry-settings");
     const confirmation = document.querySelector("#confirmation");
     const confirmationTitle = document.querySelector("#confirmation-title");
     const confirmationCopy = document.querySelector("#confirmation-copy");
@@ -257,6 +263,16 @@
     let uploadAllowed = false;
     let uploading = false;
     let language = null;
+    const MAX_IMAGE_SIZE = 32 * 1024 * 1024;
+    const MAX_VIDEO_SIZE = 90 * 1024 * 1024;
+    const TYPES_BY_EXTENSION = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", heic: "image/heic", heif: "image/heif", avif: "image/avif", mp4: "video/mp4", mov: "video/quicktime", webm: "video/webm", m4v: "video/x-m4v" };
+    const SUPPORTED_TYPES = new Set(Object.values(TYPES_BY_EXTENSION));
+    function mediaType(file) {
+      const type = (file.type || "").toLowerCase();
+      if (SUPPORTED_TYPES.has(type)) return type;
+      return TYPES_BY_EXTENSION[file.name.split(".").pop().toLowerCase()] || type;
+    }
+    function isVideo(file) { return mediaType(file).startsWith("video/"); }
 
     function applyLanguage() {
       const text = copy[language];
@@ -268,6 +284,7 @@
       document.querySelector("#choose-copy").textContent = text.choose;
       document.querySelector("#limit-copy").textContent = text.limit;
       addMore.textContent = text.addMore;
+      retrySettings.textContent = text.retry;
       document.querySelector("#name-label").textContent = text.yourName;
       document.querySelector("#name-optional").textContent = text.optionalPrivate;
       guestName.placeholder = text.namePlaceholder;
@@ -306,11 +323,19 @@
 
     function renderSelection() {
       clearPreviewUrls();
-      previews.querySelectorAll("img, .video-preview").forEach((preview) => preview.remove());
-      selectedFiles.forEach((file, index) => {
+      previews.querySelectorAll("img, .video-preview, .file-preview-fallback").forEach((preview) => preview.remove());
+      selectedFiles.slice(0, 4).forEach((file, index) => {
+        const type = mediaType(file);
+        if (type === "image/heic" || type === "image/heif") {
+          const tile = document.createElement("span");
+          tile.className = "file-preview-fallback";
+          tile.textContent = file.name;
+          previews.insertBefore(tile, count);
+          return;
+        }
         const url = URL.createObjectURL(file);
         previewUrls.push(url);
-        if (file.type.startsWith("video/")) {
+        if (isVideo(file)) {
           const wrapper = document.createElement("span");
           wrapper.className = "video-preview";
           const video = document.createElement("video");
@@ -337,44 +362,54 @@
       previews.classList.toggle("single", selectedFiles.length === 1);
       count.textContent = language === "es"
         ? selectedFiles.length === 1
-          ? (selectedFiles[0].type.startsWith("video/") ? "1 video seleccionado" : "1 foto seleccionada")
+          ? (isVideo(selectedFiles[0]) ? "1 video seleccionado" : "1 foto seleccionada")
           : `${selectedFiles.length} archivos seleccionados`
         : selectedFiles.length === 1
-          ? `1 ${selectedFiles[0].type.startsWith("video/") ? "video" : "photo"} selected`
+          ? `1 ${isVideo(selectedFiles[0]) ? "video" : "photo"} selected`
           : `${selectedFiles.length} memories selected`;
       addMore.hidden = !hasFiles;
+      addMore.setAttribute("aria-disabled", String(uploading));
+      addMore.tabIndex = uploading ? -1 : 0;
       submit.disabled = !hasFiles || !uploadAllowed || uploading;
       if (!uploading && language) submit.textContent = language === "es"
         ? selectedFiles.length > 1
           ? `Compartir ${selectedFiles.length} recuerdos`
-          : `Compartir ${selectedFiles[0]?.type.startsWith("video/") ? "este video" : "esta foto"}`
+          : `Compartir ${selectedFiles[0] && isVideo(selectedFiles[0]) ? "este video" : "esta foto"}`
         : selectedFiles.length > 1
           ? `Share ${selectedFiles.length} memories`
-          : `Share this ${selectedFiles[0]?.type.startsWith("video/") ? "video" : "photo"}`;
+          : `Share this ${selectedFiles[0] && isVideo(selectedFiles[0]) ? "video" : "photo"}`;
     }
 
     input.addEventListener("change", () => {
       const nextFiles = Array.from(input.files || []);
       const availableSlots = Math.max(0, MAX_BATCH_FILES - selectedFiles.length);
-      selectedFiles = selectedFiles.concat(nextFiles.slice(0, availableSlots));
+      let invalidMessage = "";
+      const validFiles = nextFiles.filter((file) => {
+        const type = mediaType(file);
+        if (!SUPPORTED_TYPES.has(type)) { invalidMessage = copy[language].unsupported; return false; }
+        if (file.size > (isVideo(file) ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE)) { invalidMessage = isVideo(file) ? copy[language].videoTooLarge : copy[language].photoTooLarge; return false; }
+        return true;
+      });
+      selectedFiles = selectedFiles.concat(validFiles.slice(0, availableSlots));
       input.value = "";
-      showMessage(errorMessage, nextFiles.length > availableSlots
+      showMessage(errorMessage, invalidMessage || (validFiles.length > availableSlots
         ? copy[language].batchLimit
-        : "");
+        : ""));
       renderSelection();
     });
 
-    addMore.addEventListener("click", () => input.click());
+    addMore.addEventListener("keydown", (event) => {
+      if ((event.key === "Enter" || event.key === " ") && !uploading) { event.preventDefault(); input.click(); }
+    });
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!selectedFiles.length || !uploadAllowed || uploading) return;
       const batchSize = selectedFiles.length;
-      const singleFileWasVideo = batchSize === 1 && selectedFiles[0].type.startsWith("video/");
+      const singleFileWasVideo = batchSize === 1 && isVideo(selectedFiles[0]);
       let completed = 0;
       uploading = true;
       input.disabled = true;
-      addMore.disabled = true;
       showMessage(errorMessage, "");
       renderSelection();
 
@@ -384,14 +419,14 @@
           const response = await fetch("/api/photos", {
             method: "POST",
             headers: {
-              "Content-Type": file.type,
+              "Content-Type": mediaType(file),
               "X-File-Name": encodeURIComponent(file.name),
               "X-Guest-Name": encodeURIComponent(guestName.value),
               "X-Caption": encodeURIComponent(caption.value),
             },
             body: file,
           });
-          const result = await response.json();
+          const result = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(language === "es" ? copy.es.uploadError : (result.error || copy.en.uploadError));
           completed += 1;
         }
@@ -421,7 +456,6 @@
       } finally {
         uploading = false;
         input.disabled = !uploadAllowed;
-        addMore.disabled = false;
         renderSelection();
       }
     });
@@ -437,6 +471,7 @@
     });
 
     function loadEventDay() {
+      retrySettings.hidden = true;
       fetch("/api/event-day", { cache: "no-store" })
         .then((response) => {
           if (!response.ok) throw new Error(copy[language].unavailable);
@@ -449,10 +484,20 @@
           guestName.disabled = !uploadAllowed;
           caption.disabled = !uploadAllowed;
           renderSelection();
-          if (!uploadAllowed) showMessage(errorMessage, copy[language].paused);
+          showMessage(errorMessage, uploadAllowed ? "" : copy[language].paused);
         })
-        .catch((error) => showMessage(errorMessage, error.message || copy[language].unavailable));
+        .catch(() => {
+          uploadAllowed = false;
+          input.disabled = false;
+          guestName.disabled = false;
+          caption.disabled = false;
+          retrySettings.hidden = false;
+          renderSelection();
+          showMessage(errorMessage, copy[language].connection);
+        });
     }
+
+    retrySettings.addEventListener("click", loadEventDay);
 
     document.querySelector("#choose-en").addEventListener("click", () => chooseLanguage("en"));
     document.querySelector("#choose-es").addEventListener("click", () => chooseLanguage("es"));
